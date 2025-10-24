@@ -21,6 +21,7 @@
             --player-height: 90px;
             --player-height-mobile: 110px; 
             --dark-overlay: rgba(0, 0, 0, 0.7); 
+            --volume-progress: 100%; /* New CSS Variable for Volume */
         }
 
         * {
@@ -103,6 +104,7 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
+            justify-content: space-between; /* Adjusted for search on right (New Feature) */
             position: sticky;
             top: 0;
             z-index: 10;
@@ -111,6 +113,34 @@
             color: var(--spotify-green);
             font-size: 1.8em;
             font-weight: 900; 
+            flex-shrink: 0;
+        }
+        
+        /* Search Input Styling (New Feature) */
+        .search-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: flex-end;
+            max-width: 400px;
+            margin-left: 20px;
+        }
+        #search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 25px;
+            background-color: var(--mid-gray);
+            color: var(--text-color);
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        #search-input::placeholder {
+            color: var(--subtle-text);
+        }
+        #search-input:focus {
+            outline: none;
+            border-color: var(--spotify-green);
+            background-color: var(--light-gray);
         }
         
         .container {
@@ -240,7 +270,7 @@
             background-color: #1AA350; 
         }
         
-        /* Loading Animation Styles */
+        /* Loading Animation Styles (Kept for Download Button) */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -275,7 +305,7 @@
             z-index: 20;
             height: var(--player-height);
             opacity: 0; 
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, box-shadow 0.3s ease; /* Added box-shadow transition */
         }
         
         #global-player.active {
@@ -307,6 +337,8 @@
         .player-info .track-artist {
              margin-bottom: 0;
         }
+        
+        /* Removed: Old Loading Spinner */
 
         /* 2. Controls & Seek Bar (Center) */
         .player-center {
@@ -334,27 +366,33 @@
         .control-button:hover {
             color: var(--text-color); 
         }
+        
         .control-button.active {
-            color: var(--spotify-green); 
+            color: var(--spotify-green); /* Simple color change for active state */
         }
+        
+
         .control-button:active {
             transform: scale(0.95);
         }
-
+        
+        /* Main Play/Pause Button Styling */
         #play-pause-button {
             font-size: 20px; 
             color: var(--dark-gray);
             background-color: var(--text-color);
             border: none;
             border-radius: 50%;
-            width: 40px; 
-            height: 40px;
+            /* Reset to a fixed, large size and add back central margin */
+            width: 45px; 
+            height: 45px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
-            transition: transform 0.2s ease, background-color 0.2s ease;
+            transition: transform 0.3s ease, background-color 0.2s ease;
+            margin: 0 20px; /* Add margin back for spacing */
+            padding: 0; 
         }
         #play-pause-button:hover {
             transform: scale(1.05); 
@@ -453,6 +491,7 @@
             transition: background 0.2s ease;
         }
         
+        /* Custom Track Coloring based on CSS variable */
         #volume-slider::-webkit-slider-runnable-track {
             background: linear-gradient(to right, var(--spotify-green) 0%, var(--spotify-green) var(--volume-progress, 100%), #535353 var(--volume-progress, 100%), #535353 100%);
             height: 4px;
@@ -610,6 +649,53 @@
         #modal-close-button:active {
             transform: scale(0.9);
         }
+        
+        /* Custom Context Menu Styling (New Feature) */
+        .context-menu {
+            position: fixed;
+            z-index: 1000;
+            background-color: var(--light-gray); 
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            padding: 5px 0;
+            min-width: 180px;
+            display: none; /* Hidden initially */
+            opacity: 0;
+            transform: scale(0.95);
+            transform-origin: top left;
+            transition: opacity 0.1s ease, transform 0.1s ease;
+        }
+
+        .context-menu.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .context-menu-item {
+            padding: 10px 15px;
+            font-size: 0.9em;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.1s;
+        }
+
+        .context-menu-item i {
+            margin-right: 10px;
+            width: 15px; /* Fixed width for consistent alignment */
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--mid-gray);
+            color: var(--spotify-green);
+        }
+        .context-menu hr {
+            border: none;
+            border-top: 1px solid var(--mid-gray);
+            margin: 5px 0;
+        }
 
 
         /* * RESPONSIVE ADJUSTMENTS FOR MOBILE (<= 768px) */
@@ -619,6 +705,15 @@
             }
             .header {
                 padding: 15px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .search-container {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+                max-width: none;
+                justify-content: flex-start;
             }
             .track-grid {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -681,12 +776,14 @@
                 order: 0;
             }
             
+            /* Mobile Play Button Adjustments */
             #play-pause-button {
-                width: 36px;
+                width: 36px; /* Slightly smaller for mobile */
                 height: 36px;
                 font-size: 20px;
-                margin: 0 15px;
+                margin: 0 10px; /* Reduced margin for mobile */
             }
+
             .control-button {
                  margin: 0 5px; 
             }
@@ -726,7 +823,10 @@
 
     <header class="header">
         <h1>Phonkify</h1>
-        </header>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search tracks or artists...">
+        </div>
+    </header>
 
     <main class="container">
         <h2 class="content-heading">Top 20 Best Phonk</h2>
@@ -770,9 +870,11 @@
             <div class="custom-controls">
                 <button id="shuffle-button" class="control-button" data-active="false"><i class="fas fa-random"></i></button>
                 <button id="previous-button" class="control-button"><i class="fas fa-step-backward"></i></button>
+                
                 <button id="play-pause-button">
                     <i class="fas fa-play"></i> 
                 </button>
+                
                 <button id="next-button" class="control-button"><i class="fas fa-step-forward"></i></button>
                 <button id="repeat-button" class="control-button" data-state="off"><i class="fas fa-redo-alt"></i></button>
             </div>
@@ -792,25 +894,32 @@
         
         <audio id="audio-source"></audio>
     </div>
+    
+    <div id="track-context-menu" class="context-menu">
+        <div class="context-menu-item" data-action="play"><i class="fas fa-play"></i> Play Track</div>
+        <div class="context-menu-item" data-action="download"><i class="fas fa-download"></i> Download</div>
+        <hr>
+        <div class="context-menu-item" data-action="close"><i class="fas fa-times"></i> Close Menu</div>
+    </div>
 
     <script>
         // --- 1. TRACK DATA (Example Data) ---
         const tracksData = [
             { id: 0, title: 'Clima Lindo', artist: 'GXMZ', image: 'https://i1.sndcdn.com/artworks-8a6Y3eJt2ffv-0-t500x500.jpg', uri: 'https://uc108a0ef6c4d8b77e19a9aa4880.dl.dropboxusercontent.com/cd/0/inline/Cz17MUwyucu5lFwkVs2l57U4yMPal0pP0qO_MsjbSBOI8ITwmLFFWjhEkYPueiIoKtWX_tWZ4RHCwZhikKCS4beu4LneDfxYvZ0-TiY7Yt3d7uZPrgmYRknQO9t7fuNwAG1sTzn6Ml3scveCYmgkXqhG/file#' },
             { id: 1, title: 'Fragment ', artist: 'Slxughter', image: 'https://i1.sndcdn.com/artworks-fyxokc9yZzlkXBdT-8h6nZA-t500x500.png', uri:  'https://uca97ff7a4e27174bcba3554f320.dl.dropboxusercontent.com/cd/0/inline/Cz3ZdxqXTMOSeFhFCIORjshUo0X0a-ZbhGkYVF-EaPwLPKsGRKkBgljlNkQtAkB1O1os_Py1MzUcm3f-V_o2AN9py1Kk9L1avo4J_6KscPbrxO7h4rWrzw5G7FysnQsM1923QlpR_JCaSWWGefFwLeDq/file#' },
-            { id: 2, title: 'Starly', artist: 'Lonown', image: 'https://cdn-images.dzcdn.net/images/cover/ed477f0737ddc6881772336d962fcd34/1900x1900-000000-80-0-0.jpg', uri: 'https://uc2ea43b25d7fbacd9e44b9dcb57.dl.dropboxusercontent.com/cd/0/inline/Cz20J7lkc5i5DOKaBF6PQmvWpWw9jGHE8hwntWnehtCD5GN8FoZvOTLS-Ic1YpE8vMCZgg_T9l_f_FTy79TYxhUitcJrDdUkIf68C6i6hK14AfvEvA56pRbuqUiCjAxvDVWwHKjUo4znn4OrA-Yq39J1/file#' },
+            { id: 2, title: 'Starly', artist: 'Lonown', image: 'https://cdn-images.dzcdn.net/images/cover/ed477f0737ddc6881772336d962fcd34/1900x1900-000000-80-0-0.jpg', uri: 'https://uc2ea43b25d7fbacd9e44b9dcb57.dl.dropboxusercontent.com/cd/0/inline/Cz20J7lkc5i5DOKaBF6PQmvWpWw9jGHE8hwntWnehtCD5GN8FoZvOTLS-Ic1YpE8vMCZgg_T9l_f_FTy79TYxhUitcJrDdUkIf68C6i6hK14AfvEvA56pRbuqUiCjAxvDVWwHKiUo4znn4OrA-Yq39J1/file#' },
             { id: 3, title: 'SOL', artist: 'Ogryzek', image: 'https://cdn-images.dzcdn.net/images/cover/5dd8d877202f9ca8f64a3097102fef9d/1900x1900-000000-81-0-0.jpg', uri: 'https://uc2b6f7d0244808b2f8e3e60cc7f.dl.dropboxusercontent.com/cd/0/inline/Cz02oqf1MFc6E-iaQFS4G1BRV5jM2HGWJ_ff25ZmY89JtUxgltA5z_Ne0T5N_hOBAeqK7a4V2griQjwjyaDieER9CAeQHteehzKyf6vDtEv89Yr0EBCdXzkEXjoj7WxDGK53VvWlyInXtpfhUTossDjx/file#' },
             { id: 4, title: 'Aura', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d00001e02dbf396d074fd53f8a9c6537e', uri: 'https://uc56b485f6bd4834f78dc5b5c479.dl.dropboxusercontent.com/cd/0/inline/Cz16mvBEYX0_iIYG8nfG1PDSSy4U7wrhcEAI5oETbaXAQXtwf4ZYedb3dJfhxmNSKJ4b5wDH7MYSlkKE60C5H3GlOtm8zq3tGvb9x-B53fIT_fqCxccwNOZ_N1zg-LXWaBj5P3tqBYvnRsTFWdfgv_rL/file#' },
             { id: 5, title: 'Carpe Diem', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b2738f6805ba733c26030be8005a', uri: 'https://uc11d0db309e0ef83a39e0caaf7c.dl.dropboxusercontent.com/cd/0/inline/Cz1E80xXbYjDgB0nT2IKy_tr3-P3ykF7l4OK5PS0aoOeUmsRGg3VZ5-nKXXNOE5qlAfi8wkAicoqqWl70sYuFmXcO1yvzTym0csS3GjWyikzROSIf6T93yR3KLlgxPRrUK6Jiu8Ds2TQSzV-QH5_ORa8/file#' },
             { id: 6, title: 'Sapphire', artist: 'Perpetualll', image: 'https://i1.sndcdn.com/artworks-La1ZlJK39tXlfAy6-ptk4EA-t500x500.jpg', uri: 'https://uce90a57695b2b5c2b7fce55f2a5.dl.dropboxusercontent.com/cd/0/inline/Cz2QVFCAz30adXRSI44I67kOl_9S9iUPq_vMHIlFnDxv7B_NcxbzgT41uZi946BF2xck8-2u3t1EFTcWR1fofAMXkDUf4XQeu55b5nO7upOAsmZNDxsgVfn4MhhPcJch8Gru_U4D6PInxDEDV_qzbqSA/file#' },
 			{ id: 7, title: 'Flashbacks', artist: 'Craspore', image: 'https://cdn-images.dzcdn.net/images/cover/732b25f97f1e3c7396b579790949768a/1900x1900-000000-81-0-0.jpg', uri: 'https://uc26b483f6071b09c7e11435adbb.dl.dropboxusercontent.com/cd/0/inline/Cz2_vNAyyzagLpWQpm0Egvuu-mRc4KefpNZpQVYUAJQJDlWcR2hG41RSlwCEN30plrbSyiEFgwYKp6gPs83GJYDMJvA0vaLHSZifDBVLdZqy68w8yrL4N2Tl-HjleBF0C-insy2wRe2ZZF6V_pPItmJp/file#' },
-			{ id: 8, title: 'Pride', artist: 'Slxughter', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAziEUrpTJMY1Fd4aJ2By3en8Zt8uO5LRBMA&s', uri: 'https://uce004dab0f97e6a498f6c0c2a05.dl.dropboxusercontent.com/cd/0/inline/Cz1MHeFUqciOAGP1Pi_S7MYe3DvQg09PVkgx9rQorFsgj8jPvuUAUBc6RR3scWGcjzEG4HNX8zllJ18Pnu9jvEzyB5eCgn9H1O3CQiyb3tE_0CevlfVekDjFH62ZaxnV_W9arkvFOwM0p4NJcZ8rzJP2/file#' },
+			{ id: 8, title: 'Pride', artist: 'Slxughter', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAziEUrpTJMY1Fd4aJ2By3en8Zt8uO5LRBMA&s', uri: 'https://uce004dab0f97e6a498f6c0c2a05.dl.dropboxusercontent.com/cd/0/inline/Cz1MHeFUqciOAGP1Pi_S7MYe3DvQg09PVkg9rQorFsgj8jPnu9jvEzyB5eCgn9H1O3CQiy3t3_0CevlfVekDjFH62ZaxnV_W9arkvFOwM0p4NJcZ8rzJP2/file#' },
 			{ id: 9, title: 'Solitude', artist: 'Juno', image: 'https://cdn-images.dzcdn.net/images/cover/62d3a43372ab747bd7330724e61107e6/1900x1900-000000-81-0-0.jpg', uri: 'https://uc352d324560c95b5ff25ee680a9.dl.dropboxusercontent.com/cd/0/inline/Cz2e1lozsQehGvf87KV5KG-zYniK4dLe7SfTdJAap64sPfVkrYZTnfw4YpaEf9kbyxaBDTyYr_z4-cfjKdsUOrQuSOtOOBo_pzqBi95Dv2riN8rCOicQ1E5WuMmPTQH1O2FfLgxQgXqEnibDKzzBguKS/file#' },
-			{ id: 10, title: 'Smezir', artist: 'Ilyhiryu', image: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/52/16/9052165f-5291-7bb1-dc87-71ba721bca0a/663918195291.jpg/600x600bf-60.jpg', uri: 'https://uc443c4981c491bf9957b17b3e15.dl.dropboxusercontent.com/cd/0/inline/Cz0YKNl7jwM2QhuRMPBW2ThIzwIhJMihQ-wXGdMmFm3Tv642l1G2qjdVletx55avcAwjZRIlW9NqojERDLeyyJKfPR1_02FcK6IsqR2u3W1lHmSdumDGYfaVwvdnwALsuq-nry6rKSZ9ZfBuLnMxeoeK/file#' },
+			{ id: 10, title: 'Smezir', artist: 'Ilyhiryu', image: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/52/16/9052165f-5291-7bb1-dc87-71ba721bca0a/663918195291.jpg/600x600bf-60.jpg', uri: 'https://uc443c4981c491bf9957b17b3e15.dl.dropboxusercontent.com/cd/0/inline/Cz0YKNl7jwM2QhuRMPBW2ThIzwIhJMihQ-wXGdMmFm3Tv642l1G2qjdVletx55avcAwjZRIlW9NqojERDLeyyJKfPR1_02FcK6IsqR2u3W1lHmSdumDGYfaVwvdnwALsuq-nry6rKSZ9fBuLnMxeoeK/file#' },
 			{ id: 11, title: 'Akai', artist: 'UdieNnx', image: 'https://i1.sndcdn.com/artworks-ECACwqpd2B0H-0-t500x500.jpg', uri: 'https://uc1dd9ccc596c806c499f5328121.dl.dropboxusercontent.com/cd/0/inline/Cz0oraYpN6KkzYL33wn2iqS6egGCCsQ3xO2aiKkDdukvTna59rcgRn8la38Zge8COg69D0yjXYMyTqvc9As1tVT-AJBMSfVxD-Z3r2MfzZ1IFlyUf-W1f79VR-3UGfUF4nJafDw6Likor4iBpn4_ponp/file#' },
 			{ id: 12, title: 'Empire', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b27385fb75c7f792ddefaa3d30f7', uri: 'https://ucb2f70dd6aef489e18ee2017239.dl.dropboxusercontent.com/cd/0/inline/Cz0NeFe1i7reqiEbHJ-UJL-OHog_xKU0di1JRV2KIg0MvPYJzJBtRvJS7P9m0cM6JjMvkWa0l7jhqmDlTMlBfE-2sJD3eKts0viUxCG8SPGJ0Y-QF9DFum9gpxTxOfk0OgFCPA4fEvOBm9FBD4Zqq-UE/file#' },
-			{ id: 13, title: 'Slava Funk', artist: 'Mvsterious', image: 'https://cdn-images.dzcdn.net/images/artist/125e589de1bec47cc657c04744e82458/500x500-000000-80-0-0.jpg', uri: 'https://uc28826c8bee3eeae2fb7771c12f.dl.dropboxusercontent.com/cd/0/inline/Cz3giCSPdo_6s__CeXBimioD8_-mrYWcbuBc581eQo4lzFDbnKtDIdzMLTGh8IbNU8ROA1qPcYIRf2VXDysmMjDuD_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLj_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLg/file#' },
-			{ id: 14, title: 'DNA', artist: 'LXNGVX', image: 'https://i.scdn.co/image/ab67616d0000b2738290c26e2d961fea5b2a2b5f', uri: 'https://uc761011259d008769d230d54503.dl.dropboxusercontent.com/cd/0/inline/Cz0oOPygwpA5NGLLj1tRJzMBOSs1yT7eT38nncUEOgRF0WF6H_DjqqhbJivKlZMTGc29iNITmlkTFSrPWF26qst9hihmb5XENhm9gb_Qo7ygCV_tbGHEuxw78iXv2jpx2CQ-emqHCFgzVQssXDs2R_MK/file#' },
+			{ id: 13, title: 'Slava Funk', artist: 'Mvsterious', image: 'https://cdn-images.dzcdn.net/images/artist/125e589de1bec47cc657c04744e82458/500x500-000000-80-0-0.jpg', uri: 'https://uc28826c8bee3eeae2fb7771c12f.dl.dropboxusercontent.com/cd/0/inline/Cz3giCSPdo_6s__CeXBimioD8_-mrYWcbuBc581eQo4lzFDbnKtDIdzMLTGh8IbNU8ROA1qPcYIRf2VXDysmMjDuD_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLg/file#' },
+			{ id: 14, title: 'DNA', artist: 'LXNGVX', image: 'https://i.scdn.co/image/ab67616d0000b2738290c26e2d961fea5b2a2b5f', uri: 'https://uc761011259d008769d230d54503.dl.dropboxusercontent.com/cd/0/inline/Cz0oOPygwpA5NGLLj1tRJzMBOSs1yT7eT38nncUEOgRF0WF6H_DjqqhbJivKlZMTGc29iNITmlkTFSrPWF26qst9hihmb5XENhmb5XENhm9gb_Qo7ygCV_tbGHEuxw78iXv2jpx2CQ-emqHCFgzVQssXDs2R_MK/file#' },
 			{ id: 15, title: 'Blah!', artist: 'Nomi XD', image: 'https://i.scdn.co/image/ab67616d0000b2735dd09fa6faa8a3d80c5c38fe', uri: 'https://uc509eda60230b4cbe785ef68f14.dl.dropboxusercontent.com/cd/0/inline/Cz14Yy0q08zlVINp0MSxiws24TQ2fGg0YABnNEgLGKT_rJizjYAZloYdhm_xFxqEEs8QTineQ2uUC2BnxBTSHhFpsYDfbTHFfwxaxnxKHQJm3GFAxHhKHSmExeYtXsv_tTr_SzMIZRtcyW1wCAYbbLZVg/file#' },
 			{ id: 16, title: 'Glory', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b273c9e933ef9dec999264974f90', uri: 'https://uc7bda0ec47c805b3de67eb8eda4.dl.dropboxusercontent.com/cd/0/inline/Cz1_PY5iY8iy5x6h8dqLKJubGS4LoaU-ZxR26ofMeGm8D1X-iZy_l1ixXfRYmZ8RYaIK2Z99gBbMl9IPpOKE2EMqwNvlEjLES9t_pHOIeCoNDsKSXwPcCgap7uA345I8_Ld-F3uqKWDYrrrVSr-9ryMO/file#' },
 			{ id: 17, title: 'X-Tudo', artist: 'Slxughter', image: 'https://i.scdn.co/image/ab67616d0000b2730aa3694fda40f27ea9800024', uri: 'https://ucf11d08b3224f39e94cc500eca2.dl.dropboxusercontent.com/cd/0/inline/Cz38AQUwqcVcoNnaPxdeu2CGwh66BAjq30ZORoSeMltcLLm7AafEgpfTvQT2ZN8-AiyAbjJ6vhaAzJR4pHiT0JOgBlX6NrL3Kh8bKFLdHrTT7UNg1ng_FZ144oPK0CVsZSGaHgmeLgmeDD46v6TtIH5wBim/file#' },
@@ -822,6 +931,7 @@
         // --- 2. PLAYER STATE & ELEMENTS ---
         const audioSource = document.getElementById('audio-source');
         const globalPlayer = document.getElementById('global-player');
+        const searchInput = document.getElementById('search-input'); 
         
         const playerTitle = document.getElementById('player-title');
         const playerArtist = document.getElementById('player-artist');
@@ -832,6 +942,7 @@
         // Controls
         const playPauseButton = document.getElementById('play-pause-button');
         const playPauseIcon = playPauseButton.querySelector('i');
+        // const playButtonWrapper = document.querySelector('.play-button-wrapper'); // REMOVED: Wrapper element for loading animation
         const nextButton = document.getElementById('next-button');
         const previousButton = document.getElementById('previous-button');
         const shuffleButton = document.getElementById('shuffle-button');
@@ -855,11 +966,16 @@
         const modalPlayPauseIcon = document.getElementById('modal-play-pause-icon');
         const modalNextButton = document.getElementById('modal-next-button');
         const modalPreviousButton = document.getElementById('modal-previous-button');
+        const modalImageWrapper = document.querySelector('.modal-image-wrapper');
+        
+        // Context Menu Elements
+        const contextMenu = document.getElementById('track-context-menu');
+        let activeContextMenuTrack = null; 
         
         let currentTrackIndex = -1;
         let isShuffling = false;
         let repeatState = 'off'; // 'off', 'track', 'context'
-        let previousVolume = volumeSlider.value; // Store volume for mute/unmute
+        let previousVolume = parseInt(volumeSlider.value); 
 
 
         // --- 3. HELPER FUNCTIONS ---
@@ -883,9 +999,9 @@
             }
         }
         
-        // Premium Feature: Update Volume Icon and Slider background
         function updateVolumeUI(volume) {
              const vol = parseInt(volume);
+             volumeSlider.value = vol; 
              if (vol === 0) {
                  volumeIcon.className = 'fas fa-volume-off';
              } else if (vol < 50) {
@@ -893,23 +1009,20 @@
              } else {
                  volumeIcon.className = 'fas fa-volume-up';
              }
-             // Update CSS variable for the custom volume track background
              volumeSlider.style.setProperty('--volume-progress', `${vol}%`);
         }
         
-        // Modal Open/Close Functions 
         function openModal() {
             if (currentTrackIndex !== -1) {
                 const track = tracksData[currentTrackIndex];
                 
-                // Sync UI elements
                 modalAlbumArt.src = track.image;
                 modalTitle.textContent = track.title;
                 modalArtist.textContent = track.artist;
                 modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause'; 
 
                 trackModal.classList.add('is-open');
-                document.body.classList.add('modal-open'); // Controls scrolling via CSS
+                document.body.classList.add('modal-open'); 
             }
         }
 
@@ -917,6 +1030,42 @@
             trackModal.classList.remove('is-open');
             document.body.classList.remove('modal-open'); 
         }
+        
+        function showContextMenu(event, track) {
+            event.preventDefault(); 
+            event.stopPropagation(); 
+            
+            contextMenu.classList.remove('show');
+            activeContextMenuTrack = track; 
+
+            let x = event.clientX;
+            let y = event.clientY;
+
+            const menuWidth = 180; 
+            const menuHeight = 150; 
+            const vpWidth = window.innerWidth;
+            const vpHeight = window.innerHeight;
+
+            if (x + menuWidth > vpWidth) {
+                x = vpWidth - menuWidth - 5;
+            }
+            if (y + menuHeight > vpHeight) {
+                y = vpHeight - menuHeight - 5;
+            }
+            
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
+
+            setTimeout(() => { 
+                contextMenu.classList.add('show');
+            }, 10);
+        }
+
+        function hideContextMenu() {
+            contextMenu.classList.remove('show');
+            activeContextMenuTrack = null;
+        }
+
 
         // --- 4. PLAYER CORE LOGIC ---
 
@@ -956,7 +1105,11 @@
             if (currentTrackIndex === -1 && tracksData.length > 0) {
                  playTrack(tracksData[0], 0);
             } else if (audioSource.paused || audioSource.ended) {
-                audioSource.play();
+                if (currentTrackIndex === -1 && tracksData.length > 0) {
+                     playTrack(tracksData[0], 0);
+                } else {
+                     audioSource.play();
+                }
             } else {
                 audioSource.pause();
             }
@@ -983,7 +1136,6 @@
         function playPrevious() {
             if (currentTrackIndex === -1 || tracksData.length === 0) return;
             
-            // If track is more than 3 seconds in, restart it. Otherwise, go to previous track.
             if (audioSource.currentTime > 3) {
                 audioSource.currentTime = 0;
             } else {
@@ -994,25 +1146,60 @@
         
         function cycleRepeat() {
             if (repeatState === 'off') {
-                repeatState = 'track'; 
-                repeatButton.classList.add('active');
-                repeatButton.querySelector('i').className = 'fas fa-redo-alt'; // Icon remains the same
-                audioSource.loop = true; // Enables native single-track repeat
-                isShuffling = false; 
-                shuffleButton.classList.remove('active');
-            } else if (repeatState === 'track') {
                 repeatState = 'context'; 
+                repeatButton.classList.add('active'); 
                 audioSource.loop = false; 
-            } else { // 'context'
+                
+                if (isShuffling) {
+                    isShuffling = false; 
+                    shuffleButton.classList.remove('active');
+                    shuffleButton.setAttribute('data-active', 'false');
+                }
+            } else if (repeatState === 'context') {
+                repeatState = 'track'; 
+                repeatButton.classList.add('active'); 
+                audioSource.loop = true; 
+                
+            } else { // 'track'
                 repeatState = 'off'; 
                 repeatButton.classList.remove('active');
+                audioSource.loop = false;
             }
             repeatButton.setAttribute('data-state', repeatState);
         }
+        
+        function toggleShuffle() {
+            isShuffling = !isShuffling;
+            shuffleButton.classList.toggle('active', isShuffling); 
+            shuffleButton.setAttribute('data-active', isShuffling);
+
+            if (isShuffling) {
+                 repeatState = 'off';
+                 repeatButton.classList.remove('active');
+                 repeatButton.setAttribute('data-state', repeatState);
+                 audioSource.loop = false;
+            }
+        }
+        
+        function seekBy(seconds) {
+             if (currentTrackIndex === -1) return;
+             
+             let newTime = audioSource.currentTime + seconds;
+             
+             if (newTime < 0) {
+                 newTime = 0;
+             } else if (newTime > audioSource.duration) {
+                 newTime = audioSource.duration;
+             }
+             audioSource.currentTime = newTime;
+        }
+
 
         // --- 5. EVENT LISTENERS AND UI BINDING ---
+        
+        // Removed: 'loadstart' and 'canplay' listeners for play button animation
 
-        // Audio Status Listeners (Simplified to one state handler)
+        // Audio Status Listeners 
         audioSource.addEventListener('play', () => {
             playPauseIcon.classList.remove('fa-play');
             playPauseIcon.classList.add('fa-pause');
@@ -1031,15 +1218,13 @@
             if (repeatState === 'context' || isShuffling) {
                  playNext();
             } 
-            // 'track' is handled by audioSource.loop
         });
         
-        // Time and Progress Update (Runs rapidly)
+        // Time and Progress Update 
         audioSource.addEventListener('timeupdate', () => {
             const currentTime = audioSource.currentTime;
             const duration = audioSource.duration || 0;
             
-            // Only update if not actively seeking
             if (!isSeeking) {
                 currentTimeEl.textContent = formatTime(currentTime);
                 if (isFinite(duration) && duration > 0) {
@@ -1055,7 +1240,7 @@
                 : '0:00'; 
         });
         
-        // --- PREMIUM FEATURE: SMOOTH SCRUBBING LOGIC (requestAnimationFrame) ---
+        // --- PREMIUM FEATURE: SMOOTH SCRUBBING LOGIC ---
         let isSeeking = false;
         let lastSeekX = 0; 
         let rAFId = null;  
@@ -1068,13 +1253,13 @@
 
         function visualUpdateLoop() {
             if (!isSeeking || !isFinite(audioSource.duration) || audioSource.duration === 0) {
+                 rAFId = null; 
                  return; 
             }
 
             const percentage = getSeekPercentage(lastSeekX);
             const scrubTime = audioSource.duration * percentage;
 
-            // Visual update
             progressBar.style.width = `${percentage * 100}%`;
             currentTimeEl.textContent = formatTime(scrubTime);
             
@@ -1095,13 +1280,16 @@
              }
              
              lastSeekX = e.clientX;
-             visualUpdateLoop(); 
+             if (rAFId === null) { 
+                visualUpdateLoop(); 
+             }
         }
 
         function endScrub() {
             if (!isSeeking) return;
 
             cancelAnimationFrame(rAFId);
+            rAFId = null;
             isSeeking = false;
             document.body.classList.remove('no-select'); 
 
@@ -1140,12 +1328,12 @@
             updateVolumeUI(newVolume);
             
             if (newVolume > 0) {
-                previousVolume = newVolume; // Store for mute/unmute
+                previousVolume = newVolume; 
             }
         });
         
-        // Premium Feature: Mute/Unmute Toggle
-        volumeIcon.addEventListener('click', () => {
+        // Mute/Unmute Toggle
+        function toggleMute() {
             if (audioSource.volume > 0) {
                 previousVolume = parseInt(volumeSlider.value); 
                 volumeSlider.value = 0;
@@ -1157,41 +1345,112 @@
                 audioSource.volume = newVolume / 100;
                 updateVolumeUI(newVolume);
             }
-        });
+        }
+        volumeIcon.addEventListener('click', toggleMute);
 
-
-        // --- 6. INITIALIZATION: GENERATE CARDS & BIND EVENTS ---
-        
-        // Bind primary control buttons
-        playPauseButton.addEventListener('click', togglePlayPause);
-        nextButton.addEventListener('click', playNext);
-        previousButton.addEventListener('click', playPrevious);
-
-        // Bind modal controls
-        modalPlayPauseButton.addEventListener('click', togglePlayPause);
-        modalNextButton.addEventListener('click', playNext);
-        modalPreviousButton.addEventListener('click', playPrevious);
-        modalCloseButton.addEventListener('click', closeModal);
-        playerInfoBar.addEventListener('click', openModal); // Click player bar to open modal
-
-
-        shuffleButton.addEventListener('click', () => {
-            isShuffling = !isShuffling;
-            shuffleButton.classList.toggle('active', isShuffling);
+        // --- KEYBOARD CONTROLS ---
+        document.addEventListener('keydown', (e) => {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
             
-            if (isShuffling) {
-                 repeatState = 'off';
-                 repeatButton.classList.remove('active');
-                 repeatButton.setAttribute('data-state', repeatState);
-                 audioSource.loop = false;
+            if (e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault(); 
+            }
+            
+            if (trackModal.classList.contains('is-open') && e.key === 'Escape') {
+                 closeModal();
+                 return;
+            }
+            
+            switch(e.key) {
+                case ' ': 
+                    togglePlayPause();
+                    break;
+                case 'ArrowLeft': 
+                    e.preventDefault(); 
+                    seekBy(-5);
+                    break;
+                case 'ArrowRight': 
+                    e.preventDefault(); 
+                    seekBy(5);
+                    break;
+                case 'm': 
+                case 'M':
+                    toggleMute();
+                    break;
+                case 'ArrowUp': 
+                    e.preventDefault();
+                    let volUp = Math.min(100, parseInt(volumeSlider.value) + 5);
+                    audioSource.volume = volUp / 100;
+                    updateVolumeUI(volUp);
+                    previousVolume = volUp;
+                    break;
+                case 'ArrowDown': 
+                    e.preventDefault();
+                    let volDown = Math.max(0, parseInt(volumeSlider.value) - 5);
+                    audioSource.volume = volDown / 100;
+                    updateVolumeUI(volDown);
+                    if (volDown > 0) previousVolume = volDown;
+                    break;
+                case 'n': 
+                case 'N':
+                    playNext();
+                    break;
+                case 'p': 
+                case 'P':
+                    playPrevious();
+                    break;
+                default:
+                    return;
+            }
+        });
+        // --- END KEYBOARD CONTROLS ---
+
+        // FEATURE: RIGHT-CLICK TO CLOSE MODAL
+        trackModal.addEventListener('contextmenu', (e) => {
+            if (!modalImageWrapper.contains(e.target)) {
+                e.preventDefault(); 
+                closeModal();
+            }
+        });
+        
+        // Context Menu Global Listeners
+        document.addEventListener('click', hideContextMenu);
+        document.addEventListener('scroll', hideContextMenu); 
+        window.addEventListener('resize', hideContextMenu);
+        contextMenu.addEventListener('click', (e) => e.stopPropagation()); 
+        
+        // Context Menu Item Handler
+        contextMenu.addEventListener('click', (e) => {
+            const item = e.target.closest('.context-menu-item');
+            if (!item || !activeContextMenuTrack) return;
+
+            const action = item.getAttribute('data-action');
+            const track = activeContextMenuTrack;
+            
+            hideContextMenu(); 
+
+            if (action === 'play') {
+                const index = tracksData.findIndex(t => t.id === track.id);
+                if (index !== -1) {
+                    playTrack(track, index);
+                }
+            } else if (action === 'download') {
+                const card = document.querySelector(`.track-card[data-id="${track.id}"]`);
+                if (card) {
+                    const downloadButton = card.querySelector('.download-trigger-button');
+                    if (downloadButton) {
+                        downloadButton.click();
+                    }
+                }
             }
         });
 
-        repeatButton.addEventListener('click', cycleRepeat);
 
+        // --- 6. INITIALIZATION: GENERATE CARDS, BIND EVENTS, AND SEARCH ---
 
-        // Generate track cards
-        tracksData.forEach((track, index) => {
+        function createTrackCard(track, originalIndex) {
             const card = document.createElement('div');
             card.className = 'track-card';
             card.setAttribute('data-id', track.id);
@@ -1211,11 +1470,18 @@
                 </button>
             `;
             
+            // Normal click to play
             card.addEventListener('click', (event) => {
                 if (!event.target.closest('.download-trigger-button')) {
-                    playTrack(track, index);
+                    playTrack(track, originalIndex);
                 }
             });
+            
+            // Right-click for custom context menu
+            card.addEventListener('contextmenu', (event) => {
+                 showContextMenu(event, track);
+            });
+
 
             // Download Logic with Animation
             const downloadButton = card.querySelector('.download-trigger-button');
@@ -1272,7 +1538,68 @@
             });
 
             trackList.appendChild(card);
+        }
+        
+        // Search/Filter Logic
+        function filterTracks(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+            
+            trackList.innerHTML = ''; 
+
+            const filteredTracks = tracksData.filter(track => 
+                track.title.toLowerCase().includes(term) ||
+                track.artist.toLowerCase().includes(term)
+            );
+            
+            filteredTracks.forEach((track) => {
+                const originalIndex = tracksData.findIndex(t => t.id === track.id);
+                createTrackCard(track, originalIndex); 
+            });
+            
+            const heading = document.querySelector('.content-heading');
+            if (term.length > 0) {
+                heading.textContent = `Found ${filteredTracks.length} Track${filteredTracks.length !== 1 ? 's' : ''}`;
+            } else {
+                heading.textContent = `Top ${tracksData.length} Best Phonk`;
+            }
+            
+            highlightActiveCard(); 
+        }
+
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterTracks(e.target.value);
+            }, 300); // 300ms debounce
         });
+
+
+        // Bind primary control buttons
+        playPauseButton.addEventListener('click', togglePlayPause);
+        nextButton.addEventListener('click', playNext);
+        previousButton.addEventListener('click', playPrevious);
+
+        // Bind modal controls
+        modalPlayPauseButton.addEventListener('click', togglePlayPause);
+        modalNextButton.addEventListener('click', playNext);
+        modalPreviousButton.addEventListener('click', playPrevious);
+        modalCloseButton.addEventListener('click', closeModal);
+        playerInfoBar.addEventListener('click', openModal); 
+
+
+        shuffleButton.addEventListener('click', toggleShuffle);
+        repeatButton.addEventListener('click', cycleRepeat);
+        
+        
+        // Initial track list generation
+        function initTrackList() {
+            trackList.innerHTML = '';
+            tracksData.forEach((track, index) => {
+                createTrackCard(track, index);
+            });
+        }
+        initTrackList();
     </script>
 
     </body>
