@@ -66,7 +66,7 @@
         }
         /* End Custom Scrollbar Styling */
         
-        /* 2. ⭐ NEW: Right-Click Prevention ⭐ */
+		/* 2. ⭐ REFINED: Right-Click Prevention & Dragging Prevention ⭐ */
         .track-image, 
         .modal-album-art, 
         .track-card,
@@ -76,10 +76,13 @@
             -webkit-user-select: none;
             -ms-user-select: none;
             -moz-user-select: none;
+            
+            /* ⭐ FIX: Disable Image Dragging ⭐ */
+            -webkit-user-drag: none; /* Webkit browsers */
+            user-drag: none;        /* Standard */
+            
             pointer-events: auto; /* Ensure they remain interactive for left-click/hover */
             cursor: default; /* Optional: Keep default cursor */
-            
-            /* Add oncontextmenu to the elements via JS for full cross-browser support */
         }
 
         /* NEW: Blur and Darkening Container */
@@ -103,7 +106,6 @@
             padding: 20px 40px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             display: flex;
-            /* REMOVED: justify-content: space-between; */
             align-items: center;
             position: sticky;
             top: 0;
@@ -114,7 +116,6 @@
             font-size: 1.8em;
             font-weight: 900; 
         }
-        /* REMOVED: .header nav styles */
         
         .container {
             max-width: 1400px;
@@ -146,7 +147,8 @@
             border-radius: 6px; 
             padding: 16px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
-            transition: background-color 0.2s ease, transform 0.1s ease, border 0.3s ease;
+            /* ENHANCED TRANSITION FOR SMOOTH ANIMATION */
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
             cursor: pointer;
             position: relative;
             border: 2px solid transparent; 
@@ -155,13 +157,18 @@
         .track-card.active-track {
             border: 2px solid var(--spotify-green); 
             background-color: #383838;
+            /* ⭐ ACTIVE GLOW ⭐ */
+            box-shadow: 0 0 20px rgba(30, 215, 96, 0.5), 0 8px 15px rgba(0, 0, 0, 0.6); 
         }
 
-        /* Play Icon Overlay */
+        /* Play Icon Overlay - MODIFIED FOR CENTERING */
         .play-icon-overlay {
             position: absolute;
-            bottom: 80px; 
-            right: 25px;
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%); /* Centering the element */
+            right: auto;
+            
             width: 48px;
             height: 48px;
             background-color: var(--spotify-green);
@@ -171,19 +178,22 @@
             justify-content: center;
             align-items: center;
             opacity: 0; 
-            transform: translateY(4px);
             transition: opacity 0.3s ease, transform 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
             pointer-events: none; 
         }
         
+        /* ⭐ IMPROVED HOVER ANIMATION: 3D Tilt + Glow ⭐ */
         .track-card:hover {
             background-color: rgba(46, 46, 46, 0.9);
+            transform: perspective(1000px) rotateX(1deg) rotateY(1deg) scale(1.02); 
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.15), 0 8px 20px rgba(0, 0, 0, 0.8);
         }
         
         .track-card:hover .play-icon-overlay {
              opacity: 1; 
-             transform: translateY(0);
+             /* Apply slight upward movement from new centered position */
+             transform: translate(-50%, -50%) translateY(-5px); 
         }
 
         .track-image {
@@ -213,8 +223,11 @@
             margin-bottom: 10px;
         }
 
+        /* DOWNLOAD BUTTON STYLING */
         .download-button {
-            display: block;
+            display: flex; /* Use flex to center and position icon/text */
+            justify-content: center;
+            align-items: center;
             width: 100%;
             padding: 8px 10px;
             background-color: var(--spotify-green);
@@ -226,12 +239,32 @@
             font-weight: 700;
             border: none;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s; /* Smoother transitions */
             margin-top: 10px; 
         }
         .download-button:hover {
             background-color: #1AA350; 
         }
+        
+        /* ⭐ NEW: Loading Animation Styles ⭐ */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .download-button.loading {
+            background-color: #383838; /* Darker background */
+            color: var(--subtle-text);
+            cursor: default;
+            pointer-events: none; /* Disable clicks */
+        }
+        
+        /* Apply spinner animation and spacing */
+        .download-button .fa-spinner {
+            margin-right: 5px; 
+            animation: spin 1s linear infinite;
+        }
+        /* End NEW: Loading Animation Styles */
 
 
         /*
@@ -601,18 +634,22 @@
             .header {
                 padding: 15px 20px;
             }
-            /* .header nav is already removed, but keeping its display:none wouldn't hurt */
             .track-grid {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
             
             .play-icon-overlay {
                  opacity: 1; 
-                 transform: translateY(0);
+                 /* Reset transform for mobile, rely on absolute positioning */
+                 transform: translate(-50%, -50%); 
                  width: 36px;
                  height: 36px;
-                 bottom: 75px; 
-                 right: 15px;
+                 /* Reposition for better mobile visibility if needed, but centering should be fine */
+            }
+            
+            /* Disable 3D transform on mobile for performance and better touch feel */
+            .track-card:hover {
+                 transform: none;
             }
 
             /* Stacked Player Bar for Mobile */
@@ -724,7 +761,7 @@
         <div class="modal-content">
             
             <div class="modal-image-wrapper">
-                <img id="modal-album-art" class="modal-album-art" src="" alt="Album Art">
+                <img id="modal-album-art" class="modal-album-art" src="" alt="Album Art" draggable="false">
                 
                 <div class="modal-controls-overlay">
                     <div class="modal-controls-group">
@@ -743,7 +780,8 @@
     </div>
     
     <div id="global-player">
-        <div class="player-info" id="player-info-bar"> <img id="player-image" src="" alt="Album Art" style="display:none;">
+        <div class="player-info" id="player-info-bar"> 
+            <img id="player-image" src="" alt="Album Art" style="display:none;" draggable="false">
             <div class="player-info-text">
                 <div id="player-title" class="track-title" style="margin-bottom: 0;">Select a Track</div>
                 <div id="player-artist" class="track-artist" style="margin-bottom: 0;">To begin playback</div>
@@ -797,7 +835,7 @@
 			{ id: 13, title: 'Slava Funk', artist: 'Mvsterious', image: 'https://cdn-images.dzcdn.net/images/artist/125e589de1bec47cc657c04744e82458/500x500-000000-80-0-0.jpg', uri: 'https://uc28826c8bee3eeae2fb7771c12f.dl.dropboxusercontent.com/cd/0/inline/Cz3giCSPdo_6s__CeXBimioD8_-mrYWcbuBc581eQo4lzFDbnKtDIdzMLTGh8IbNU8ROA1qPcYIRf2VXDysmMjDuD_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLqjibZy2uJ0XHvdXonoNu7AOJ/file#' },
 			{ id: 14, title: 'DNA', artist: 'LXNGVX', image: 'https://i.scdn.co/image/ab67616d0000b2738290c26e2d961fea5b2a2b5f', uri: 'https://uc761011259d008769d230d54503.dl.dropboxusercontent.com/cd/0/inline/Cz0oOPygwpA5NGLLj1tRJzMBOSs1yT7eT38nncUEOgRF0WF6H_DjqqhbJivKlZMTGc29iNITmlkTFSrPWF26qst9hihmb5XENhm9gb_Qo7ygCV_tbGHEuxw78iXv2jpx2CQ-emqHCFgzVQssXDs2R_MK/file#' },
 			{ id: 15, title: 'Blah!', artist: 'Nomi XD', image: 'https://i.scdn.co/image/ab67616d0000b2735dd09fa6faa8a3d80c5c38fe', uri: 'https://uc509eda60230b4cbe785ef68f14.dl.dropboxusercontent.com/cd/0/inline/Cz14Yy0q08zlVINp0MSxiws24TQ2fGg0YABnNEgLGKT_rJizYAZloYdhm_xFxqEEs8QTineQ2uUC2BnxBTSHhFpsYDfbTHMfwxaxnxKHQJm3GFAxHhKHSmExeYtXsv_tTr_SzMIZRtcyW1wCAYbbLZVg/file#' },
-			{ id: 16, title: 'Glory', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b273c9e933ef9dec999264974f90', uri: 'https://uc7bda0ec47c805b3de67eb8eda4.dl.dropboxusercontent.com/cd/0/inline/Cz1_PY5iY8iy5x6h8dqLKJubGS4LoaU-ZxR26ofMeGm8D1X-iZy_l1ixXfRYmZ8RYaIK2Z99gBbMl9IPpOKE2EMqwNvlEjLES9t_pHOIeCoNDsKSXwPcCgap7uA345I8_Ld-F3uqKWDYrrrVSr-9ryMO/file#' },
+			{ id: 16, title: 'Glory', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b273c9e933ef9dec999264974f90', uri: 'https://uc7bda0ec47c805b3de67eb8eda4.dl.dropboxusercontent.com/cd/0/inline/Cz1_PY5iY8iy5x6h8dqLKJubGS4LoaU-ZxR26ofMeGm8D1X-iZy_l1ixXfRYmZ8RYaIK2Z99gBbMl9IPfOKE2EMqwNvlEjLES9t_pHOIeCoNDsKSXwPcCgap7uA345I8_Ld-F3uqKWDYrrrVSr-9ryMO/file#' },
 			{ id: 17, title: 'X-Tudo', artist: 'Slxughter', image: 'https://i.scdn.co/image/ab67616d0000b2730aa3694fda40f27ea9800024', uri: 'https://ucf11d08b3224f39e94cc500eca2.dl.dropboxusercontent.com/cd/0/inline/Cz38AQUwqcVcoNnaPxdeu2CGwh66BAjq30ZORoSeMltcLLm7AafEgpfTvQT2ZN8-AiyAbjJ6vhaAzJR4pHiT0JOgBlX6NrL3Kh8bKFLdHrTT7UNg1ng_FZ144oPK0CVsZSGaHgmebDD46v6TtIH5wBim/file#' },
 			{ id: 18, title: 'Void', artist: 'Isq', image: 'https://i.scdn.co/image/ab67616d0000b273479c9842be5a7b9dd0b7454c', uri: 'https://uc4167ea0b3e9c379c3f472b0938.dl.dropboxusercontent.com/cd/0/inline/Cz0m4eY05V7hE83LuRc8h6PyjLS1nPERQ7Ob601U20NRFjwNhCpwJkhjqBeOKXh7mLuxwr3q8V_sStkVHYOsOy1GPpEwxMxeG1PIUxFA5NOzcdjYrwa7qzl3d4BH4Uy9DCHmv-vk2J9ownaJj0Vf0jyS/file#' },
 			{ id: 19, title: '✻H+3+ЯД✻7luCJIo0T6', artist: 'Vyrval', image: 'https://i.scdn.co/image/ab67616d0000b273e8624537ab89ae32598f5844', uri: 'https://ucb2af9842728b71965996216f90.dl.dropboxusercontent.com/cd/0/inline/Cz1gvXJ_Ukz_Et-vUvYGcJGcCznKYSy_PwJYssrWG0zwhOF3bNtYwz0vhJH_PIxyy0B6e3kG6T_RurI6RMylWi5dypQ6DEtsODLI_rzIHLJObw62sbUE9ZQ4xTBSGnE0W6NvpTGz5Bz1-ARIPWdc6wbr/file#' },
@@ -879,7 +917,7 @@
              }
         }
         
-        // Modal Open/Close Functions 
+        // Modal Open/Close Functions - MODIFIED TO CONTROL SCROLLING
         function openModal() {
             if (currentTrackIndex !== -1) {
                 const track = tracksData[currentTrackIndex];
@@ -895,11 +933,13 @@
                 }
 
                 trackModal.classList.add('is-open');
+                document.body.style.overflow = 'hidden'; // Disable body scrolling
             }
         }
 
         function closeModal() {
             trackModal.classList.remove('is-open');
+            document.body.style.overflow = ''; // Re-enable body scrolling
         }
 
         /* 3. Function to prevent right-click on elements */
@@ -912,51 +952,6 @@
 
 
         // --- 4. PLAYER CORE LOGIC ---
-
-        // NEW ASYNC DOWNLOAD FUNCTION
-        async function forceDownload(uri, filename, button) {
-            console.log(`Attempting to download: ${filename} from ${uri}`);
-            
-            // Disable the button to prevent double-clicks and provide feedback
-            button.disabled = true;
-            button.textContent = 'Downloading...';
-
-            try {
-                // 1. Fetch the audio data as a Blob (The key step to bypass server headers)
-                const response = await fetch(uri); 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const blob = await response.blob();
-                
-                // 2. Create a temporary URL for the Blob
-                const url = window.URL.createObjectURL(blob);
-                
-                // 3. Create a temporary anchor tag to trigger the download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename; // Set the desired filename
-                document.body.appendChild(a);
-                
-                // 4. Programmatically click the anchor tag
-                a.click();
-                
-                // 5. Clean up the temporary elements and URL
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                
-                console.log('Download complete.');
-
-            } catch (error) {
-                console.error('Download failed:', error);
-                alert('Download failed. Check the console for details.');
-            } finally {
-                // Re-enable the button
-                button.disabled = false;
-                button.textContent = 'Download';
-            }
-        }
-
 
         function playTrack(track, index) {
             // 1. Update State
@@ -1256,54 +1251,97 @@
         });
 
 
-        // --- 6. INITIALIZATION: GENERATE CARDS & BIND EVENTS (MODIFIED FOR PROGRAMMATIC DOWNLOAD) ---
+        // --- 6. INITIALIZATION: GENERATE CARDS & BIND EVENTS ---
         tracksData.forEach((track, index) => {
             const card = document.createElement('div');
             card.className = 'track-card';
             card.setAttribute('data-id', track.id);
 
-            // MODIFIED: Replaced <a> tag with <button> to facilitate programmatic download
+            const downloadFileName = `${track.title.replace(/\s/g, '_')}_${track.artist.replace(/\s/g, '_')}.mp3`;
+            const originalText = 'Download';
+
             card.innerHTML = `
-                <img src="${track.image}" alt="Album Art for ${track.title}" class="track-image">
+                <img src="${track.image}" alt="Album Art for ${track.title}" class="track-image" draggable="false">
                 <div class="play-icon-overlay"><i class="fas fa-play"></i></div>
                 <div class="track-info">
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist}</div>
                 </div>
-                <button class="download-button" data-uri="${track.uri}" data-title="${track.title}" data-artist="${track.artist}">
-                    Download
+                <button class="download-trigger-button download-button" data-uri="${track.uri}" data-filename="${downloadFileName}">
+                    ${originalText}
                 </button>
             `;
             
             // Add right-click prevention to the card
             disableRightClick(card); 
 
-            // Find the new download button
-            const downloadButton = card.querySelector('.download-button');
-            
-            // NEW LOGIC: Event listener for the download button
-            downloadButton.addEventListener('click', async (event) => {
-                // Stop the click event from propagating to the card's play function
-                event.stopPropagation(); 
-                
-                const uri = downloadButton.getAttribute('data-uri');
-                const title = downloadButton.getAttribute('data-title');
-                const artist = downloadButton.getAttribute('data-artist');
-                
-                // Create a clean filename
-                const filename = `${title.replace(/\s/g, '_')}_${artist.replace(/\s/g, '_')}.mp3`;
-                
-                // Call the new async download function
-                await forceDownload(uri, filename, downloadButton);
-            });
-
-            // Existing: Event listener for the rest of the card (for playing the track)
+            // Attach event listener for playing the track (on the card itself)
             card.addEventListener('click', (event) => {
-                // Only play if the target is NOT the download button
-                if (!event.target.classList.contains('download-button')) {
+                // Prevent playing if the download button itself was clicked
+                if (!event.target.closest('.download-trigger-button')) {
                     playTrack(track, index);
                 }
             });
+
+            // ⭐ ENHANCED DOWNLOAD LOGIC WITH ANIMATION ⭐
+            const downloadButton = card.querySelector('.download-trigger-button');
+            downloadButton.addEventListener('click', async (event) => {
+                event.stopPropagation(); // Stop the card's click event from firing
+                const uri = downloadButton.getAttribute('data-uri');
+                const filename = downloadButton.getAttribute('data-filename');
+                
+                // 1. START LOADING ANIMATION
+                downloadButton.innerHTML = `<i class="fas fa-spinner"></i> Downloading...`;
+                downloadButton.classList.add('loading');
+                downloadButton.style.backgroundColor = ''; // Use CSS default loading background
+                downloadButton.disabled = true;
+
+                try {
+                    const response = await fetch(uri);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const blob = await response.blob();
+                    
+                    // 2. Trigger download
+                    const blobUrl = URL.createObjectURL(blob);
+                    const tempLink = document.createElement('a');
+                    tempLink.href = blobUrl;
+                    tempLink.download = filename; 
+                    
+                    document.body.appendChild(tempLink);
+                    tempLink.click();
+                    document.body.removeChild(tempLink); 
+                    
+                    URL.revokeObjectURL(blobUrl);
+
+                    // 3. SUCCESS ANIMATION
+                    downloadButton.classList.remove('loading');
+                    downloadButton.innerHTML = `<i class="fas fa-check"></i> Downloaded!`;
+                    downloadButton.style.backgroundColor = '#1AA350'; // Green success color
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        downloadButton.innerHTML = originalText;
+                        downloadButton.disabled = false;
+                        downloadButton.style.backgroundColor = ''; 
+                    }, 3000);
+
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    
+                    // 4. ERROR ANIMATION
+                    downloadButton.classList.remove('loading');
+                    downloadButton.innerHTML = `<i class="fas fa-times"></i> Failed`;
+                    downloadButton.style.backgroundColor = '#FF4500'; // Red error color
+                    downloadButton.disabled = false;
+                    
+                    setTimeout(() => {
+                        downloadButton.innerHTML = originalText;
+                        downloadButton.style.backgroundColor = ''; 
+                    }, 3000);
+                }
+            });
+            // ⭐ END ENHANCED DOWNLOAD LOGIC ⭐
 
             trackList.appendChild(card);
         });
