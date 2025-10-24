@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immersive Phonk Player - Custom</title>
+    <title>Immersive Phonk Player - Premium</title>
     <link rel="icon" type="image/png" href="https://i.ibb.co/JwTGGmM7/cropped-circle-image-10.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -20,7 +20,7 @@
             --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             --player-height: 90px;
             --player-height-mobile: 110px; 
-            --dark-overlay: rgba(0, 0, 0, 0.7); /* Custom dark overlay for background */
+            --dark-overlay: rgba(0, 0, 0, 0.7); 
         }
 
         * {
@@ -29,10 +29,10 @@
             box-sizing: border-box;
         }
         
-        /* NEW: Disable text selection during seeking */
+        /* Premium Feature: Disable text selection during seeking */
         .no-select {
             user-select: none;
-            cursor: ew-resize !important; /* Visual cue for horizontal dragging */
+            cursor: ew-resize !important; 
         }
 
         body {
@@ -41,22 +41,22 @@
             line-height: 1.6;
             padding-bottom: var(--player-height); 
             
-            /* ⭐ NEW: Background Image Styling ⭐ */
+            /* Background Image Styling */
             background-image: url('https://i.redd.it/et1yntwo6dc61.jpg');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
-            background-color: var(--dark-gray); /* Base color */
+            background-color: var(--dark-gray); 
         }
         
-        /* 1. ⭐ NEW: Custom Scrollbar Styling (Webkit) ⭐ */
+        /* Custom Scrollbar Styling (Premium Polish) */
         ::-webkit-scrollbar {
             width: 10px;
             background: var(--dark-gray);
         }
 
         ::-webkit-scrollbar-thumb {
-            background-color: var(--light-gray); /* Match card background color */
+            background-color: var(--light-gray); 
             border-radius: 5px;
             border: 2px solid var(--dark-gray);
         }
@@ -64,36 +64,32 @@
         ::-webkit-scrollbar-thumb:hover {
             background-color: var(--mid-gray);
         }
-        /* End Custom Scrollbar Styling */
         
-		/* 2. ⭐ REFINED: Right-Click Prevention & Dragging Prevention ⭐ */
+        /* Dragging and Right-Click Prevention (Enhanced for all image types) */
         .track-image, 
         .modal-album-art, 
-        .track-card,
         .player-info img {
-            /* Disable right-click context menu on images and track elements */
             user-select: none;
             -webkit-user-select: none;
             -ms-user-select: none;
             -moz-user-select: none;
             
-            /* ⭐ FIX: Disable Image Dragging ⭐ */
-            -webkit-user-drag: none; /* Webkit browsers */
-            user-drag: none;        /* Standard */
+            -webkit-user-drag: none; 
+            user-drag: none;        
             
-            pointer-events: auto; /* Ensure they remain interactive for left-click/hover */
-            cursor: default; /* Optional: Keep default cursor */
+            pointer-events: auto; 
+            cursor: default; 
         }
 
-        /* NEW: Blur and Darkening Container */
+        /* Background Blur Overlay */
         .background-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--dark-overlay); /* Darken */
-            backdrop-filter: blur(8px); /* Blur */
+            background-color: var(--dark-overlay); 
+            backdrop-filter: blur(8px); 
             -webkit-backdrop-filter: blur(8px);
             z-index: -1; 
         }
@@ -102,7 +98,7 @@
         * Header & Main Layout
         */
         .header {
-            background-color: rgba(24, 24, 24, 0.8); /* Semi-transparent background */
+            background-color: rgba(24, 24, 24, 0.8); 
             padding: 20px 40px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             display: flex;
@@ -127,7 +123,7 @@
             font-size: 2em;
             color: var(--text-color);
             padding-left: 10px;
-            background: rgba(14, 14, 14, 0.6); /* Slightly transparent background for readability */
+            background: rgba(14, 14, 14, 0.6); 
             display: inline-block;
             padding: 5px 15px;
             border-radius: 4px;
@@ -143,30 +139,29 @@
         * Refined Track Card Styling
         */
         .track-card {
-            background-color: rgba(36, 36, 36, 0.8); /* More transparent cards */
+            background-color: rgba(36, 36, 36, 0.8); 
             border-radius: 6px; 
             padding: 16px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
-            /* ENHANCED TRANSITION FOR SMOOTH ANIMATION */
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
             cursor: pointer;
             position: relative;
             border: 2px solid transparent; 
         }
         
+        /* Premium Feature: Active Track Glow */
         .track-card.active-track {
             border: 2px solid var(--spotify-green); 
             background-color: #383838;
-            /* ⭐ ACTIVE GLOW ⭐ */
             box-shadow: 0 0 20px rgba(30, 215, 96, 0.5), 0 8px 15px rgba(0, 0, 0, 0.6); 
         }
 
-        /* Play Icon Overlay - MODIFIED FOR CENTERING */
+        /* Premium Feature: Vertically Centered Play Icon Overlay */
         .play-icon-overlay {
             position: absolute;
             top: 50%; 
             left: 50%;
-            transform: translate(-50%, -50%); /* Centering the element */
+            transform: translate(-50%, -50%); 
             right: auto;
             
             width: 48px;
@@ -183,7 +178,7 @@
             pointer-events: none; 
         }
         
-        /* ⭐ IMPROVED HOVER ANIMATION: 3D Tilt + Glow ⭐ */
+        /* Premium Feature: Improved Hover Animation (3D Tilt + Glow) */
         .track-card:hover {
             background-color: rgba(46, 46, 46, 0.9);
             transform: perspective(1000px) rotateX(1deg) rotateY(1deg) scale(1.02); 
@@ -192,7 +187,6 @@
         
         .track-card:hover .play-icon-overlay {
              opacity: 1; 
-             /* Apply slight upward movement from new centered position */
              transform: translate(-50%, -50%) translateY(-5px); 
         }
 
@@ -223,9 +217,9 @@
             margin-bottom: 10px;
         }
 
-        /* DOWNLOAD BUTTON STYLING */
+        /* Download Button Styling */
         .download-button {
-            display: flex; /* Use flex to center and position icon/text */
+            display: flex; 
             justify-content: center;
             align-items: center;
             width: 100%;
@@ -239,33 +233,30 @@
             font-weight: 700;
             border: none;
             cursor: pointer;
-            transition: background-color 0.3s, color 0.3s, transform 0.2s; /* Smoother transitions */
+            transition: background-color 0.3s, color 0.3s, transform 0.2s; 
             margin-top: 10px; 
         }
         .download-button:hover {
             background-color: #1AA350; 
         }
         
-        /* ⭐ NEW: Loading Animation Styles ⭐ */
+        /* Loading Animation Styles */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
         .download-button.loading {
-            background-color: #383838; /* Darker background */
+            background-color: #383838; 
             color: var(--subtle-text);
             cursor: default;
-            pointer-events: none; /* Disable clicks */
+            pointer-events: none; 
         }
         
-        /* Apply spinner animation and spacing */
         .download-button .fa-spinner {
             margin-right: 5px; 
             animation: spin 1s linear infinite;
         }
-        /* End NEW: Loading Animation Styles */
-
 
         /*
         * Custom Player UI (Bottom Bar)
@@ -275,7 +266,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: rgba(24, 24, 24, 0.95); /* Slightly transparent */
+            background-color: rgba(24, 24, 24, 0.95); 
             padding: 0 16px; 
             display: flex;
             justify-content: space-between;
@@ -298,7 +289,7 @@
             width: 30%; 
             min-width: 150px;
             max-width: 300px;
-            cursor: pointer; /* NEW: Indicate the player is clickable for the modal */
+            cursor: pointer; 
         }
         .player-info img {
             width: 60px; 
@@ -346,6 +337,9 @@
         .control-button.active {
             color: var(--spotify-green); 
         }
+        .control-button:active {
+            transform: scale(0.95);
+        }
 
         #play-pause-button {
             font-size: 20px; 
@@ -366,6 +360,9 @@
             transform: scale(1.05); 
             background-color: var(--spotify-green); 
             color: var(--dark-gray);
+        }
+        #play-pause-button:active {
+            transform: scale(0.95);
         }
         
         .seek-bar-container {
@@ -390,7 +387,6 @@
             width: 0%;
             background: var(--text-color); 
             border-radius: 2px;
-            /* MODIFIED: Removed transition for instant, fast updates (and better scrubbing) */
             transition: none; 
             position: relative;
         }
@@ -398,6 +394,7 @@
             background: var(--spotify-green);
         }
         
+        /* Premium Feature: Progress Bar Scrubbing Thumb */
         #progress-bar::after {
             content: '';
             position: absolute;
@@ -409,15 +406,18 @@
             background: var(--text-color);
             border-radius: 50%;
             opacity: 0; 
-            transition: opacity 0.1s ease;
-        }
-        #seek-bar:hover #progress-bar::after {
-            opacity: 1; 
-        }
-        #global-player.playing #seek-bar:hover #progress-bar::after {
-            background: var(--spotify-green);
+            transition: opacity 0.1s ease, background-color 0.2s;
+            pointer-events: none; /* Let the parent div handle the click/drag */
         }
         
+        #seek-bar:hover #progress-bar::after,
+        .no-select #progress-bar::after { /* Show thumb when dragging */
+            opacity: 1; 
+        }
+        #global-player.playing #progress-bar::after {
+            background: var(--spotify-green);
+        }
+
         /* 3. Volume (Right Side) */
         .volume-control {
             width: 30%;
@@ -427,17 +427,21 @@
             padding-right: 15px;
         }
         #volume-icon {
-            font-size: 18px; /* Slightly larger icon */
+            font-size: 18px; 
             margin-right: 10px;
             color: var(--subtle-text);
             cursor: pointer;
-            transition: color 0.1s ease;
+            transition: color 0.1s ease, transform 0.1s ease;
         }
         #volume-icon:hover {
             color: var(--text-color);
+            transform: scale(1.1);
+        }
+        #volume-icon:active {
+            transform: scale(0.9);
         }
         
-        /* ⭐ IMPROVED: Custom Volume Slider Styling ⭐ */
+        /* Premium Feature: Custom Volume Slider Styling */
         #volume-slider {
             width: 100px;
             -webkit-appearance: none;
@@ -446,17 +450,15 @@
             background: #535353;
             border-radius: 2px;
             cursor: pointer;
+            transition: background 0.2s ease;
         }
         
-        /* Slider Track Styling (Webkit) */
         #volume-slider::-webkit-slider-runnable-track {
-            width: 100%;
+            background: linear-gradient(to right, var(--spotify-green) 0%, var(--spotify-green) var(--volume-progress, 100%), #535353 var(--volume-progress, 100%), #535353 100%);
             height: 4px;
-            background: #535353;
             border-radius: 2px;
         }
         
-        /* Slider Thumb Styling (Webkit) */
         #volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -468,48 +470,28 @@
             transition: background-color 0.2s, transform 0.2s;
         }
         
-        /* Slider Track Styling (Firefox) */
-        #volume-slider::-moz-range-track {
-            width: 100%;
-            height: 4px;
-            background: #535353;
-            border-radius: 2px;
-        }
-        
-        /* Slider Thumb Styling (Firefox) */
-        #volume-slider::-moz-range-thumb {
-            width: 12px;
-            height: 12px;
-            background: var(--text-color);
-            border-radius: 50%;
-            border: none;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-
-        /* Hover effect on thumb */
         #volume-slider:hover::-webkit-slider-thumb,
         #volume-slider:active::-webkit-slider-thumb {
             background: var(--spotify-green);
             transform: scale(1.1);
         }
-        #volume-slider:hover::-moz-range-thumb,
-        #volume-slider:active::-moz-range-thumb {
-            background: var(--spotify-green);
-            transform: scale(1.1);
-        }
-        /* End Custom Volume Slider Styling */
+
 		
-        /* * ⭐ Full-Screen Modal Styles ⭐ */
+        /* * Full-Screen Modal Styles */
         #track-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(14, 14, 14, 0.95); /* Dark background with slight transparency */
+            background-color: rgba(14, 14, 14, 0.95); 
             z-index: 100;
-            display: none; /* Hidden by default */
-            place-items: center; /* Center content */
+            display: none; 
+            place-items: center; 
+        }
+        /* Premium Feature: Disable scrolling when modal is open */
+        body.modal-open {
+            overflow: hidden;
         }
 
         #track-modal.is-open {
@@ -527,18 +509,17 @@
             position: relative; 
         }
         
-        /* Image Wrapper for correct overlay positioning */
         .modal-image-wrapper {
-            position: relative; /* Context for absolute overlay */
-            width: min(80vw, 400px); /* Match image size */
-            height: min(80vw, 400px); /* Match image size */
+            position: relative; 
+            width: min(80vw, 400px); 
+            height: min(80vw, 400px); 
             border-radius: 8px;
-            margin-bottom: 40px; /* Space before title */
+            margin-bottom: 40px; 
         }
 
         .modal-album-art {
-            width: 100%; /* Fill the wrapper */
-            height: 100%; /* Fill the wrapper */
+            width: 100%; 
+            height: 100%; 
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             transition: transform 0.3s ease;
@@ -560,19 +541,18 @@
             color: var(--spotify-green);
         }
         
-        /* FIX: Hover Controls Popup - Now perfectly covers the image and moves with it */
+        /* Modal Controls Overlay */
         .modal-controls-overlay {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%; /* Cover the parent wrapper */
-            height: 100%; /* Cover the parent wrapper */
+            width: 100%; 
+            height: 100%; 
             display: grid;
             place-items: center;
             background-color: rgba(0, 0, 0, 0.6); 
             border-radius: 8px; 
             opacity: 0;
-            /* MODIFIED: Added transform to transition for smooth movement */
             transition: opacity 0.3s ease, transform 0.3s ease; 
             pointer-events: none; 
         }
@@ -580,7 +560,6 @@
         .modal-image-wrapper:hover .modal-controls-overlay {
             opacity: 1;
             pointer-events: auto; 
-            /* MODIFIED: Apply the exact same transform as the image */
             transform: translateY(-5px); 
         }
         
@@ -591,7 +570,7 @@
         }
         
         .modal-control-button {
-            background-color: rgba(30, 215, 96, 0.9); /* Spotify Green with slight transparency */
+            background-color: rgba(30, 215, 96, 0.9); 
             color: var(--dark-gray);
             border: none;
             border-radius: 50%;
@@ -607,6 +586,9 @@
             background-color: var(--spotify-green);
             transform: scale(1.05);
         }
+        .modal-control-button:active {
+            transform: scale(0.95);
+        }
 
         /* Close Button */
         #modal-close-button {
@@ -619,10 +601,14 @@
             font-size: 30px;
             cursor: pointer;
             z-index: 110;
-            transition: color 0.2s ease;
+            transition: color 0.2s ease, transform 0.1s ease;
         }
         #modal-close-button:hover {
             color: var(--text-color);
+            transform: scale(1.1);
+        }
+        #modal-close-button:active {
+            transform: scale(0.9);
         }
 
 
@@ -640,14 +626,11 @@
             
             .play-icon-overlay {
                  opacity: 1; 
-                 /* Reset transform for mobile, rely on absolute positioning */
                  transform: translate(-50%, -50%); 
                  width: 36px;
                  height: 36px;
-                 /* Reposition for better mobile visibility if needed, but centering should be fine */
             }
             
-            /* Disable 3D transform on mobile for performance and better touch feel */
             .track-card:hover {
                  transform: none;
             }
@@ -663,13 +646,11 @@
             .player-info {
                 width: 100%;
                 max-width: none;
-                justify-content: flex-start;
                 order: 1; 
                 margin-top: 5px;
                 padding-top: 5px; 
             }
             
-            /* MOBILE IMAGE FIX: Reduced size and spacing */
             .player-info img {
                  width: 45px; 
                  height: 45px;
@@ -688,8 +669,6 @@
                 order: 0; 
                 flex-direction: row;
                 justify-content: space-between; 
-                align-items: center;
-                margin-bottom: 0;
             }
             .custom-controls {
                 margin-bottom: 0;
@@ -698,7 +677,6 @@
                 justify-content: flex-end;
             }
             
-            /* Put Shuffle/Repeat on the left */
             #shuffle-button, #repeat-button {
                 order: 0;
             }
@@ -712,6 +690,7 @@
             .control-button {
                  margin: 0 5px; 
             }
+            
             /* Hide non-essential player elements on mobile */
             .seek-bar-container {
                 display: none; 
@@ -733,9 +712,8 @@
                 font-size: 22px;
             }
             
-            /* Modal overlay on mobile */
+            /* Mobile: Disable complex hover overlay */
             .modal-controls-overlay {
-                /* On mobile, the hover functionality is unreliable, so let's stick to showing only when open. */
                 opacity: 0; 
                 pointer-events: none;
             }
@@ -816,29 +794,28 @@
     </div>
 
     <script>
-        // --- 1. TRACK DATA (Using Data URIs for self-contained, working examples) ---
-        // NOTE: These are short silent/example audio files for demo purposes.
+        // --- 1. TRACK DATA (Example Data) ---
         const tracksData = [
             { id: 0, title: 'Clima Lindo', artist: 'GXMZ', image: 'https://i1.sndcdn.com/artworks-8a6Y3eJt2ffv-0-t500x500.jpg', uri: 'https://uc108a0ef6c4d8b77e19a9aa4880.dl.dropboxusercontent.com/cd/0/inline/Cz17MUwyucu5lFwkVs2l57U4yMPal0pP0qO_MsjbSBOI8ITwmLFFWjhEkYPueiIoKtWX_tWZ4RHCwZhikKCS4beu4LneDfxYvZ0-TiY7Yt3d7uZPrgmYRknQO9t7fuNwAG1sTzn6Ml3scveCYmgkXqhG/file#' },
-            { id: 1, title: 'Fragment ', artist: 'Slxughter', image: 'https://i1.sndcdn.com/artworks-fyxokc9yZzlkXBdT-8h6nZA-t500x500.png', uri: 'https://uca97ff7a4e27174bcba3554f320.dl.dropboxusercontent.com/cd/0/inline/Cz3ZdxqXTMOSeFhFCIORjshUo0X0a-ZbhGkYVF-EaPwLPKsGRKkBgljlNkQtAkB1O1os_Py1MzUcm3f-V_o2AN9py1Kk9L1avo4J_6KscPbrxO7h4rWrzw5G7FysnQsM1923QlpR_JCaSWWGefFwLeDq/file#' },
+            { id: 1, title: 'Fragment ', artist: 'Slxughter', image: 'https://i1.sndcdn.com/artworks-fyxokc9yZzlkXBdT-8h6nZA-t500x500.png', uri:  'https://uca97ff7a4e27174bcba3554f320.dl.dropboxusercontent.com/cd/0/inline/Cz3ZdxqXTMOSeFhFCIORjshUo0X0a-ZbhGkYVF-EaPwLPKsGRKkBgljlNkQtAkB1O1os_Py1MzUcm3f-V_o2AN9py1Kk9L1avo4J_6KscPbrxO7h4rWrzw5G7FysnQsM1923QlpR_JCaSWWGefFwLeDq/file#' },
             { id: 2, title: 'Starly', artist: 'Lonown', image: 'https://cdn-images.dzcdn.net/images/cover/ed477f0737ddc6881772336d962fcd34/1900x1900-000000-80-0-0.jpg', uri: 'https://uc2ea43b25d7fbacd9e44b9dcb57.dl.dropboxusercontent.com/cd/0/inline/Cz20J7lkc5i5DOKaBF6PQmvWpWw9jGHE8hwntWnehtCD5GN8FoZvOTLS-Ic1YpE8vMCZgg_T9l_f_FTy79TYxhUitcJrDdUkIf68C6i6hK14AfvEvA56pRbuqUiCjAxvDVWwHKjUo4znn4OrA-Yq39J1/file#' },
             { id: 3, title: 'SOL', artist: 'Ogryzek', image: 'https://cdn-images.dzcdn.net/images/cover/5dd8d877202f9ca8f64a3097102fef9d/1900x1900-000000-81-0-0.jpg', uri: 'https://uc2b6f7d0244808b2f8e3e60cc7f.dl.dropboxusercontent.com/cd/0/inline/Cz02oqf1MFc6E-iaQFS4G1BRV5jM2HGWJ_ff25ZmY89JtUxgltA5z_Ne0T5N_hOBAeqK7a4V2griQjwjyaDieER9CAeQHteehzKyf6vDtEv89Yr0EBCdXzkEXjoj7WxDGK53VvWlyInXtpfhUTossDjx/file#' },
-            { id: 4, title: 'Aura', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d00001e02dbf396d074fd53f8a9c6537e', uri: 'https://uc56b485f6bd4834f78dc5b5c479.dl.dropboxusercontent.com/cd/0/inline/Cz16mvBEYX0_iIYG9nfG1PDSSy4U7wrhcEAI5oETbaXAQXtwf4ZYedb3dJfhxmNSKJ4b5wDH7MYSlkKE60C5H3GlOtm8zq3tGvb9x-B53fIT_fqCxccwNOZ_N1zg-LXWaBj5P3tqBYvnRsTFWdfgv_rL/file#' },
-            { id: 5, title: 'Carpe Diem', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b2738f6805ba733c26030be8005a', uri: 'https://uc11d0db309e0ef83a39e0caaf7c.dl.dropboxusercontent.com/cd/0/inline/Cz1E80xXbYjDgB0nT2IKy_tr3-P3ykF7l4OK5PS0aoOeUmsRGg3VZ5-nKXXNOE5qlAfi8wkAicoqqWl70sYuFmXcO1yvzTym0csS3GjWyik5ROSIf6T93yR3KLlgxPRrUK6Jiu8Ds2TQSvV-QH5_ORa8/file#' },
-            { id: 6, title: 'Sapphire', artist: 'Perpetualll', image: 'https://i1.sndcdn.com/artworks-La1ZlJK39tXlfAy6-ptk4EA-t500x500.jpg', uri: 'https://uce90a57695b2b5c2b7fce55f2a5.dl.dropboxusercontent.com/cd/0/inline/Cz2QVFCAz30adXRSI44I67kOl_9S9iUPq_vMHIiFnDxv7B_NcxbzgT41uZi946BF2xck8-2u3t1EFTcWR1fofAMXkDUf4XQeu55b5nO7upOAsmZNDxsgVfn4MhhPcJch8Gru_U4D6PInxDEDV_qzbqSA/file#' },
-			{ id: 7, title: 'Flashbacks', artist: 'Craspore', image: 'https://cdn-images.dzcdn.net/images/cover/732b25f97f1e3c7396b579790949768a/1900x1900-000000-81-0-0.jpg', uri: 'https://uc26b483f6071b09c7e11435adbb.dl.dropboxusercontent.com/cd/0/inline/Cz2_vNAyyzagLpWQpm0Egvuu-mRc4KefpNZpQVYUAJQJDlWcR2hG41RSlwCEN30plrbSyiEFgwYKp6gPs83GJYDMJvA0vaLHSZifDBVLdZqy68w8yrL4N2Tl-HjleBF0C-insy2wRehZZF6V_pPItmJp/file#' },
+            { id: 4, title: 'Aura', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d00001e02dbf396d074fd53f8a9c6537e', uri: 'https://uc56b485f6bd4834f78dc5b5c479.dl.dropboxusercontent.com/cd/0/inline/Cz16mvBEYX0_iIYG8nfG1PDSSy4U7wrhcEAI5oETbaXAQXtwf4ZYedb3dJfhxmNSKJ4b5wDH7MYSlkKE60C5H3GlOtm8zq3tGvb9x-B53fIT_fqCxccwNOZ_N1zg-LXWaBj5P3tqBYvnRsTFWdfgv_rL/file#' },
+            { id: 5, title: 'Carpe Diem', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b2738f6805ba733c26030be8005a', uri: 'https://uc11d0db309e0ef83a39e0caaf7c.dl.dropboxusercontent.com/cd/0/inline/Cz1E80xXbYjDgB0nT2IKy_tr3-P3ykF7l4OK5PS0aoOeUmsRGg3VZ5-nKXXNOE5qlAfi8wkAicoqqWl70sYuFmXcO1yvzTym0csS3GjWyikzROSIf6T93yR3KLlgxPRrUK6Jiu8Ds2TQSzV-QH5_ORa8/file#' },
+            { id: 6, title: 'Sapphire', artist: 'Perpetualll', image: 'https://i1.sndcdn.com/artworks-La1ZlJK39tXlfAy6-ptk4EA-t500x500.jpg', uri: 'https://uce90a57695b2b5c2b7fce55f2a5.dl.dropboxusercontent.com/cd/0/inline/Cz2QVFCAz30adXRSI44I67kOl_9S9iUPq_vMHIlFnDxv7B_NcxbzgT41uZi946BF2xck8-2u3t1EFTcWR1fofAMXkDUf4XQeu55b5nO7upOAsmZNDxsgVfn4MhhPcJch8Gru_U4D6PInxDEDV_qzbqSA/file#' },
+			{ id: 7, title: 'Flashbacks', artist: 'Craspore', image: 'https://cdn-images.dzcdn.net/images/cover/732b25f97f1e3c7396b579790949768a/1900x1900-000000-81-0-0.jpg', uri: 'https://uc26b483f6071b09c7e11435adbb.dl.dropboxusercontent.com/cd/0/inline/Cz2_vNAyyzagLpWQpm0Egvuu-mRc4KefpNZpQVYUAJQJDlWcR2hG41RSlwCEN30plrbSyiEFgwYKp6gPs83GJYDMJvA0vaLHSZifDBVLdZqy68w8yrL4N2Tl-HjleBF0C-insy2wRe2ZZF6V_pPItmJp/file#' },
 			{ id: 8, title: 'Pride', artist: 'Slxughter', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAziEUrpTJMY1Fd4aJ2By3en8Zt8uO5LRBMA&s', uri: 'https://uce004dab0f97e6a498f6c0c2a05.dl.dropboxusercontent.com/cd/0/inline/Cz1MHeFUqciOAGP1Pi_S7MYe3DvQg09PVkgx9rQorFsgj8jPvuUAUBc6RR3scWGcjzEG4HNX8zllJ18Pnu9jvEzyB5eCgn9H1O3CQiyb3tE_0CevlfVekDjFH62ZaxnV_W9arkvFOwM0p4NJcZ8rzJP2/file#' },
 			{ id: 9, title: 'Solitude', artist: 'Juno', image: 'https://cdn-images.dzcdn.net/images/cover/62d3a43372ab747bd7330724e61107e6/1900x1900-000000-81-0-0.jpg', uri: 'https://uc352d324560c95b5ff25ee680a9.dl.dropboxusercontent.com/cd/0/inline/Cz2e1lozsQehGvf87KV5KG-zYniK4dLe7SfTdJAap64sPfVkrYZTnfw4YpaEf9kbyxaBDTyYr_z4-cfjKdsUOrQuSOtOOBo_pzqBi95Dv2riN8rCOicQ1E5WuMmPTQH1O2FfLgxQgXqEnibDKzzBguKS/file#' },
 			{ id: 10, title: 'Smezir', artist: 'Ilyhiryu', image: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/52/16/9052165f-5291-7bb1-dc87-71ba721bca0a/663918195291.jpg/600x600bf-60.jpg', uri: 'https://uc443c4981c491bf9957b17b3e15.dl.dropboxusercontent.com/cd/0/inline/Cz0YKNl7jwM2QhuRMPBW2ThIzwIhJMihQ-wXGdMmFm3Tv642l1G2qjdVletx55avcAwjZRIlW9NqojERDLeyyJKfPR1_02FcK6IsqR2u3W1lHmSdumDGYfaVwvdnwALsuq-nry6rKSZ9ZfBuLnMxeoeK/file#' },
 			{ id: 11, title: 'Akai', artist: 'UdieNnx', image: 'https://i1.sndcdn.com/artworks-ECACwqpd2B0H-0-t500x500.jpg', uri: 'https://uc1dd9ccc596c806c499f5328121.dl.dropboxusercontent.com/cd/0/inline/Cz0oraYpN6KkzYL33wn2iqS6egGCCsQ3xO2aiKkDdukvTna59rcgRn8la38Zge8COg69D0yjXYMyTqvc9As1tVT-AJBMSfVxD-Z3r2MfzZ1IFlyUf-W1f79VR-3UGfUF4nJafDw6Likor4iBpn4_ponp/file#' },
 			{ id: 12, title: 'Empire', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b27385fb75c7f792ddefaa3d30f7', uri: 'https://ucb2f70dd6aef489e18ee2017239.dl.dropboxusercontent.com/cd/0/inline/Cz0NeFe1i7reqiEbHJ-UJL-OHog_xKU0di1JRV2KIg0MvPYJzJBtRvJS7P9m0cM6JjMvkWa0l7jhqmDlTMlBfE-2sJD3eKts0viUxCG8SPGJ0Y-QF9DFum9gpxTxOfk0OgFCPA4fEvOBm9FBD4Zqq-UE/file#' },
-			{ id: 13, title: 'Slava Funk', artist: 'Mvsterious', image: 'https://cdn-images.dzcdn.net/images/artist/125e589de1bec47cc657c04744e82458/500x500-000000-80-0-0.jpg', uri: 'https://uc28826c8bee3eeae2fb7771c12f.dl.dropboxusercontent.com/cd/0/inline/Cz3giCSPdo_6s__CeXBimioD8_-mrYWcbuBc581eQo4lzFDbnKtDIdzMLTGh8IbNU8ROA1qPcYIRf2VXDysmMjDuD_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLqjibZy2uJ0XHvdXonoNu7AOJ/file#' },
+			{ id: 13, title: 'Slava Funk', artist: 'Mvsterious', image: 'https://cdn-images.dzcdn.net/images/artist/125e589de1bec47cc657c04744e82458/500x500-000000-80-0-0.jpg', uri: 'https://uc28826c8bee3eeae2fb7771c12f.dl.dropboxusercontent.com/cd/0/inline/Cz3giCSPdo_6s__CeXBimioD8_-mrYWcbuBc581eQo4lzFDbnKtDIdzMLTGh8IbNU8ROA1qPcYIRf2VXDysmMjDuD_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLj_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLg/file#' },
 			{ id: 14, title: 'DNA', artist: 'LXNGVX', image: 'https://i.scdn.co/image/ab67616d0000b2738290c26e2d961fea5b2a2b5f', uri: 'https://uc761011259d008769d230d54503.dl.dropboxusercontent.com/cd/0/inline/Cz0oOPygwpA5NGLLj1tRJzMBOSs1yT7eT38nncUEOgRF0WF6H_DjqqhbJivKlZMTGc29iNITmlkTFSrPWF26qst9hihmb5XENhm9gb_Qo7ygCV_tbGHEuxw78iXv2jpx2CQ-emqHCFgzVQssXDs2R_MK/file#' },
-			{ id: 15, title: 'Blah!', artist: 'Nomi XD', image: 'https://i.scdn.co/image/ab67616d0000b2735dd09fa6faa8a3d80c5c38fe', uri: 'https://uc509eda60230b4cbe785ef68f14.dl.dropboxusercontent.com/cd/0/inline/Cz14Yy0q08zlVINp0MSxiws24TQ2fGg0YABnNEgLGKT_rJizYAZloYdhm_xFxqEEs8QTineQ2uUC2BnxBTSHhFpsYDfbTHMfwxaxnxKHQJm3GFAxHhKHSmExeYtXsv_tTr_SzMIZRtcyW1wCAYbbLZVg/file#' },
-			{ id: 16, title: 'Glory', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b273c9e933ef9dec999264974f90', uri: 'https://uc7bda0ec47c805b3de67eb8eda4.dl.dropboxusercontent.com/cd/0/inline/Cz1_PY5iY8iy5x6h8dqLKJubGS4LoaU-ZxR26ofMeGm8D1X-iZy_l1ixXfRYmZ8RYaIK2Z99gBbMl9IPfOKE2EMqwNvlEjLES9t_pHOIeCoNDsKSXwPcCgap7uA345I8_Ld-F3uqKWDYrrrVSr-9ryMO/file#' },
-			{ id: 17, title: 'X-Tudo', artist: 'Slxughter', image: 'https://i.scdn.co/image/ab67616d0000b2730aa3694fda40f27ea9800024', uri: 'https://ucf11d08b3224f39e94cc500eca2.dl.dropboxusercontent.com/cd/0/inline/Cz38AQUwqcVcoNnaPxdeu2CGwh66BAjq30ZORoSeMltcLLm7AafEgpfTvQT2ZN8-AiyAbjJ6vhaAzJR4pHiT0JOgBlX6NrL3Kh8bKFLdHrTT7UNg1ng_FZ144oPK0CVsZSGaHgmebDD46v6TtIH5wBim/file#' },
+			{ id: 15, title: 'Blah!', artist: 'Nomi XD', image: 'https://i.scdn.co/image/ab67616d0000b2735dd09fa6faa8a3d80c5c38fe', uri: 'https://uc509eda60230b4cbe785ef68f14.dl.dropboxusercontent.com/cd/0/inline/Cz14Yy0q08zlVINp0MSxiws24TQ2fGg0YABnNEgLGKT_rJizjYAZloYdhm_xFxqEEs8QTineQ2uUC2BnxBTSHhFpsYDfbTHFfwxaxnxKHQJm3GFAxHhKHSmExeYtXsv_tTr_SzMIZRtcyW1wCAYbbLZVg/file#' },
+			{ id: 16, title: 'Glory', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b273c9e933ef9dec999264974f90', uri: 'https://uc7bda0ec47c805b3de67eb8eda4.dl.dropboxusercontent.com/cd/0/inline/Cz1_PY5iY8iy5x6h8dqLKJubGS4LoaU-ZxR26ofMeGm8D1X-iZy_l1ixXfRYmZ8RYaIK2Z99gBbMl9IPpOKE2EMqwNvlEjLES9t_pHOIeCoNDsKSXwPcCgap7uA345I8_Ld-F3uqKWDYrrrVSr-9ryMO/file#' },
+			{ id: 17, title: 'X-Tudo', artist: 'Slxughter', image: 'https://i.scdn.co/image/ab67616d0000b2730aa3694fda40f27ea9800024', uri: 'https://ucf11d08b3224f39e94cc500eca2.dl.dropboxusercontent.com/cd/0/inline/Cz38AQUwqcVcoNnaPxdeu2CGwh66BAjq30ZORoSeMltcLLm7AafEgpfTvQT2ZN8-AiyAbjJ6vhaAzJR4pHiT0JOgBlX6NrL3Kh8bKFLdHrTT7UNg1ng_FZ144oPK0CVsZSGaHgmeLgmeDD46v6TtIH5wBim/file#' },
 			{ id: 18, title: 'Void', artist: 'Isq', image: 'https://i.scdn.co/image/ab67616d0000b273479c9842be5a7b9dd0b7454c', uri: 'https://uc4167ea0b3e9c379c3f472b0938.dl.dropboxusercontent.com/cd/0/inline/Cz0m4eY05V7hE83LuRc8h6PyjLS1nPERQ7Ob601U20NRFjwNhCpwJkhjqBeOKXh7mLuxwr3q8V_sStkVHYOsOy1GPpEwxMxeG1PIUxFA5NOzcdjYrwa7qzl3d4BH4Uy9DCHmv-vk2J9ownaJj0Vf0jyS/file#' },
-			{ id: 19, title: '✻H+3+ЯД✻7luCJIo0T6', artist: 'Vyrval', image: 'https://i.scdn.co/image/ab67616d0000b273e8624537ab89ae32598f5844', uri: 'https://ucb2af9842728b71965996216f90.dl.dropboxusercontent.com/cd/0/inline/Cz1gvXJ_Ukz_Et-vUvYGcJGcCznKYSy_PwJYssrWG0zwhOF3bNtYwz0vhJH_PIxyy0B6e3kG6T_RurI6RMylWi5dypQ6DEtsODLI_rzIHLJObw62sbUE9ZQ4xTBSGnE0W6NvpTGz5Bz1-ARIPWdc6wbr/file#' },
+			{ id: 19, title: '✻H+3+ЯД✻7luCJIo0T6', artist: 'Vyrval', image: 'https://i.scdn.co/image/ab67616d0000b273e8624537ab89ae32598f5844', uri: 'https://ucb2af9842728b71965996216f90.dl.dropboxusercontent.com/cd/0/inline/Cz1gvXJ_Ukz_Et-vUvYGcJGcCznKYSy_PwJYssrWG0zwhOF3bNtYwz0vhJH_PIxyy0B6e3kG6T_RurI6RMylWi5dypQ6DEtsODLI_rzIHLJObw62sbUE3ZQ4xTBSGnE0W6NvpTGz5Bz1-ARIPWdc6wbr/file#' },
         ];
 
 
@@ -881,8 +858,8 @@
         
         let currentTrackIndex = -1;
         let isShuffling = false;
-        let repeatState = 'off'; 
-        let previousVolume = volumeSlider.value; 
+        let repeatState = 'off'; // 'off', 'track', 'context'
+        let previousVolume = volumeSlider.value; // Store volume for mute/unmute
 
 
         // --- 3. HELPER FUNCTIONS ---
@@ -899,7 +876,6 @@
             });
 
             if (currentTrackIndex !== -1) {
-                // Assuming track.id is unique and matches the data-id attribute
                 const activeCard = document.querySelector(`.track-card[data-id="${tracksData[currentTrackIndex].id}"]`);
                 if (activeCard) {
                     activeCard.classList.add('active-track');
@@ -907,49 +883,40 @@
             }
         }
         
-        function updateVolumeIcon(volume) {
-             if (volume === 0) {
+        // Premium Feature: Update Volume Icon and Slider background
+        function updateVolumeUI(volume) {
+             const vol = parseInt(volume);
+             if (vol === 0) {
                  volumeIcon.className = 'fas fa-volume-off';
-             } else if (volume < 50) {
+             } else if (vol < 50) {
                  volumeIcon.className = 'fas fa-volume-down';
              } else {
                  volumeIcon.className = 'fas fa-volume-up';
              }
+             // Update CSS variable for the custom volume track background
+             volumeSlider.style.setProperty('--volume-progress', `${vol}%`);
         }
         
-        // Modal Open/Close Functions - MODIFIED TO CONTROL SCROLLING
+        // Modal Open/Close Functions 
         function openModal() {
             if (currentTrackIndex !== -1) {
                 const track = tracksData[currentTrackIndex];
+                
+                // Sync UI elements
                 modalAlbumArt.src = track.image;
                 modalTitle.textContent = track.title;
                 modalArtist.textContent = track.artist;
-                
-                // Sync modal play/pause icon with player state
-                if (audioSource.paused) {
-                    modalPlayPauseIcon.className = 'fas fa-play';
-                } else {
-                    modalPlayPauseIcon.className = 'fas fa-pause';
-                }
+                modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause'; 
 
                 trackModal.classList.add('is-open');
-                document.body.style.overflow = 'hidden'; // Disable body scrolling
+                document.body.classList.add('modal-open'); // Controls scrolling via CSS
             }
         }
 
         function closeModal() {
             trackModal.classList.remove('is-open');
-            document.body.style.overflow = ''; // Re-enable body scrolling
+            document.body.classList.remove('modal-open'); 
         }
-
-        /* 3. Function to prevent right-click on elements */
-        function disableRightClick(element) {
-             element.addEventListener('contextmenu', (e) => {
-                 e.preventDefault();
-             });
-        }
-        /* End Right-Click Prevention Function */
-
 
         // --- 4. PLAYER CORE LOGIC ---
 
@@ -974,21 +941,14 @@
             modalTitle.textContent = track.title;
             modalArtist.textContent = track.artist;
 
-
             // 4. Play (handle Autoplay restriction)
             audioSource.play()
                 .then(() => {
-                    playPauseIcon.classList.remove('fa-play');
-                    playPauseIcon.classList.add('fa-pause');
-                    globalPlayer.classList.add('playing'); 
-                    modalPlayPauseIcon.className = 'fas fa-pause'; // Sync modal icon
+                    // Handled by 'play' event listener
                 })
                 .catch(error => {
-                    playPauseIcon.classList.remove('fa-pause');
-                    playPauseIcon.classList.add('fa-play');
-                    globalPlayer.classList.remove('playing');
-                    modalPlayPauseIcon.className = 'fas fa-play'; // Sync modal icon
                     console.warn("Autoplay was prevented. Please click the play button.", error);
+                    // Handled by 'pause' event listener if play fails
                 });
         }
         
@@ -1036,34 +996,178 @@
             if (repeatState === 'off') {
                 repeatState = 'track'; 
                 repeatButton.classList.add('active');
-                // Optional: add a '1' icon for single-track repeat if using a different icon pack
-                repeatButton.querySelector('i').className = 'fas fa-redo-alt'; 
+                repeatButton.querySelector('i').className = 'fas fa-redo-alt'; // Icon remains the same
                 audioSource.loop = true; // Enables native single-track repeat
-                // Turn off shuffle when explicitly setting repeat
                 isShuffling = false; 
                 shuffleButton.classList.remove('active');
             } else if (repeatState === 'track') {
                 repeatState = 'context'; 
-                // Set the icon back to just the arrow for playlist repeat 
-                repeatButton.querySelector('i').className = 'fas fa-redo-alt fa-solid';
-                audioSource.loop = false; // Disable native loop for playlist repeat
+                audioSource.loop = false; 
             } else { // 'context'
                 repeatState = 'off'; 
                 repeatButton.classList.remove('active');
-                repeatButton.querySelector('i').className = 'fas fa-redo-alt';
-                audioSource.loop = false;
             }
+            repeatButton.setAttribute('data-state', repeatState);
         }
 
+        // --- 5. EVENT LISTENERS AND UI BINDING ---
 
-        // --- 5. EVENT LISTENERS FOR CUSTOM UI ---
+        // Audio Status Listeners (Simplified to one state handler)
+        audioSource.addEventListener('play', () => {
+            playPauseIcon.classList.remove('fa-play');
+            playPauseIcon.classList.add('fa-pause');
+            globalPlayer.classList.add('playing'); 
+            modalPlayPauseIcon.className = 'fas fa-pause'; 
+        });
 
-        // Playback Controls
+        audioSource.addEventListener('pause', () => {
+            playPauseIcon.classList.remove('fa-pause');
+            playPauseIcon.classList.add('fa-play');
+            globalPlayer.classList.remove('playing'); 
+            modalPlayPauseIcon.className = 'fas fa-play'; 
+        });
+
+        audioSource.addEventListener('ended', () => {
+            if (repeatState === 'context' || isShuffling) {
+                 playNext();
+            } 
+            // 'track' is handled by audioSource.loop
+        });
+        
+        // Time and Progress Update (Runs rapidly)
+        audioSource.addEventListener('timeupdate', () => {
+            const currentTime = audioSource.currentTime;
+            const duration = audioSource.duration || 0;
+            
+            // Only update if not actively seeking
+            if (!isSeeking) {
+                currentTimeEl.textContent = formatTime(currentTime);
+                if (isFinite(duration) && duration > 0) {
+                    const progress = (currentTime / duration) * 100;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }
+        });
+        
+        audioSource.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = isFinite(audioSource.duration) && audioSource.duration > 0
+                ? formatTime(audioSource.duration)
+                : '0:00'; 
+        });
+        
+        // --- PREMIUM FEATURE: SMOOTH SCRUBBING LOGIC (requestAnimationFrame) ---
+        let isSeeking = false;
+        let lastSeekX = 0; 
+        let rAFId = null;  
+
+        function getSeekPercentage(clientX) {
+            const rect = seekBar.getBoundingClientRect();
+            const clickX = clientX - rect.left; 
+            return Math.max(0, Math.min(1, clickX / rect.width));
+        }
+
+        function visualUpdateLoop() {
+            if (!isSeeking || !isFinite(audioSource.duration) || audioSource.duration === 0) {
+                 return; 
+            }
+
+            const percentage = getSeekPercentage(lastSeekX);
+            const scrubTime = audioSource.duration * percentage;
+
+            // Visual update
+            progressBar.style.width = `${percentage * 100}%`;
+            currentTimeEl.textContent = formatTime(scrubTime);
+            
+            rAFId = requestAnimationFrame(visualUpdateLoop);
+        }
+        
+        function startScrub(e) {
+             if (e.button !== 0 || !isFinite(audioSource.duration) || audioSource.duration === 0) return;
+
+             isSeeking = true;
+             document.body.classList.add('no-select'); 
+             
+             if (!audioSource.paused) {
+                 audioSource.pause();
+                 audioSource.wasPlaying = true;
+             } else {
+                 audioSource.wasPlaying = false;
+             }
+             
+             lastSeekX = e.clientX;
+             visualUpdateLoop(); 
+        }
+
+        function endScrub() {
+            if (!isSeeking) return;
+
+            cancelAnimationFrame(rAFId);
+            isSeeking = false;
+            document.body.classList.remove('no-select'); 
+
+            const finalPercentage = getSeekPercentage(lastSeekX);
+            const finalTime = audioSource.duration * finalPercentage;
+
+            audioSource.currentTime = finalTime;
+            if (audioSource.wasPlaying) {
+                 audioSource.play().catch(error => {
+                    console.warn("Autoplay resumed after seeking was prevented:", error);
+                 });
+            }
+            audioSource.wasPlaying = false;
+        }
+
+        // Attach Seek Event Listeners
+        seekBar.addEventListener('mousedown', startScrub);
+
+        document.addEventListener('mousemove', (e) => {
+            if (isSeeking) {
+                lastSeekX = e.clientX;
+            }
+        });
+
+        document.addEventListener('mouseup', endScrub);
+        // --- END SMOOTH SCRUBBING LOGIC ---
+
+
+        // Volume control
+        audioSource.volume = volumeSlider.value / 100; 
+        updateVolumeUI(volumeSlider.value); 
+        
+        volumeSlider.addEventListener('input', (e) => {
+            const newVolume = parseInt(e.target.value);
+            audioSource.volume = newVolume / 100;
+            updateVolumeUI(newVolume);
+            
+            if (newVolume > 0) {
+                previousVolume = newVolume; // Store for mute/unmute
+            }
+        });
+        
+        // Premium Feature: Mute/Unmute Toggle
+        volumeIcon.addEventListener('click', () => {
+            if (audioSource.volume > 0) {
+                previousVolume = parseInt(volumeSlider.value); 
+                volumeSlider.value = 0;
+                audioSource.volume = 0;
+                updateVolumeUI(0);
+            } else {
+                const newVolume = previousVolume > 0 ? previousVolume : 50; 
+                volumeSlider.value = newVolume;
+                audioSource.volume = newVolume / 100;
+                updateVolumeUI(newVolume);
+            }
+        });
+
+
+        // --- 6. INITIALIZATION: GENERATE CARDS & BIND EVENTS ---
+        
+        // Bind primary control buttons
         playPauseButton.addEventListener('click', togglePlayPause);
         nextButton.addEventListener('click', playNext);
         previousButton.addEventListener('click', playPrevious);
 
-        // Modal Controls sync with main player functions 
+        // Bind modal controls
         modalPlayPauseButton.addEventListener('click', togglePlayPause);
         modalNextButton.addEventListener('click', playNext);
         modalPreviousButton.addEventListener('click', playPrevious);
@@ -1076,10 +1180,9 @@
             shuffleButton.classList.toggle('active', isShuffling);
             
             if (isShuffling) {
-                 // Turn off repeat when shuffling
                  repeatState = 'off';
                  repeatButton.classList.remove('active');
-                 repeatButton.querySelector('i').className = 'fas fa-redo-alt';
+                 repeatButton.setAttribute('data-state', repeatState);
                  audioSource.loop = false;
             }
         });
@@ -1087,171 +1190,7 @@
         repeatButton.addEventListener('click', cycleRepeat);
 
 
-        // Audio Status Listeners
-        audioSource.addEventListener('play', () => {
-            playPauseIcon.classList.remove('fa-play');
-            playPauseIcon.classList.add('fa-pause');
-            globalPlayer.classList.add('playing'); 
-            modalPlayPauseIcon.className = 'fas fa-pause'; // Sync modal icon
-        });
-
-        audioSource.addEventListener('pause', () => {
-            playPauseIcon.classList.remove('fa-pause');
-            playPauseIcon.classList.add('fa-play');
-            globalPlayer.classList.remove('playing'); 
-            modalPlayPauseIcon.className = 'fas fa-play'; // Sync modal icon
-        });
-
-        // Handle Track End
-        audioSource.addEventListener('ended', () => {
-            if (repeatState === 'context' || isShuffling) {
-                 playNext();
-            } 
-            // repeatState === 'track' is handled by audioSource.loop = true
-            // repeatState === 'off' stops here
-        });
-        
-        // Update time display and progress bar
-        audioSource.addEventListener('timeupdate', () => {
-            const currentTime = audioSource.currentTime;
-            const duration = audioSource.duration || 0;
-            
-            // Only update the progress bar and time if the user is not actively seeking
-            if (!isSeeking) {
-                currentTimeEl.textContent = formatTime(currentTime);
-                
-                if (isFinite(duration) && duration > 0) {
-                    const progress = (currentTime / duration) * 100;
-                    progressBar.style.width = `${progress}%`;
-                }
-            }
-        });
-        
-        // Update duration once metadata is loaded
-        audioSource.addEventListener('loadedmetadata', () => {
-            durationEl.textContent = isFinite(audioSource.duration) && audioSource.duration > 0
-                ? formatTime(audioSource.duration)
-                : '0:00'; 
-        });
-        
-        // --- NEW SMOOTH SCRUBBING LOGIC (requestAnimationFrame) ---
-        let isSeeking = false;
-        let lastSeekX = 0; // Stores the latest mouse X position during drag
-        let rAFId = null;  // Request Animation Frame ID
-
-        function getSeekPercentage(clientX) {
-            const rect = seekBar.getBoundingClientRect();
-            // Calculate mouse position relative to the seek bar
-            const clickX = clientX - rect.left; 
-            // Clamp percentage between 0 and 1
-            return Math.max(0, Math.min(1, clickX / rect.width));
-        }
-
-        function visualUpdateLoop() {
-            if (!isSeeking || !isFinite(audioSource.duration) || audioSource.duration === 0) {
-                 return; // Safety check
-            }
-
-            const percentage = getSeekPercentage(lastSeekX);
-            const scrubTime = audioSource.duration * percentage;
-
-            // 1. VISUAL UPDATE (Progress Bar and Time)
-            progressBar.style.width = `${percentage * 100}%`;
-            currentTimeEl.textContent = formatTime(scrubTime);
-            
-            // 2. CONTINUE LOOP (Ensures smooth 60fps update)
-            rAFId = requestAnimationFrame(visualUpdateLoop);
-        }
-        
-        function startScrub(e) {
-             if (e.button !== 0 || !isFinite(audioSource.duration) || audioSource.duration === 0) return;
-
-             isSeeking = true;
-             // Add class to prevent text selection and show dragging cursor
-             document.body.classList.add('no-select'); 
-             
-             // Pause the audio, but remember if it was playing to resume later
-             if (!audioSource.paused) {
-                 audioSource.pause();
-                 audioSource.wasPlaying = true;
-             } else {
-                 audioSource.wasPlaying = false;
-             }
-             
-             // Start the continuous visual update loop
-             lastSeekX = e.clientX;
-             visualUpdateLoop(); 
-        }
-
-        function endScrub() {
-            if (!isSeeking) return;
-
-            // 1. Stop the visual update loop
-            cancelAnimationFrame(rAFId);
-            isSeeking = false;
-            document.body.classList.remove('no-select'); 
-
-            // 2. Calculate the final seek time
-            const finalPercentage = getSeekPercentage(lastSeekX);
-            const finalTime = audioSource.duration * finalPercentage;
-
-            // 3. Set audio time and resume playback if it was playing
-            audioSource.currentTime = finalTime;
-            if (audioSource.wasPlaying) {
-                 audioSource.play().catch(error => {
-                    console.warn("Autoplay resumed after seeking was prevented:", error);
-                 });
-            }
-            audioSource.wasPlaying = false;
-        }
-
-        // Attach Event Listeners
-        seekBar.addEventListener('mousedown', startScrub);
-
-        // Listen for mouse movement across the entire document
-        document.addEventListener('mousemove', (e) => {
-            if (isSeeking) {
-                // Update coordinate (the rAF loop uses this to draw the bar)
-                lastSeekX = e.clientX;
-            }
-        });
-
-        // Stop seeking when mouse button is released anywhere
-        document.addEventListener('mouseup', endScrub);
-        // --- END NEW SMOOTH SCRUBBING LOGIC ---
-
-
-        // Volume control
-        audioSource.volume = volumeSlider.value / 100; 
-        updateVolumeIcon(parseInt(volumeSlider.value)); 
-        
-        volumeSlider.addEventListener('input', (e) => {
-            const newVolume = parseInt(e.target.value);
-            audioSource.volume = newVolume / 100;
-            updateVolumeIcon(newVolume);
-            
-            if (newVolume > 0) {
-                previousVolume = newVolume;
-            }
-        });
-        
-        // Mute/Unmute Toggle
-        volumeIcon.addEventListener('click', () => {
-            if (audioSource.volume > 0) {
-                previousVolume = parseInt(volumeSlider.value); 
-                volumeSlider.value = 0;
-                audioSource.volume = 0;
-                updateVolumeIcon(0);
-            } else {
-                const newVolume = previousVolume > 0 ? previousVolume : 50; 
-                volumeSlider.value = newVolume;
-                audioSource.volume = newVolume / 100;
-                updateVolumeIcon(newVolume);
-            }
-        });
-
-
-        // --- 6. INITIALIZATION: GENERATE CARDS & BIND EVENTS ---
+        // Generate track cards
         tracksData.forEach((track, index) => {
             const card = document.createElement('div');
             card.className = 'track-card';
@@ -1272,28 +1211,22 @@
                 </button>
             `;
             
-            // Add right-click prevention to the card
-            disableRightClick(card); 
-
-            // Attach event listener for playing the track (on the card itself)
             card.addEventListener('click', (event) => {
-                // Prevent playing if the download button itself was clicked
                 if (!event.target.closest('.download-trigger-button')) {
                     playTrack(track, index);
                 }
             });
 
-            // ⭐ ENHANCED DOWNLOAD LOGIC WITH ANIMATION ⭐
+            // Download Logic with Animation
             const downloadButton = card.querySelector('.download-trigger-button');
             downloadButton.addEventListener('click', async (event) => {
-                event.stopPropagation(); // Stop the card's click event from firing
+                event.stopPropagation(); 
                 const uri = downloadButton.getAttribute('data-uri');
                 const filename = downloadButton.getAttribute('data-filename');
                 
-                // 1. START LOADING ANIMATION
                 downloadButton.innerHTML = `<i class="fas fa-spinner"></i> Downloading...`;
                 downloadButton.classList.add('loading');
-                downloadButton.style.backgroundColor = ''; // Use CSS default loading background
+                downloadButton.style.backgroundColor = ''; 
                 downloadButton.disabled = true;
 
                 try {
@@ -1302,7 +1235,6 @@
                     
                     const blob = await response.blob();
                     
-                    // 2. Trigger download
                     const blobUrl = URL.createObjectURL(blob);
                     const tempLink = document.createElement('a');
                     tempLink.href = blobUrl;
@@ -1314,12 +1246,10 @@
                     
                     URL.revokeObjectURL(blobUrl);
 
-                    // 3. SUCCESS ANIMATION
                     downloadButton.classList.remove('loading');
-                    downloadButton.innerHTML = `<i class="fas fa-check"></i> Downloaded!`;
-                    downloadButton.style.backgroundColor = '#1AA350'; // Green success color
+                    downloadButton.innerHTML = `Done!`;
+                    downloadButton.style.backgroundColor = '#1AA350'; 
                     
-                    // Reset after 3 seconds
                     setTimeout(() => {
                         downloadButton.innerHTML = originalText;
                         downloadButton.disabled = false;
@@ -1329,10 +1259,9 @@
                 } catch (error) {
                     console.error('Download failed:', error);
                     
-                    // 4. ERROR ANIMATION
                     downloadButton.classList.remove('loading');
                     downloadButton.innerHTML = `<i class="fas fa-times"></i> Failed`;
-                    downloadButton.style.backgroundColor = '#FF4500'; // Red error color
+                    downloadButton.style.backgroundColor = '#FF4500'; 
                     downloadButton.disabled = false;
                     
                     setTimeout(() => {
@@ -1341,15 +1270,9 @@
                     }, 3000);
                 }
             });
-            // ⭐ END ENHANCED DOWNLOAD LOGIC ⭐
 
             trackList.appendChild(card);
         });
-
-        // Add right-click prevention to player images and modal album art
-        disableRightClick(playerImage);
-        disableRightClick(modalAlbumArt);
-
     </script>
 
     </body>
