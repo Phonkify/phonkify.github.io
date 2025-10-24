@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immersive Phonk Player - Premium</title>
-    <link rel="icon" type="image/png" href="https://i.ibb.co/JwTGGmM7/cropped-circle-image-10.png">
+    <title id="original-title">Immersive Phonk Player - Premium</title> 
+    <link id="dynamic-icon" rel="icon" type="image/png" href="https://i.ibb.co/JwTGGmM7/cropped-circle-image-10.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /*
@@ -829,7 +829,7 @@
     </header>
 
     <main class="container">
-        <h2 class="content-heading">Top 20 Best Phonk</h2>
+        <h2 class="content-heading" id="main-heading">Top 20 Best Phonk</h2>
         <div class="track-grid" id="track-list">
             </div>
     </main>
@@ -898,6 +898,7 @@
     <div id="track-context-menu" class="context-menu">
         <div class="context-menu-item" data-action="play"><i class="fas fa-play"></i> Play Track</div>
         <div class="context-menu-item" data-action="download"><i class="fas fa-download"></i> Download</div>
+        <div class="context-menu-item" data-action="share"><i class="fas fa-share-alt"></i> Share Track</div>
         <hr>
         <div class="context-menu-item" data-action="close"><i class="fas fa-times"></i> Close Menu</div>
     </div>
@@ -905,26 +906,26 @@
     <script>
         // --- 1. TRACK DATA (Example Data) ---
         const tracksData = [
-            { id: 0, title: 'Clima Lindo', artist: 'GXMZ', image: 'https://i1.sndcdn.com/artworks-8a6Y3eJt2ffv-0-t500x500.jpg', uri: 'https://uc108a0ef6c4d8b77e19a9aa4880.dl.dropboxusercontent.com/cd/0/inline/Cz17MUwyucu5lFwkVs2l57U4yMPal0pP0qO_MsjbSBOI8ITwmLFFWjhEkYPueiIoKtWX_tWZ4RHCwZhikKCS4beu4LneDfxYvZ0-TiY7Yt3d7uZPrgmYRknQO9t7fuNwAG1sTzn6Ml3scveCYmgkXqhG/file#' },
-            { id: 1, title: 'Fragment ', artist: 'Slxughter', image: 'https://i1.sndcdn.com/artworks-fyxokc9yZzlkXBdT-8h6nZA-t500x500.png', uri:  'https://uca97ff7a4e27174bcba3554f320.dl.dropboxusercontent.com/cd/0/inline/Cz3ZdxqXTMOSeFhFCIORjshUo0X0a-ZbhGkYVF-EaPwLPKsGRKkBgljlNkQtAkB1O1os_Py1MzUcm3f-V_o2AN9py1Kk9L1avo4J_6KscPbrxO7h4rWrzw5G7FysnQsM1923QlpR_JCaSWWGefFwLeDq/file#' },
-            { id: 2, title: 'Starly', artist: 'Lonown', image: 'https://cdn-images.dzcdn.net/images/cover/ed477f0737ddc6881772336d962fcd34/1900x1900-000000-80-0-0.jpg', uri: 'https://uc2ea43b25d7fbacd9e44b9dcb57.dl.dropboxusercontent.com/cd/0/inline/Cz20J7lkc5i5DOKaBF6PQmvWpWw9jGHE8hwntWnehtCD5GN8FoZvOTLS-Ic1YpE8vMCZgg_T9l_f_FTy79TYxhUitcJrDdUkIf68C6i6hK14AfvEvA56pRbuqUiCjAxvDVWwHKiUo4znn4OrA-Yq39J1/file#' },
-            { id: 3, title: 'SOL', artist: 'Ogryzek', image: 'https://cdn-images.dzcdn.net/images/cover/5dd8d877202f9ca8f64a3097102fef9d/1900x1900-000000-81-0-0.jpg', uri: 'https://uc2b6f7d0244808b2f8e3e60cc7f.dl.dropboxusercontent.com/cd/0/inline/Cz02oqf1MFc6E-iaQFS4G1BRV5jM2HGWJ_ff25ZmY89JtUxgltA5z_Ne0T5N_hOBAeqK7a4V2griQjwjyaDieER9CAeQHteehzKyf6vDtEv89Yr0EBCdXzkEXjoj7WxDGK53VvWlyInXtpfhUTossDjx/file#' },
-            { id: 4, title: 'Aura', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d00001e02dbf396d074fd53f8a9c6537e', uri: 'https://uc56b485f6bd4834f78dc5b5c479.dl.dropboxusercontent.com/cd/0/inline/Cz16mvBEYX0_iIYG8nfG1PDSSy4U7wrhcEAI5oETbaXAQXtwf4ZYedb3dJfhxmNSKJ4b5wDH7MYSlkKE60C5H3GlOtm8zq3tGvb9x-B53fIT_fqCxccwNOZ_N1zg-LXWaBj5P3tqBYvnRsTFWdfgv_rL/file#' },
-            { id: 5, title: 'Carpe Diem', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b2738f6805ba733c26030be8005a', uri: 'https://uc11d0db309e0ef83a39e0caaf7c.dl.dropboxusercontent.com/cd/0/inline/Cz1E80xXbYjDgB0nT2IKy_tr3-P3ykF7l4OK5PS0aoOeUmsRGg3VZ5-nKXXNOE5qlAfi8wkAicoqqWl70sYuFmXcO1yvzTym0csS3GjWyikzROSIf6T93yR3KLlgxPRrUK6Jiu8Ds2TQSzV-QH5_ORa8/file#' },
-            { id: 6, title: 'Sapphire', artist: 'Perpetualll', image: 'https://i1.sndcdn.com/artworks-La1ZlJK39tXlfAy6-ptk4EA-t500x500.jpg', uri: 'https://uce90a57695b2b5c2b7fce55f2a5.dl.dropboxusercontent.com/cd/0/inline/Cz2QVFCAz30adXRSI44I67kOl_9S9iUPq_vMHIlFnDxv7B_NcxbzgT41uZi946BF2xck8-2u3t1EFTcWR1fofAMXkDUf4XQeu55b5nO7upOAsmZNDxsgVfn4MhhPcJch8Gru_U4D6PInxDEDV_qzbqSA/file#' },
-			{ id: 7, title: 'Flashbacks', artist: 'Craspore', image: 'https://cdn-images.dzcdn.net/images/cover/732b25f97f1e3c7396b579790949768a/1900x1900-000000-81-0-0.jpg', uri: 'https://uc26b483f6071b09c7e11435adbb.dl.dropboxusercontent.com/cd/0/inline/Cz2_vNAyyzagLpWQpm0Egvuu-mRc4KefpNZpQVYUAJQJDlWcR2hG41RSlwCEN30plrbSyiEFgwYKp6gPs83GJYDMJvA0vaLHSZifDBVLdZqy68w8yrL4N2Tl-HjleBF0C-insy2wRe2ZZF6V_pPItmJp/file#' },
-			{ id: 8, title: 'Pride', artist: 'Slxughter', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAziEUrpTJMY1Fd4aJ2By3en8Zt8uO5LRBMA&s', uri: 'https://uce004dab0f97e6a498f6c0c2a05.dl.dropboxusercontent.com/cd/0/inline/Cz1MHeFUqciOAGP1Pi_S7MYe3DvQg09PVkg9rQorFsgj8jPnu9jvEzyB5eCgn9H1O3CQiy3t3_0CevlfVekDjFH62ZaxnV_W9arkvFOwM0p4NJcZ8rzJP2/file#' },
-			{ id: 9, title: 'Solitude', artist: 'Juno', image: 'https://cdn-images.dzcdn.net/images/cover/62d3a43372ab747bd7330724e61107e6/1900x1900-000000-81-0-0.jpg', uri: 'https://uc352d324560c95b5ff25ee680a9.dl.dropboxusercontent.com/cd/0/inline/Cz2e1lozsQehGvf87KV5KG-zYniK4dLe7SfTdJAap64sPfVkrYZTnfw4YpaEf9kbyxaBDTyYr_z4-cfjKdsUOrQuSOtOOBo_pzqBi95Dv2riN8rCOicQ1E5WuMmPTQH1O2FfLgxQgXqEnibDKzzBguKS/file#' },
-			{ id: 10, title: 'Smezir', artist: 'Ilyhiryu', image: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/52/16/9052165f-5291-7bb1-dc87-71ba721bca0a/663918195291.jpg/600x600bf-60.jpg', uri: 'https://uc443c4981c491bf9957b17b3e15.dl.dropboxusercontent.com/cd/0/inline/Cz0YKNl7jwM2QhuRMPBW2ThIzwIhJMihQ-wXGdMmFm3Tv642l1G2qjdVletx55avcAwjZRIlW9NqojERDLeyyJKfPR1_02FcK6IsqR2u3W1lHmSdumDGYfaVwvdnwALsuq-nry6rKSZ9fBuLnMxeoeK/file#' },
+                        { id: 0, title: 'Clima Lindo', artist: 'GXMZ', image: 'https://i1.sndcdn.com/artworks-8a6Y3eJt2ffv-0-t500x500.jpg', uri: 'https://uc108a0ef6c4d8b77e19a9aa4880.dl.dropboxusercontent.com/cd/0/inline/Cz17MUwyucu5lFwkVs2l57U4yMPal0pP0qO_MsjbSBOI8ITwmLFFWjhEkYPueiIoKtWX_tWZ4RHCwZhikKCS4beu4LneDfxYvZ0-TiY7Yt3d7uZPrgmYRknQO9t7fuNwAG1sTzn6Ml3scveCYmgkXqhG/file#' },
+            { id: 1, title: 'Fragment ', artist: 'Slxughter', image: 'https://i1.sndcdn.com/artworks-fyxokc9yZzlkXBdT-8h6nZA-t500x500.png', uri: 'https://uca97ff7a4e27174bcba3554f320.dl.dropboxusercontent.com/cd/0/inline/Cz3ZdxqXTMOSeFhFCIORjshUo0X0a-ZbhGkYVF-EaPwLPKsGRKkBgljlNkQtAkB1O1os_Py1MzUcm3f-V_o2AN9py1Kk9L1avo4J_6KscPbrxO7h4rWrzw5G7FysnQsM1923QlpR_JCaSWWGefFwLeDq/file#' },
+            { id: 2, title: 'Starly', artist: 'Lonown', image: 'https://cdn-images.dzcdn.net/images/cover/ed477f0737ddc6881772336d962fcd34/1900x1900-000000-80-0-0.jpg', uri: 'https://uc2ea43b25d7fbacd9e44b9dcb57.dl.dropboxusercontent.com/cd/0/inline/Cz20J7lkc5i5DOKaBF6PQmvWpWw9jGHE8hwntWnehtCD5GN8FoZvOTLS-Ic1YpE8vMCZgg_T9l_f_FTy79TYxhUitcJrDdUkIf68C6i6hK14AfvEvA56pRbuqUiCjAxvDVWwHKjUo4znn4OrA-Yq39J1/file#' },
+            { id: 3, title: 'SOL', artist: 'Ogryzek', image: 'https://i1.sndcdn.com/artworks-gU8nVMS0Wu2h-0-t500x500.jpg', uri: 'https://uc2b6f7d0244808b2f8e3e60cc7f.dl.dropboxusercontent.com/cd/0/inline/Cz02oqf1MFc6E-iaQFS4G1BRV5jM2HGWJ_ff25ZmY89JtUxgltA5z_Ne0T5N_hOBAeqK7a4V2griQjwjyaDieER9CAeQHteehzKyf6vDtEv89Yr0EBCdXzkEXjoj7WxDGK53VvWlyInXtpfhUTossDjx/file#' },
+            { id: 4, title: 'Aura', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d00001e02dbf396d074fd53f8a9c6537e', uri: 'https://uc56b485f6bd4834f78dc5b5c479.dl.dropboxusercontent.com/cd/0/inline/Cz16mvBEYX0_iIYG9nfG1PDSSy4U7wrhcEAI5oETbaXAQXtwf4ZYedb3dJfhxmNSKJ4b5wDH7MYSlkKE60C5H3GlOtm8zq3tGvb9x-B53fIT_fqCxccwNOZ_N1zg-LXWaBj5P3tqBYvnRsTFWdfgv_rL/file#' },
+            { id: 5, title: 'Carpe Diem', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b2738f6805ba733c26030be8005a', uri: 'https://uc11d0db309e0ef83a39e0caaf7c.dl.dropboxusercontent.com/cd/0/inline/Cz1E80xXbYjDgB0nT2IKy_tr3-P3ykF7l4OK5PS0aoOeUmsRGg3VZ5-nKXXNOE5qlAfi8wkAicoqqWl70sYuFmXcO1yvzTym0csS3GjWyik5ROSIf6T93yR3KLlgxPRrUK6Jiu8Ds2TQSvV-QH5_ORa8/file#' },
+            { id: 6, title: 'Sapphire', artist: 'Perpetualll', image: 'https://i1.sndcdn.com/artworks-La1ZlJK39tXlfAy6-ptk4EA-t500x500.jpg', uri: 'https://uce90a57695b2b5c2b7fce55f2a5.dl.dropboxusercontent.com/cd/0/inline/Cz2QVFCAz30adXRSI44I67kOl_9S9iUPq_vMHIiFnDxv7B_NcxbzgT41uZi946BF2xck8-2u3t1EFTcWR1fofAMXkDUf4XQeu55b5nO7upOAsmZNDxsgVfn4MhhPcJch8Gru_U4D6PInxDEDV_qzbqSA/file#' },
+			{ id: 7, title: 'Flashbacks', artist: 'Craspore', image: 'https://i.postimg.cc/R0465RJm/1900x1900-000000-81-0-0.jpg', uri: 'https://uc26b483f6071b09c7e11435adbb.dl.dropboxusercontent.com/cd/0/inline/Cz2_vNAyyzagLpWQpm0Egvuu-mRc4KefpNZpQVYUAJQJDlWcR2hG41RSlwCEN30plrbSyiEFgwYKp6gPs83GJYDMJvA0vaLHSZifDBVLdZqy68w8yrL4N2Tl-HjleBF0C-insy2wRehZZF6V_pPItmJp/file#' },
+			{ id: 8, title: 'Pride', artist: 'Slxughter', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAziEUrpTJMY1Fd4aJ2By3en8Zt8uO5LRBMA&s', uri: 'https://uce004dab0f97e6a498f6c0c2a05.dl.dropboxusercontent.com/cd/0/inline/Cz1MHeFUqciOAGP1Pi_S7MYe3DvQg09PVkgx9rQorFsgj8jPvuUAUBc6RR3scWGcjzEG4HNX8zllJ18Pnu9jvEzyB5eCgn9H1O3CQiyb3tE_0CevlfVekDjFH62ZaxnV_W9arkvFOwM0p4NJcZ8rzJP2/file#' },
+			{ id: 9, title: 'Solitude', artist: 'Juno', image: 'https://i.scdn.co/image/ab67616d0000b273a045aeb15a3758ef8f32f75b', uri: 'https://uc352d324560c95b5ff25ee680a9.dl.dropboxusercontent.com/cd/0/inline/Cz2e1lozsQehGvf87KV5KG-zYniK4dLe7SfTdJAap64sPfVkrYZTnfw4YpaEf9kbyxaBDTyYr_z4-cfjKdsUOrQuSOtOOBo_pzqBi95Dv2riN8rCOicQ1E5WuMmPTQH1O2FfLgxQgXqEnibDKzzBguKS/file#' },
+			{ id: 10, title: 'Smezir', artist: 'Ilyhiryu', image: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/52/16/9052165f-5291-7bb1-dc87-71ba721bca0a/663918195291.jpg/600x600bf-60.jpg', uri: 'https://uc443c4981c491bf9957b17b3e15.dl.dropboxusercontent.com/cd/0/inline/Cz0YKNl7jwM2QhuRMPBW2ThIzwIhJMihQ-wXGdMmFm3Tv642l1G2qjdVletx55avcAwjZRIlW9NqojERDLeyyJKfPR1_02FcK6IsqR2u3W1lHmSdumDGYfaVwvdnwALsuq-nry6rKSZ9ZfBuLnMxeoeK/file#' },
 			{ id: 11, title: 'Akai', artist: 'UdieNnx', image: 'https://i1.sndcdn.com/artworks-ECACwqpd2B0H-0-t500x500.jpg', uri: 'https://uc1dd9ccc596c806c499f5328121.dl.dropboxusercontent.com/cd/0/inline/Cz0oraYpN6KkzYL33wn2iqS6egGCCsQ3xO2aiKkDdukvTna59rcgRn8la38Zge8COg69D0yjXYMyTqvc9As1tVT-AJBMSfVxD-Z3r2MfzZ1IFlyUf-W1f79VR-3UGfUF4nJafDw6Likor4iBpn4_ponp/file#' },
 			{ id: 12, title: 'Empire', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b27385fb75c7f792ddefaa3d30f7', uri: 'https://ucb2f70dd6aef489e18ee2017239.dl.dropboxusercontent.com/cd/0/inline/Cz0NeFe1i7reqiEbHJ-UJL-OHog_xKU0di1JRV2KIg0MvPYJzJBtRvJS7P9m0cM6JjMvkWa0l7jhqmDlTMlBfE-2sJD3eKts0viUxCG8SPGJ0Y-QF9DFum9gpxTxOfk0OgFCPA4fEvOBm9FBD4Zqq-UE/file#' },
-			{ id: 13, title: 'Slava Funk', artist: 'Mvsterious', image: 'https://cdn-images.dzcdn.net/images/artist/125e589de1bec47cc657c04744e82458/500x500-000000-80-0-0.jpg', uri: 'https://uc28826c8bee3eeae2fb7771c12f.dl.dropboxusercontent.com/cd/0/inline/Cz3giCSPdo_6s__CeXBimioD8_-mrYWcbuBc581eQo4lzFDbnKtDIdzMLTGh8IbNU8ROA1qPcYIRf2VXDysmMjDuD_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLg/file#' },
-			{ id: 14, title: 'DNA', artist: 'LXNGVX', image: 'https://i.scdn.co/image/ab67616d0000b2738290c26e2d961fea5b2a2b5f', uri: 'https://uc761011259d008769d230d54503.dl.dropboxusercontent.com/cd/0/inline/Cz0oOPygwpA5NGLLj1tRJzMBOSs1yT7eT38nncUEOgRF0WF6H_DjqqhbJivKlZMTGc29iNITmlkTFSrPWF26qst9hihmb5XENhmb5XENhm9gb_Qo7ygCV_tbGHEuxw78iXv2jpx2CQ-emqHCFgzVQssXDs2R_MK/file#' },
-			{ id: 15, title: 'Blah!', artist: 'Nomi XD', image: 'https://i.scdn.co/image/ab67616d0000b2735dd09fa6faa8a3d80c5c38fe', uri: 'https://uc509eda60230b4cbe785ef68f14.dl.dropboxusercontent.com/cd/0/inline/Cz14Yy0q08zlVINp0MSxiws24TQ2fGg0YABnNEgLGKT_rJizjYAZloYdhm_xFxqEEs8QTineQ2uUC2BnxBTSHhFpsYDfbTHFfwxaxnxKHQJm3GFAxHhKHSmExeYtXsv_tTr_SzMIZRtcyW1wCAYbbLZVg/file#' },
-			{ id: 16, title: 'Glory', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b273c9e933ef9dec999264974f90', uri: 'https://uc7bda0ec47c805b3de67eb8eda4.dl.dropboxusercontent.com/cd/0/inline/Cz1_PY5iY8iy5x6h8dqLKJubGS4LoaU-ZxR26ofMeGm8D1X-iZy_l1ixXfRYmZ8RYaIK2Z99gBbMl9IPpOKE2EMqwNvlEjLES9t_pHOIeCoNDsKSXwPcCgap7uA345I8_Ld-F3uqKWDYrrrVSr-9ryMO/file#' },
-			{ id: 17, title: 'X-Tudo', artist: 'Slxughter', image: 'https://i.scdn.co/image/ab67616d0000b2730aa3694fda40f27ea9800024', uri: 'https://ucf11d08b3224f39e94cc500eca2.dl.dropboxusercontent.com/cd/0/inline/Cz38AQUwqcVcoNnaPxdeu2CGwh66BAjq30ZORoSeMltcLLm7AafEgpfTvQT2ZN8-AiyAbjJ6vhaAzJR4pHiT0JOgBlX6NrL3Kh8bKFLdHrTT7UNg1ng_FZ144oPK0CVsZSGaHgmeLgmeDD46v6TtIH5wBim/file#' },
+			{ id: 13, title: 'Slava Funk', artist: 'Mvsterious', image: 'https://cdn-images.dzcdn.net/images/artist/125e589de1bec47cc657c04744e82458/500x500-000000-80-0-0.jpg', uri: 'https://uc28826c8bee3eeae2fb7771c12f.dl.dropboxusercontent.com/cd/0/inline/Cz3giCSPdo_6s__CeXBimioD8_-mrYWcbuBc581eQo4lzFDbnKtDIdzMLTGh8IbNU8ROA1qPcYIRf2VXDysmMjDuD_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLqjibZy2uJ0XHvdXonoNu7AOJ/file#' },
+			{ id: 14, title: 'DNA', artist: 'LXNGVX', image: 'https://i.scdn.co/image/ab67616d0000b2738290c26e2d961fea5b2a2b5f', uri: 'https://uc761011259d008769d230d54503.dl.dropboxusercontent.com/cd/0/inline/Cz0oOPygwpA5NGLLj1tRJzMBOSs1yT7eT38nncUEOgRF0WF6H_DjqqhbJivKlZMTGc29iNITmlkTFSrPWF26qst9hihmb5XENhm9gb_Qo7ygCV_tbGHEuxw78iXv2jpx2CQ-emqHCFgzVQssXDs2R_MK/file#' },
+			{ id: 15, title: 'Blah!', artist: 'Nomi XD', image: 'https://i.scdn.co/image/ab67616d0000b2735dd09fa6faa8a3d80c5c38fe', uri: 'https://uc509eda60230b4cbe785ef68f14.dl.dropboxusercontent.com/cd/0/inline/Cz14Yy0q08zlVINp0MSxiws24TQ2fGg0YABnNEgLGKT_rJizYAZloYdhm_xFxqEEs8QTineQ2uUC2BnxBTSHhFpsYDfbTHMfwxaxnxKHQJm3GFAxHhKHSmExeYtXsv_tTr_SzMIZRtcyW1wCAYbbLZVg/file#' },
+			{ id: 16, title: 'Glory', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b273c9e933ef9dec999264974f90', uri: 'https://uc7bda0ec47c805b3de67eb8eda4.dl.dropboxusercontent.com/cd/0/inline/Cz1_PY5iY8iy5x6h8dqLKJubGS4LoaU-ZxR26ofMeGm8D1X-iZy_l1ixXfRYmZ8RYaIK2Z99gBbMl9IPfOKE2EMqwNvlEjLES9t_pHOIeCoNDsKSXwPcCgap7uA345I8_Ld-F3uqKWDYrrrVSr-9ryMO/file#' },
+			{ id: 17, title: 'X-Tudo', artist: 'Slxughter', image: 'https://i.scdn.co/image/ab67616d0000b2730aa3694fda40f27ea9800024', uri: 'https://ucf11d08b3224f39e94cc500eca2.dl.dropboxusercontent.com/cd/0/inline/Cz38AQUwqcVcoNnaPxdeu2CGwh66BAjq30ZORoSeMltcLLm7AafEgpfTvQT2ZN8-AiyAbjJ6vhaAzJR4pHiT0JOgBlX6NrL3Kh8bKFLdHrTT7UNg1ng_FZ144oPK0CVsZSGaHgmebDD46v6TtIH5wBim/file#' },
 			{ id: 18, title: 'Void', artist: 'Isq', image: 'https://i.scdn.co/image/ab67616d0000b273479c9842be5a7b9dd0b7454c', uri: 'https://uc4167ea0b3e9c379c3f472b0938.dl.dropboxusercontent.com/cd/0/inline/Cz0m4eY05V7hE83LuRc8h6PyjLS1nPERQ7Ob601U20NRFjwNhCpwJkhjqBeOKXh7mLuxwr3q8V_sStkVHYOsOy1GPpEwxMxeG1PIUxFA5NOzcdjYrwa7qzl3d4BH4Uy9DCHmv-vk2J9ownaJj0Vf0jyS/file#' },
-			{ id: 19, title: '✻H+3+ЯД✻7luCJIo0T6', artist: 'Vyrval', image: 'https://i.scdn.co/image/ab67616d0000b273e8624537ab89ae32598f5844', uri: 'https://ucb2af9842728b71965996216f90.dl.dropboxusercontent.com/cd/0/inline/Cz1gvXJ_Ukz_Et-vUvYGcJGcCznKYSy_PwJYssrWG0zwhOF3bNtYwz0vhJH_PIxyy0B6e3kG6T_RurI6RMylWi5dypQ6DEtsODLI_rzIHLJObw62sbUE3ZQ4xTBSGnE0W6NvpTGz5Bz1-ARIPWdc6wbr/file#' },
+			{ id: 19, title: '✻H+3+ЯД✻7luCJIo0T6', artist: 'Vyrval', image: 'https://i.scdn.co/image/ab67616d0000b273e8624537ab89ae32598f5844', uri: 'https://ucb2af9842728b71965996216f90.dl.dropboxusercontent.com/cd/0/inline/Cz1gvXJ_Ukz_Et-vUvYGcJGcCznKYSy_PwJYssrWG0zwhOF3bNtYwz0vhJH_PIxyy0B6e3kG6T_RurI6RMylWi5dypQ6DEtsODLI_rzIHLJObw62sbUE9ZQ4xTBSGnE0W6NvpTGz5Bz1-ARIPWdc6wbr/file#' },
         ];
 
 
@@ -938,11 +939,18 @@
         const playerImage = document.getElementById('player-image');
         const playerInfoBar = document.getElementById('player-info-bar'); 
         const trackList = document.getElementById('track-list');
+        
+        // Dynamic Metadata Elements
+        const mainHeading = document.getElementById('main-heading');
+        const dynamicIcon = document.getElementById('dynamic-icon');
+        const originalTitle = document.title;
+        const originalIconHref = dynamicIcon.href;
+        const originalHeading = mainHeading.textContent;
+
 
         // Controls
         const playPauseButton = document.getElementById('play-pause-button');
         const playPauseIcon = playPauseButton.querySelector('i');
-        // const playButtonWrapper = document.querySelector('.play-button-wrapper'); // REMOVED: Wrapper element for loading animation
         const nextButton = document.getElementById('next-button');
         const previousButton = document.getElementById('previous-button');
         const shuffleButton = document.getElementById('shuffle-button');
@@ -985,6 +993,83 @@
             const sec = Math.floor(seconds % 60);
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
+        
+        // New Asynchronous function to round the image using Canvas
+        function createRoundedFaviconUrl(imageUrl, size = 64) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                // Important for loading cross-origin images to canvas
+                img.crossOrigin = "Anonymous"; 
+                
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+
+                    // Draw a circle clip path
+                    ctx.beginPath();
+                    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
+
+                    // Draw the image inside the circle
+                    ctx.drawImage(img, 0, 0, size, size);
+
+                    // Resolve with the data URL (PNG format for transparency support if needed)
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                
+                img.onerror = () => {
+                     // Fallback to original image URL on error
+                     console.error('Failed to load or process image for favicon rounding:', imageUrl);
+                     resolve(imageUrl); 
+                };
+                
+                img.src = imageUrl;
+            });
+        }
+        
+        // --- URL and Metadata Management ---
+        function getTrackIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('track');
+        }
+
+        function updateUrlForModal(trackId) {
+            const url = new URL(window.location);
+            url.searchParams.set('track', trackId);
+            window.history.pushState({ trackId: trackId }, '', url);
+        }
+
+        function removeTrackIdFromUrl() {
+            const url = new URL(window.location);
+            if (url.searchParams.has('track')) {
+                 url.searchParams.delete('track');
+                 window.history.pushState({}, '', url);
+            }
+        }
+        
+        // Modified to be async and use the new rounded favicon creator
+        async function updateDocumentMetadata(track) {
+             // Update Title
+             document.title = `${track.title} - ${track.artist} | Phonkify`;
+             
+             // Update Favicon/Icon with rounded image
+             const roundedUrl = await createRoundedFaviconUrl(track.image);
+             dynamicIcon.href = roundedUrl;
+             
+             // Update Main Heading
+             mainHeading.textContent = `Now Playing: ${track.title}`;
+        }
+        
+        function resetDocumentMetadata() {
+             document.title = originalTitle;
+             dynamicIcon.href = originalIconHref;
+             mainHeading.textContent = originalHeading;
+        }
+        // --- End URL and Metadata Management ---
+
 
         function highlightActiveCard() {
             document.querySelectorAll('.track-card').forEach(card => {
@@ -1020,6 +1105,10 @@
                 modalTitle.textContent = track.title;
                 modalArtist.textContent = track.artist;
                 modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause'; 
+                
+                // New: Update URL and metadata when modal opens
+                updateUrlForModal(track.id);
+                updateDocumentMetadata(track); // Call to async function is non-blocking
 
                 trackModal.classList.add('is-open');
                 document.body.classList.add('modal-open'); 
@@ -1029,6 +1118,10 @@
         function closeModal() {
             trackModal.classList.remove('is-open');
             document.body.classList.remove('modal-open'); 
+            
+            // New: Reset URL and metadata when modal closes
+            removeTrackIdFromUrl();
+            resetDocumentMetadata();
         }
         
         function showContextMenu(event, track) {
@@ -1042,7 +1135,7 @@
             let y = event.clientY;
 
             const menuWidth = 180; 
-            const menuHeight = 150; 
+            const menuHeight = 190; 
             const vpWidth = window.innerWidth;
             const vpHeight = window.innerHeight;
 
@@ -1089,6 +1182,10 @@
             modalAlbumArt.src = track.image;
             modalTitle.textContent = track.title;
             modalArtist.textContent = track.artist;
+            
+            // Update document metadata (title, favicon, heading)
+            updateDocumentMetadata(track); 
+
 
             // 4. Play (handle Autoplay restriction)
             audioSource.play()
@@ -1444,6 +1541,17 @@
                         downloadButton.click();
                     }
                 }
+            } else if (action === 'share') {
+                // New: Share functionality
+                const shareUrl = `${window.location.origin}${window.location.pathname}?track=${track.id}`;
+                navigator.clipboard.writeText(shareUrl)
+                    .then(() => {
+                        alert(`Share link copied to clipboard:\n${shareUrl}`);
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text: ', err);
+                        alert(`Failed to copy link. Please manually copy:\n${shareUrl}`);
+                    });
             }
         });
 
@@ -1560,7 +1668,10 @@
             if (term.length > 0) {
                 heading.textContent = `Found ${filteredTracks.length} Track${filteredTracks.length !== 1 ? 's' : ''}`;
             } else {
-                heading.textContent = `Top ${tracksData.length} Best Phonk`;
+                // Keep the dynamic heading if a track is playing, otherwise reset
+                if (!trackModal.classList.contains('is-open')) {
+                    heading.textContent = originalHeading;
+                }
             }
             
             highlightActiveCard(); 
@@ -1585,7 +1696,12 @@
         modalNextButton.addEventListener('click', playNext);
         modalPreviousButton.addEventListener('click', playPrevious);
         modalCloseButton.addEventListener('click', closeModal);
-        playerInfoBar.addEventListener('click', openModal); 
+        // Modified playerInfoBar to check if the modal is already open to prevent URL and metadata issues when clicking a track card.
+        playerInfoBar.addEventListener('click', () => {
+            if (currentTrackIndex !== -1) {
+                openModal();
+            }
+        });
 
 
         shuffleButton.addEventListener('click', toggleShuffle);
@@ -1599,7 +1715,30 @@
                 createTrackCard(track, index);
             });
         }
+        
+        // New: Function to handle initial load/sharing link
+        function checkUrlForTrack() {
+             const trackIdStr = getTrackIdFromUrl();
+             if (trackIdStr !== null) {
+                 const trackId = parseInt(trackIdStr);
+                 const trackIndex = tracksData.findIndex(t => t.id === trackId);
+                 
+                 if (trackIndex !== -1) {
+                     // Immediately play the track to load it into the player state
+                     playTrack(tracksData[trackIndex], trackIndex);
+                     
+                     // And open the modal
+                     openModal();
+                     
+                     // Since playTrack uses play(), pause immediately if not user-driven
+                     audioSource.pause(); 
+                 }
+             }
+        }
+        
+        // 7. INITIALIZATION
         initTrackList();
+        checkUrlForTrack();
     </script>
 
     </body>
