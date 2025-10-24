@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immersive Phonk Player - Custom</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/JwTGGmM7/cropped-circle-image-10.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /*
+        * Global Reset and Variables (Spotify Theme)
+        */
+        :root {
+            --spotify-green: #1ED760; 
+            --dark-gray: #0E0E0E; 
+            --mid-gray: #181818; 
+            --light-gray: #242424; 
+            --text-color: #ffffff;
+            --subtle-text: #b3b3b3;
+            --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --player-height: 90px;
+            --player-height-mobile: 110px; 
+            --dark-overlay: rgba(0, 0, 0, 0.7); /* Custom dark overlay for background */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* NEW: Disable text selection during seeking */
+        .no-select {
+            user-select: none;
+            cursor: ew-resize !important; /* Visual cue for horizontal dragging */
+        }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: var(--player-height); 
+            
+            /* ⭐ NEW: Background Image Styling ⭐ */
+            background-image: url('https://i.redd.it/et1yntwo6dc61.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-color: var(--dark-gray); /* Base color */
+        }
+        
+        /* 1. ⭐ NEW: Custom Scrollbar Styling (Webkit) ⭐ */
+        ::-webkit-scrollbar {
+            width: 10px;
+            background: var(--dark-gray);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--light-gray); /* Match card background color */
+            border-radius: 5px;
+            border: 2px solid var(--dark-gray);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--mid-gray);
+        }
+        /* End Custom Scrollbar Styling */
+        
+        /* 2. ⭐ NEW: Right-Click Prevention ⭐ */
+        .track-image, 
+        .modal-album-art, 
+        .track-card,
+        .player-info img {
+            /* Disable right-click context menu on images and track elements */
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
+            pointer-events: auto; /* Ensure they remain interactive for left-click/hover */
+            cursor: default; /* Optional: Keep default cursor */
+            
+            /* Add oncontextmenu to the elements via JS for full cross-browser support */
+        }
+
+        /* NEW: Blur and Darkening Container */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-overlay); /* Darken */
+            backdrop-filter: blur(8px); /* Blur */
+            -webkit-backdrop-filter: blur(8px);
+            z-index: -1; 
+        }
+
+        /*
+        * Header & Main Layout
+        */
+        .header {
+            background-color: rgba(24, 24, 24, 0.8); /* Semi-transparent background */
+            padding: 20px 40px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            /* REMOVED: justify-content: space-between; */
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header h1 {
+            color: var(--spotify-green);
+            font-size: 1.8em;
+            font-weight: 900; 
+        }
+        /* REMOVED: .header nav styles */
+        
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .content-heading {
+            margin-bottom: 30px;
+            font-size: 2em;
+            color: var(--text-color);
+            padding-left: 10px;
+            background: rgba(14, 14, 14, 0.6); /* Slightly transparent background for readability */
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 4px;
+        }
+        .track-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 24px;
+            padding: 10px;
+        }
+
+        /*
+        * Refined Track Card Styling
+        */
+        .track-card {
+            background-color: rgba(36, 36, 36, 0.8); /* More transparent cards */
+            border-radius: 6px; 
+            padding: 16px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
+            transition: background-color 0.2s ease, transform 0.1s ease, border 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            border: 2px solid transparent; 
+        }
+        
+        .track-card.active-track {
+            border: 2px solid var(--spotify-green); 
+            background-color: #383838;
+        }
+
+        /* Play Icon Overlay */
+        .play-icon-overlay {
+            position: absolute;
+            bottom: 80px; 
+            right: 25px;
+            width: 48px;
+            height: 48px;
+            background-color: var(--spotify-green);
+            color: var(--dark-gray);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; 
+            transform: translateY(4px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            pointer-events: none; 
+        }
+        
+        .track-card:hover {
+            background-color: rgba(46, 46, 46, 0.9);
+        }
+        
+        .track-card:hover .play-icon-overlay {
+             opacity: 1; 
+             transform: translateY(0);
+        }
+
+        .track-image {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+        
+        .track-info {
+            height: 50px; 
+        }
+
+        .track-title {
+            font-size: 1em;
+            font-weight: 700;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .track-artist {
+            font-size: 0.9em;
+            color: var(--subtle-text);
+            margin-bottom: 10px;
+        }
+
+        .download-button {
+            display: block;
+            width: 100%;
+            padding: 8px 10px;
+            background-color: var(--spotify-green);
+            color: var(--dark-gray);
+            text-align: center;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 0.9em;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px; 
+        }
+        .download-button:hover {
+            background-color: #1AA350; 
+        }
+
+
+        /*
+        * Custom Player UI (Bottom Bar)
+        */
+        #global-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(24, 24, 24, 0.95); /* Slightly transparent */
+            padding: 0 16px; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.8);
+            z-index: 20;
+            height: var(--player-height);
+            opacity: 0; 
+            transition: opacity 0.3s ease;
+        }
+        
+        #global-player.active {
+            opacity: 1;
+        }
+        
+        /* 1. Player Info (Left Side) - Desktop Styles */
+        .player-info {
+            display: flex;
+            align-items: center;
+            width: 30%; 
+            min-width: 150px;
+            max-width: 300px;
+            cursor: pointer; /* NEW: Indicate the player is clickable for the modal */
+        }
+        .player-info img {
+            width: 60px; 
+            height: 60px;
+            border-radius: 4px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .player-info-text {
+            flex-grow: 1; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+        }
+        .player-info .track-artist {
+             margin-bottom: 0;
+        }
+
+        /* 2. Controls & Seek Bar (Center) */
+        .player-center {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .custom-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .control-button {
+            background: none;
+            border: none;
+            color: var(--subtle-text);
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 12px;
+            padding: 5px;
+            transition: color 0.1s ease, transform 0.1s ease;
+        }
+        .control-button:hover {
+            color: var(--text-color); 
+        }
+        .control-button.active {
+            color: var(--spotify-green); 
+        }
+
+        #play-pause-button {
+            font-size: 20px; 
+            color: var(--dark-gray);
+            background-color: var(--text-color);
+            border: none;
+            border-radius: 50%;
+            width: 40px; 
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        #play-pause-button:hover {
+            transform: scale(1.05); 
+            background-color: var(--spotify-green); 
+            color: var(--dark-gray);
+        }
+        
+        .seek-bar-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            color: var(--subtle-text);
+            font-size: 12px;
+            max-width: 450px;
+        }
+        #seek-bar {
+            flex-grow: 1;
+            height: 4px;
+            background: #535353; 
+            border-radius: 2px;
+            margin: 0 10px;
+            cursor: pointer;
+            position: relative;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--text-color); 
+            border-radius: 2px;
+            /* MODIFIED: Removed transition for instant, fast updates (and better scrubbing) */
+            transition: none; 
+            position: relative;
+        }
+        #global-player.playing #progress-bar {
+            background: var(--spotify-green);
+        }
+        
+        #progress-bar::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translate(50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: var(--text-color);
+            border-radius: 50%;
+            opacity: 0; 
+            transition: opacity 0.1s ease;
+        }
+        #seek-bar:hover #progress-bar::after {
+            opacity: 1; 
+        }
+        #global-player.playing #seek-bar:hover #progress-bar::after {
+            background: var(--spotify-green);
+        }
+        
+        /* 3. Volume (Right Side) */
+        .volume-control {
+            width: 30%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-right: 15px;
+        }
+        #volume-icon {
+            font-size: 18px; /* Slightly larger icon */
+            margin-right: 10px;
+            color: var(--subtle-text);
+            cursor: pointer;
+            transition: color 0.1s ease;
+        }
+        #volume-icon:hover {
+            color: var(--text-color);
+        }
+        
+        /* ⭐ IMPROVED: Custom Volume Slider Styling ⭐ */
+        #volume-slider {
+            width: 100px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: #535353;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        
+        /* Slider Track Styling (Webkit) */
+        #volume-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #535353;
+            border-radius: 2px;
+        }
+        
+        /* Slider Thumb Styling (Webkit) */
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--text-color);
+            border-radius: 50%;
+            margin-top: -4px; 
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        
+        /* Slider Track Styling (Firefox) */
+        #volume-slider::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            background: #535353;
+            border-radius: 2px;
+        }
+        
+        /* Slider Thumb Styling (Firefox) */
+        #volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: var(--text-color);
+            border-radius: 50%;
+            border: none;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        /* Hover effect on thumb */
+        #volume-slider:hover::-webkit-slider-thumb,
+        #volume-slider:active::-webkit-slider-thumb {
+            background: var(--spotify-green);
+            transform: scale(1.1);
+        }
+        #volume-slider:hover::-moz-range-thumb,
+        #volume-slider:active::-moz-range-thumb {
+            background: var(--spotify-green);
+            transform: scale(1.1);
+        }
+        /* End Custom Volume Slider Styling */
+		
+        /* * ⭐ Full-Screen Modal Styles ⭐ */
+        #track-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(14, 14, 14, 0.95); /* Dark background with slight transparency */
+            z-index: 100;
+            display: none; /* Hidden by default */
+            place-items: center; /* Center content */
+        }
+
+        #track-modal.is-open {
+            display: grid; 
+        }
+
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 90%;
+            max-height: 90%;
+            text-align: center;
+            position: relative; 
+        }
+        
+        /* Image Wrapper for correct overlay positioning */
+        .modal-image-wrapper {
+            position: relative; /* Context for absolute overlay */
+            width: min(80vw, 400px); /* Match image size */
+            height: min(80vw, 400px); /* Match image size */
+            border-radius: 8px;
+            margin-bottom: 40px; /* Space before title */
+        }
+
+        .modal-album-art {
+            width: 100%; /* Fill the wrapper */
+            height: 100%; /* Fill the wrapper */
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-image-wrapper:hover .modal-album-art {
+             transform: translateY(-5px);
+        }
+
+        .modal-title {
+            font-size: 3em;
+            font-weight: 900;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .modal-artist {
+            font-size: 1.5em;
+            color: var(--spotify-green);
+        }
+        
+        /* FIX: Hover Controls Popup - Now perfectly covers the image and moves with it */
+        .modal-controls-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%; /* Cover the parent wrapper */
+            height: 100%; /* Cover the parent wrapper */
+            display: grid;
+            place-items: center;
+            background-color: rgba(0, 0, 0, 0.6); 
+            border-radius: 8px; 
+            opacity: 0;
+            /* MODIFIED: Added transform to transition for smooth movement */
+            transition: opacity 0.3s ease, transform 0.3s ease; 
+            pointer-events: none; 
+        }
+        
+        .modal-image-wrapper:hover .modal-controls-overlay {
+            opacity: 1;
+            pointer-events: auto; 
+            /* MODIFIED: Apply the exact same transform as the image */
+            transform: translateY(-5px); 
+        }
+        
+        .modal-controls-group {
+             display: flex;
+             align-items: center;
+             gap: 40px;
+        }
+        
+        .modal-control-button {
+            background-color: rgba(30, 215, 96, 0.9); /* Spotify Green with slight transparency */
+            color: var(--dark-gray);
+            border: none;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        
+        .modal-control-button:hover {
+            background-color: var(--spotify-green);
+            transform: scale(1.05);
+        }
+
+        /* Close Button */
+        #modal-close-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--subtle-text);
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 110;
+            transition: color 0.2s ease;
+        }
+        #modal-close-button:hover {
+            color: var(--text-color);
+        }
+
+
+        /* * RESPONSIVE ADJUSTMENTS FOR MOBILE (<= 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: var(--player-height-mobile); 
+            }
+            .header {
+                padding: 15px 20px;
+            }
+            /* .header nav is already removed, but keeping its display:none wouldn't hurt */
+            .track-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            
+            .play-icon-overlay {
+                 opacity: 1; 
+                 transform: translateY(0);
+                 width: 36px;
+                 height: 36px;
+                 bottom: 75px; 
+                 right: 15px;
+            }
+
+            /* Stacked Player Bar for Mobile */
+            #global-player {
+                padding: 10px 15px;
+                flex-direction: column;
+                height: var(--player-height-mobile); 
+                align-items: flex-start;
+                justify-content: space-around; 
+            }
+            .player-info {
+                width: 100%;
+                max-width: none;
+                justify-content: flex-start;
+                order: 1; 
+                margin-top: 5px;
+                padding-top: 5px; 
+            }
+            
+            /* MOBILE IMAGE FIX: Reduced size and spacing */
+            .player-info img {
+                 width: 45px; 
+                 height: 45px;
+                 margin-right: 10px; 
+            }
+            
+            .player-info .track-title {
+                 font-size: 0.9em;
+            }
+            .player-info .track-artist {
+                 font-size: 0.8em;
+            }
+            
+            .player-center {
+                width: 100%;
+                order: 0; 
+                flex-direction: row;
+                justify-content: space-between; 
+                align-items: center;
+                margin-bottom: 0;
+            }
+            .custom-controls {
+                margin-bottom: 0;
+                order: 1; 
+                flex-grow: 1;
+                justify-content: flex-end;
+            }
+            
+            /* Put Shuffle/Repeat on the left */
+            #shuffle-button, #repeat-button {
+                order: 0;
+            }
+            
+            #play-pause-button {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+                margin: 0 15px;
+            }
+            .control-button {
+                 margin: 0 5px; 
+            }
+            /* Hide non-essential player elements on mobile */
+            .seek-bar-container {
+                display: none; 
+            }
+            .volume-control {
+                display: none; 
+            }
+            
+            /* Modal adjustments for mobile */
+            .modal-title {
+                font-size: 2em;
+            }
+            .modal-artist {
+                font-size: 1.2em;
+            }
+            .modal-control-button {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+            }
+            
+            /* Modal overlay on mobile */
+            .modal-controls-overlay {
+                /* On mobile, the hover functionality is unreliable, so let's stick to showing only when open. */
+                opacity: 0; 
+                pointer-events: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="background-overlay"></div>
+
+    <header class="header">
+        <h1>Phonkify</h1>
+        </header>
+
+    <main class="container">
+        <h2 class="content-heading">Top 20 Best Phonk</h2>
+        <div class="track-grid" id="track-list">
+            </div>
+    </main>
+
+    <div id="track-modal">
+        <button id="modal-close-button"><i class="fas fa-times"></i></button>
+        <div class="modal-content">
+            
+            <div class="modal-image-wrapper">
+                <img id="modal-album-art" class="modal-album-art" src="" alt="Album Art">
+                
+                <div class="modal-controls-overlay">
+                    <div class="modal-controls-group">
+                        <button id="modal-previous-button" class="modal-control-button"><i class="fas fa-step-backward"></i></button>
+                        <button id="modal-play-pause-button" class="modal-control-button">
+                            <i class="fas fa-play" id="modal-play-pause-icon"></i> 
+                        </button>
+                        <button id="modal-next-button" class="modal-control-button"><i class="fas fa-step-forward"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-title" id="modal-title"></div>
+            <div class="modal-artist" id="modal-artist"></div>
+
+        </div>
+    </div>
+    
+    <div id="global-player">
+        <div class="player-info" id="player-info-bar"> <img id="player-image" src="" alt="Album Art" style="display:none;">
+            <div class="player-info-text">
+                <div id="player-title" class="track-title" style="margin-bottom: 0;">Select a Track</div>
+                <div id="player-artist" class="track-artist" style="margin-bottom: 0;">To begin playback</div>
+            </div>
+        </div>
+
+        <div class="player-center">
+            <div class="custom-controls">
+                <button id="shuffle-button" class="control-button" data-active="false"><i class="fas fa-random"></i></button>
+                <button id="previous-button" class="control-button"><i class="fas fa-step-backward"></i></button>
+                <button id="play-pause-button">
+                    <i class="fas fa-play"></i> 
+                </button>
+                <button id="next-button" class="control-button"><i class="fas fa-step-forward"></i></button>
+                <button id="repeat-button" class="control-button" data-state="off"><i class="fas fa-redo-alt"></i></button>
+            </div>
+            <div class="seek-bar-container">
+                <span id="current-time">0:00</span>
+                <div id="seek-bar">
+                    <div id="progress-bar"></div>
+                </div>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+        
+		<div class="volume-control">
+            <i id="volume-icon" class="fas fa-volume-up"></i>
+            <input type="range" id="volume-slider" min="0" max="100" value="100">
+        </div>
+        
+        <audio id="audio-source"></audio>
+    </div>
+
+    <script>
+        // --- 1. TRACK DATA (Using Data URIs for self-contained, working examples) ---
+        // NOTE: These are short silent/example audio files for demo purposes.
+        const tracksData = [
+            { id: 0, title: 'Clima Lindo', artist: 'GXMZ', image: 'https://i1.sndcdn.com/artworks-8a6Y3eJt2ffv-0-t500x500.jpg', uri: 'https://uc108a0ef6c4d8b77e19a9aa4880.dl.dropboxusercontent.com/cd/0/inline/Cz17MUwyucu5lFwkVs2l57U4yMPal0pP0qO_MsjbSBOI8ITwmLFFWjhEkYPueiIoKtWX_tWZ4RHCwZhikKCS4beu4LneDfxYvZ0-TiY7Yt3d7uZPrgmYRknQO9t7fuNwAG1sTzn6Ml3scveCYmgkXqhG/file#' },
+            { id: 1, title: 'Fragment ', artist: 'Slxughter', image: 'https://i1.sndcdn.com/artworks-fyxokc9yZzlkXBdT-8h6nZA-t500x500.png', uri: 'https://uca97ff7a4e27174bcba3554f320.dl.dropboxusercontent.com/cd/0/inline/Cz3ZdxqXTMOSeFhFCIORjshUo0X0a-ZbhGkYVF-EaPwLPKsGRKkBgljlNkQtAkB1O1os_Py1MzUcm3f-V_o2AN9py1Kk9L1avo4J_6KscPbrxO7h4rWrzw5G7FysnQsM1923QlpR_JCaSWWGefFwLeDq/file#' },
+            { id: 2, title: 'Starly', artist: 'Lonown', image: 'https://cdn-images.dzcdn.net/images/cover/ed477f0737ddc6881772336d962fcd34/1900x1900-000000-80-0-0.jpg', uri: 'https://uc2ea43b25d7fbacd9e44b9dcb57.dl.dropboxusercontent.com/cd/0/inline/Cz20J7lkc5i5DOKaBF6PQmvWpWw9jGHE8hwntWnehtCD5GN8FoZvOTLS-Ic1YpE8vMCZgg_T9l_f_FTy79TYxhUitcJrDdUkIf68C6i6hK14AfvEvA56pRbuqUiCjAxvDVWwHKjUo4znn4OrA-Yq39J1/file#' },
+            { id: 3, title: 'SOL', artist: 'Ogryzek', image: 'https://cdn-images.dzcdn.net/images/cover/5dd8d877202f9ca8f64a3097102fef9d/1900x1900-000000-81-0-0.jpg', uri: 'https://uc2b6f7d0244808b2f8e3e60cc7f.dl.dropboxusercontent.com/cd/0/inline/Cz02oqf1MFc6E-iaQFS4G1BRV5jM2HGWJ_ff25ZmY89JtUxgltA5z_Ne0T5N_hOBAeqK7a4V2griQjwjyaDieER9CAeQHteehzKyf6vDtEv89Yr0EBCdXzkEXjoj7WxDGK53VvWlyInXtpfhUTossDjx/file#' },
+            { id: 4, title: 'Aura', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d00001e02dbf396d074fd53f8a9c6537e', uri: 'https://uc56b485f6bd4834f78dc5b5c479.dl.dropboxusercontent.com/cd/0/inline/Cz16mvBEYX0_iIYG9nfG1PDSSy4U7wrhcEAI5oETbaXAQXtwf4ZYedb3dJfhxmNSKJ4b5wDH7MYSlkKE60C5H3GlOtm8zq3tGvb9x-B53fIT_fqCxccwNOZ_N1zg-LXWaBj5P3tqBYvnRsTFWdfgv_rL/file#' },
+            { id: 5, title: 'Carpe Diem', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b2738f6805ba733c26030be8005a', uri: 'https://uc11d0db309e0ef83a39e0caaf7c.dl.dropboxusercontent.com/cd/0/inline/Cz1E80xXbYjDgB0nT2IKy_tr3-P3ykF7l4OK5PS0aoOeUmsRGg3VZ5-nKXXNOE5qlAfi8wkAicoqqWl70sYuFmXcO1yvzTym0csS3GjWyik5ROSIf6T93yR3KLlgxPRrUK6Jiu8Ds2TQSvV-QH5_ORa8/file#' },
+            { id: 6, title: 'Sapphire', artist: 'Perpetualll', image: 'https://i1.sndcdn.com/artworks-La1ZlJK39tXlfAy6-ptk4EA-t500x500.jpg', uri: 'https://uce90a57695b2b5c2b7fce55f2a5.dl.dropboxusercontent.com/cd/0/inline/Cz2QVFCAz30adXRSI44I67kOl_9S9iUPq_vMHIiFnDxv7B_NcxbzgT41uZi946BF2xck8-2u3t1EFTcWR1fofAMXkDUf4XQeu55b5nO7upOAsmZNDxsgVfn4MhhPcJch8Gru_U4D6PInxDEDV_qzbqSA/file#' },
+			{ id: 7, title: 'Flashbacks', artist: 'Craspore', image: 'https://cdn-images.dzcdn.net/images/cover/732b25f97f1e3c7396b579790949768a/1900x1900-000000-81-0-0.jpg', uri: 'https://uc26b483f6071b09c7e11435adbb.dl.dropboxusercontent.com/cd/0/inline/Cz2_vNAyyzagLpWQpm0Egvuu-mRc4KefpNZpQVYUAJQJDlWcR2hG41RSlwCEN30plrbSyiEFgwYKp6gPs83GJYDMJvA0vaLHSZifDBVLdZqy68w8yrL4N2Tl-HjleBF0C-insy2wRehZZF6V_pPItmJp/file#' },
+			{ id: 8, title: 'Pride', artist: 'Slxughter', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAziEUrpTJMY1Fd4aJ2By3en8Zt8uO5LRBMA&s', uri: 'https://uce004dab0f97e6a498f6c0c2a05.dl.dropboxusercontent.com/cd/0/inline/Cz1MHeFUqciOAGP1Pi_S7MYe3DvQg09PVkgx9rQorFsgj8jPvuUAUBc6RR3scWGcjzEG4HNX8zllJ18Pnu9jvEzyB5eCgn9H1O3CQiyb3tE_0CevlfVekDjFH62ZaxnV_W9arkvFOwM0p4NJcZ8rzJP2/file#' },
+			{ id: 9, title: 'Solitude', artist: 'Juno', image: 'https://cdn-images.dzcdn.net/images/cover/62d3a43372ab747bd7330724e61107e6/1900x1900-000000-81-0-0.jpg', uri: 'https://uc352d324560c95b5ff25ee680a9.dl.dropboxusercontent.com/cd/0/inline/Cz2e1lozsQehGvf87KV5KG-zYniK4dLe7SfTdJAap64sPfVkrYZTnfw4YpaEf9kbyxaBDTyYr_z4-cfjKdsUOrQuSOtOOBo_pzqBi95Dv2riN8rCOicQ1E5WuMmPTQH1O2FfLgxQgXqEnibDKzzBguKS/file#' },
+			{ id: 10, title: 'Smezir', artist: 'Ilyhiryu', image: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/52/16/9052165f-5291-7bb1-dc87-71ba721bca0a/663918195291.jpg/600x600bf-60.jpg', uri: 'https://uc443c4981c491bf9957b17b3e15.dl.dropboxusercontent.com/cd/0/inline/Cz0YKNl7jwM2QhuRMPBW2ThIzwIhJMihQ-wXGdMmFm3Tv642l1G2qjdVletx55avcAwjZRIlW9NqojERDLeyyJKfPR1_02FcK6IsqR2u3W1lHmSdumDGYfaVwvdnwALsuq-nry6rKSZ9ZfBuLnMxeoeK/file#' },
+			{ id: 11, title: 'Akai', artist: 'UdieNnx', image: 'https://i1.sndcdn.com/artworks-ECACwqpd2B0H-0-t500x500.jpg', uri: 'https://uc1dd9ccc596c806c499f5328121.dl.dropboxusercontent.com/cd/0/inline/Cz0oraYpN6KkzYL33wn2iqS6egGCCsQ3xO2aiKkDdukvTna59rcgRn8la38Zge8COg69D0yjXYMyTqvc9As1tVT-AJBMSfVxD-Z3r2MfzZ1IFlyUf-W1f79VR-3UGfUF4nJafDw6Likor4iBpn4_ponp/file#' },
+			{ id: 12, title: 'Empire', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b27385fb75c7f792ddefaa3d30f7', uri: 'https://ucb2f70dd6aef489e18ee2017239.dl.dropboxusercontent.com/cd/0/inline/Cz0NeFe1i7reqiEbHJ-UJL-OHog_xKU0di1JRV2KIg0MvPYJzJBtRvJS7P9m0cM6JjMvkWa0l7jhqmDlTMlBfE-2sJD3eKts0viUxCG8SPGJ0Y-QF9DFum9gpxTxOfk0OgFCPA4fEvOBm9FBD4Zqq-UE/file#' },
+			{ id: 13, title: 'Slava Funk', artist: 'Mvsterious', image: 'https://cdn-images.dzcdn.net/images/artist/125e589de1bec47cc657c04744e82458/500x500-000000-80-0-0.jpg', uri: 'https://uc28826c8bee3eeae2fb7771c12f.dl.dropboxusercontent.com/cd/0/inline/Cz3giCSPdo_6s__CeXBimioD8_-mrYWcbuBc581eQo4lzFDbnKtDIdzMLTGh8IbNU8ROA1qPcYIRf2VXDysmMjDuD_lPjAutuezV7DP0pYf_XGJPhawXOzC8k3CyX9GLqjibZy2uJ0XHvdXonoNu7AOJ/file#' },
+			{ id: 14, title: 'DNA', artist: 'LXNGVX', image: 'https://i.scdn.co/image/ab67616d0000b2738290c26e2d961fea5b2a2b5f', uri: 'https://uc761011259d008769d230d54503.dl.dropboxusercontent.com/cd/0/inline/Cz0oOPygwpA5NGLLj1tRJzMBOSs1yT7eT38nncUEOgRF0WF6H_DjqqhbJivKlZMTGc29iNITmlkTFSrPWF26qst9hihmb5XENhm9gb_Qo7ygCV_tbGHEuxw78iXv2jpx2CQ-emqHCFgzVQssXDs2R_MK/file#' },
+			{ id: 15, title: 'Blah!', artist: 'Nomi XD', image: 'https://i.scdn.co/image/ab67616d0000b2735dd09fa6faa8a3d80c5c38fe', uri: 'https://uc509eda60230b4cbe785ef68f14.dl.dropboxusercontent.com/cd/0/inline/Cz14Yy0q08zlVINp0MSxiws24TQ2fGg0YABnNEgLGKT_rJizYAZloYdhm_xFxqEEs8QTineQ2uUC2BnxBTSHhFpsYDfbTHMfwxaxnxKHQJm3GFAxHhKHSmExeYtXsv_tTr_SzMIZRtcyW1wCAYbbLZVg/file#' },
+			{ id: 16, title: 'Glory', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d0000b273c9e933ef9dec999264974f90', uri: 'https://uc7bda0ec47c805b3de67eb8eda4.dl.dropboxusercontent.com/cd/0/inline/Cz1_PY5iY8iy5x6h8dqLKJubGS4LoaU-ZxR26ofMeGm8D1X-iZy_l1ixXfRYmZ8RYaIK2Z99gBbMl9IPpOKE2EMqwNvlEjLES9t_pHOIeCoNDsKSXwPcCgap7uA345I8_Ld-F3uqKWDYrrrVSr-9ryMO/file#' },
+			{ id: 17, title: 'X-Tudo', artist: 'Slxughter', image: 'https://i.scdn.co/image/ab67616d0000b2730aa3694fda40f27ea9800024', uri: 'https://ucf11d08b3224f39e94cc500eca2.dl.dropboxusercontent.com/cd/0/inline/Cz38AQUwqcVcoNnaPxdeu2CGwh66BAjq30ZORoSeMltcLLm7AafEgpfTvQT2ZN8-AiyAbjJ6vhaAzJR4pHiT0JOgBlX6NrL3Kh8bKFLdHrTT7UNg1ng_FZ144oPK0CVsZSGaHgmebDD46v6TtIH5wBim/file#' },
+			{ id: 18, title: 'Void', artist: 'Isq', image: 'https://i.scdn.co/image/ab67616d0000b273479c9842be5a7b9dd0b7454c', uri: 'https://uc4167ea0b3e9c379c3f472b0938.dl.dropboxusercontent.com/cd/0/inline/Cz0m4eY05V7hE83LuRc8h6PyjLS1nPERQ7Ob601U20NRFjwNhCpwJkhjqBeOKXh7mLuxwr3q8V_sStkVHYOsOy1GPpEwxMxeG1PIUxFA5NOzcdjYrwa7qzl3d4BH4Uy9DCHmv-vk2J9ownaJj0Vf0jyS/file#' },
+			{ id: 19, title: '✻H+3+ЯД✻7luCJIo0T6', artist: 'Vyrval', image: 'https://i.scdn.co/image/ab67616d0000b273e8624537ab89ae32598f5844', uri: 'https://ucb2af9842728b71965996216f90.dl.dropboxusercontent.com/cd/0/inline/Cz1gvXJ_Ukz_Et-vUvYGcJGcCznKYSy_PwJYssrWG0zwhOF3bNtYwz0vhJH_PIxyy0B6e3kG6T_RurI6RMylWi5dypQ6DEtsODLI_rzIHLJObw62sbUE9ZQ4xTBSGnE0W6NvpTGz5Bz1-ARIPWdc6wbr/file#' },
+        ];
+
+
+        // --- 2. PLAYER STATE & ELEMENTS ---
+        const audioSource = document.getElementById('audio-source');
+        const globalPlayer = document.getElementById('global-player');
+        
+        const playerTitle = document.getElementById('player-title');
+        const playerArtist = document.getElementById('player-artist');
+        const playerImage = document.getElementById('player-image');
+        const playerInfoBar = document.getElementById('player-info-bar'); 
+        const trackList = document.getElementById('track-list');
+
+        // Controls
+        const playPauseButton = document.getElementById('play-pause-button');
+        const playPauseIcon = playPauseButton.querySelector('i');
+        const nextButton = document.getElementById('next-button');
+        const previousButton = document.getElementById('previous-button');
+        const shuffleButton = document.getElementById('shuffle-button');
+        const repeatButton = document.getElementById('repeat-button');
+
+        // Seek/Volume
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const progressBar = document.getElementById('progress-bar');
+        const seekBar = document.getElementById('seek-bar');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeIcon = document.getElementById('volume-icon'); 
+        
+        // Modal Elements 
+        const trackModal = document.getElementById('track-modal');
+        const modalCloseButton = document.getElementById('modal-close-button');
+        const modalAlbumArt = document.getElementById('modal-album-art');
+        const modalTitle = document.getElementById('modal-title');
+        const modalArtist = document.getElementById('modal-artist');
+        const modalPlayPauseButton = document.getElementById('modal-play-pause-button');
+        const modalPlayPauseIcon = document.getElementById('modal-play-pause-icon');
+        const modalNextButton = document.getElementById('modal-next-button');
+        const modalPreviousButton = document.getElementById('modal-previous-button');
+        
+        let currentTrackIndex = -1;
+        let isShuffling = false;
+        let repeatState = 'off'; 
+        let previousVolume = volumeSlider.value; 
+
+
+        // --- 3. HELPER FUNCTIONS ---
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function highlightActiveCard() {
+            document.querySelectorAll('.track-card').forEach(card => {
+                card.classList.remove('active-track');
+            });
+
+            if (currentTrackIndex !== -1) {
+                // Assuming track.id is unique and matches the data-id attribute
+                const activeCard = document.querySelector(`.track-card[data-id="${tracksData[currentTrackIndex].id}"]`);
+                if (activeCard) {
+                    activeCard.classList.add('active-track');
+                }
+            }
+        }
+        
+        function updateVolumeIcon(volume) {
+             if (volume === 0) {
+                 volumeIcon.className = 'fas fa-volume-off';
+             } else if (volume < 50) {
+                 volumeIcon.className = 'fas fa-volume-down';
+             } else {
+                 volumeIcon.className = 'fas fa-volume-up';
+             }
+        }
+        
+        // Modal Open/Close Functions 
+        function openModal() {
+            if (currentTrackIndex !== -1) {
+                const track = tracksData[currentTrackIndex];
+                modalAlbumArt.src = track.image;
+                modalTitle.textContent = track.title;
+                modalArtist.textContent = track.artist;
+                
+                // Sync modal play/pause icon with player state
+                if (audioSource.paused) {
+                    modalPlayPauseIcon.className = 'fas fa-play';
+                } else {
+                    modalPlayPauseIcon.className = 'fas fa-pause';
+                }
+
+                trackModal.classList.add('is-open');
+            }
+        }
+
+        function closeModal() {
+            trackModal.classList.remove('is-open');
+        }
+
+        /* 3. Function to prevent right-click on elements */
+        function disableRightClick(element) {
+             element.addEventListener('contextmenu', (e) => {
+                 e.preventDefault();
+             });
+        }
+        /* End Right-Click Prevention Function */
+
+
+        // --- 4. PLAYER CORE LOGIC ---
+
+        // NEW ASYNC DOWNLOAD FUNCTION
+        async function forceDownload(uri, filename, button) {
+            console.log(`Attempting to download: ${filename} from ${uri}`);
+            
+            // Disable the button to prevent double-clicks and provide feedback
+            button.disabled = true;
+            button.textContent = 'Downloading...';
+
+            try {
+                // 1. Fetch the audio data as a Blob (The key step to bypass server headers)
+                const response = await fetch(uri); 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const blob = await response.blob();
+                
+                // 2. Create a temporary URL for the Blob
+                const url = window.URL.createObjectURL(blob);
+                
+                // 3. Create a temporary anchor tag to trigger the download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename; // Set the desired filename
+                document.body.appendChild(a);
+                
+                // 4. Programmatically click the anchor tag
+                a.click();
+                
+                // 5. Clean up the temporary elements and URL
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                console.log('Download complete.');
+
+            } catch (error) {
+                console.error('Download failed:', error);
+                alert('Download failed. Check the console for details.');
+            } finally {
+                // Re-enable the button
+                button.disabled = false;
+                button.textContent = 'Download';
+            }
+        }
+
+
+        function playTrack(track, index) {
+            // 1. Update State
+            currentTrackIndex = index;
+            
+            // 2. Load Track
+            audioSource.src = track.uri;
+            audioSource.load();
+
+            // 3. Update UI
+            playerTitle.textContent = track.title;
+            playerArtist.textContent = track.artist;
+            playerImage.src = track.image;
+            playerImage.style.display = 'block';
+            globalPlayer.classList.add('active');
+            highlightActiveCard();
+            
+            // Update Modal Content 
+            modalAlbumArt.src = track.image;
+            modalTitle.textContent = track.title;
+            modalArtist.textContent = track.artist;
+
+
+            // 4. Play (handle Autoplay restriction)
+            audioSource.play()
+                .then(() => {
+                    playPauseIcon.classList.remove('fa-play');
+                    playPauseIcon.classList.add('fa-pause');
+                    globalPlayer.classList.add('playing'); 
+                    modalPlayPauseIcon.className = 'fas fa-pause'; // Sync modal icon
+                })
+                .catch(error => {
+                    playPauseIcon.classList.remove('fa-pause');
+                    playPauseIcon.classList.add('fa-play');
+                    globalPlayer.classList.remove('playing');
+                    modalPlayPauseIcon.className = 'fas fa-play'; // Sync modal icon
+                    console.warn("Autoplay was prevented. Please click the play button.", error);
+                });
+        }
+        
+        function togglePlayPause() {
+            if (currentTrackIndex === -1 && tracksData.length > 0) {
+                 playTrack(tracksData[0], 0);
+            } else if (audioSource.paused || audioSource.ended) {
+                audioSource.play();
+            } else {
+                audioSource.pause();
+            }
+        }
+
+        function playNext() {
+            if (currentTrackIndex === -1 || tracksData.length === 0) return;
+
+            let nextIndex = currentTrackIndex;
+
+            if (isShuffling) {
+                let newIndex;
+                do {
+                    newIndex = Math.floor(Math.random() * tracksData.length);
+                } while (newIndex === currentTrackIndex && tracksData.length > 1);
+                nextIndex = newIndex;
+            } else {
+                nextIndex = (currentTrackIndex + 1) % tracksData.length;
+            }
+            
+            playTrack(tracksData[nextIndex], nextIndex);
+        }
+
+        function playPrevious() {
+            if (currentTrackIndex === -1 || tracksData.length === 0) return;
+            
+            // If track is more than 3 seconds in, restart it. Otherwise, go to previous track.
+            if (audioSource.currentTime > 3) {
+                audioSource.currentTime = 0;
+            } else {
+                let prevIndex = (currentTrackIndex - 1 + tracksData.length) % tracksData.length;
+                playTrack(tracksData[prevIndex], prevIndex);
+            }
+        }
+        
+        function cycleRepeat() {
+            if (repeatState === 'off') {
+                repeatState = 'track'; 
+                repeatButton.classList.add('active');
+                // Optional: add a '1' icon for single-track repeat if using a different icon pack
+                repeatButton.querySelector('i').className = 'fas fa-redo-alt'; 
+                audioSource.loop = true; // Enables native single-track repeat
+                // Turn off shuffle when explicitly setting repeat
+                isShuffling = false; 
+                shuffleButton.classList.remove('active');
+            } else if (repeatState === 'track') {
+                repeatState = 'context'; 
+                // Set the icon back to just the arrow for playlist repeat 
+                repeatButton.querySelector('i').className = 'fas fa-redo-alt fa-solid';
+                audioSource.loop = false; // Disable native loop for playlist repeat
+            } else { // 'context'
+                repeatState = 'off'; 
+                repeatButton.classList.remove('active');
+                repeatButton.querySelector('i').className = 'fas fa-redo-alt';
+                audioSource.loop = false;
+            }
+        }
+
+
+        // --- 5. EVENT LISTENERS FOR CUSTOM UI ---
+
+        // Playback Controls
+        playPauseButton.addEventListener('click', togglePlayPause);
+        nextButton.addEventListener('click', playNext);
+        previousButton.addEventListener('click', playPrevious);
+
+        // Modal Controls sync with main player functions 
+        modalPlayPauseButton.addEventListener('click', togglePlayPause);
+        modalNextButton.addEventListener('click', playNext);
+        modalPreviousButton.addEventListener('click', playPrevious);
+        modalCloseButton.addEventListener('click', closeModal);
+        playerInfoBar.addEventListener('click', openModal); // Click player bar to open modal
+
+
+        shuffleButton.addEventListener('click', () => {
+            isShuffling = !isShuffling;
+            shuffleButton.classList.toggle('active', isShuffling);
+            
+            if (isShuffling) {
+                 // Turn off repeat when shuffling
+                 repeatState = 'off';
+                 repeatButton.classList.remove('active');
+                 repeatButton.querySelector('i').className = 'fas fa-redo-alt';
+                 audioSource.loop = false;
+            }
+        });
+
+        repeatButton.addEventListener('click', cycleRepeat);
+
+
+        // Audio Status Listeners
+        audioSource.addEventListener('play', () => {
+            playPauseIcon.classList.remove('fa-play');
+            playPauseIcon.classList.add('fa-pause');
+            globalPlayer.classList.add('playing'); 
+            modalPlayPauseIcon.className = 'fas fa-pause'; // Sync modal icon
+        });
+
+        audioSource.addEventListener('pause', () => {
+            playPauseIcon.classList.remove('fa-pause');
+            playPauseIcon.classList.add('fa-play');
+            globalPlayer.classList.remove('playing'); 
+            modalPlayPauseIcon.className = 'fas fa-play'; // Sync modal icon
+        });
+
+        // Handle Track End
+        audioSource.addEventListener('ended', () => {
+            if (repeatState === 'context' || isShuffling) {
+                 playNext();
+            } 
+            // repeatState === 'track' is handled by audioSource.loop = true
+            // repeatState === 'off' stops here
+        });
+        
+        // Update time display and progress bar
+        audioSource.addEventListener('timeupdate', () => {
+            const currentTime = audioSource.currentTime;
+            const duration = audioSource.duration || 0;
+            
+            // Only update the progress bar and time if the user is not actively seeking
+            if (!isSeeking) {
+                currentTimeEl.textContent = formatTime(currentTime);
+                
+                if (isFinite(duration) && duration > 0) {
+                    const progress = (currentTime / duration) * 100;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }
+        });
+        
+        // Update duration once metadata is loaded
+        audioSource.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = isFinite(audioSource.duration) && audioSource.duration > 0
+                ? formatTime(audioSource.duration)
+                : '0:00'; 
+        });
+        
+        // --- NEW SMOOTH SCRUBBING LOGIC (requestAnimationFrame) ---
+        let isSeeking = false;
+        let lastSeekX = 0; // Stores the latest mouse X position during drag
+        let rAFId = null;  // Request Animation Frame ID
+
+        function getSeekPercentage(clientX) {
+            const rect = seekBar.getBoundingClientRect();
+            // Calculate mouse position relative to the seek bar
+            const clickX = clientX - rect.left; 
+            // Clamp percentage between 0 and 1
+            return Math.max(0, Math.min(1, clickX / rect.width));
+        }
+
+        function visualUpdateLoop() {
+            if (!isSeeking || !isFinite(audioSource.duration) || audioSource.duration === 0) {
+                 return; // Safety check
+            }
+
+            const percentage = getSeekPercentage(lastSeekX);
+            const scrubTime = audioSource.duration * percentage;
+
+            // 1. VISUAL UPDATE (Progress Bar and Time)
+            progressBar.style.width = `${percentage * 100}%`;
+            currentTimeEl.textContent = formatTime(scrubTime);
+            
+            // 2. CONTINUE LOOP (Ensures smooth 60fps update)
+            rAFId = requestAnimationFrame(visualUpdateLoop);
+        }
+        
+        function startScrub(e) {
+             if (e.button !== 0 || !isFinite(audioSource.duration) || audioSource.duration === 0) return;
+
+             isSeeking = true;
+             // Add class to prevent text selection and show dragging cursor
+             document.body.classList.add('no-select'); 
+             
+             // Pause the audio, but remember if it was playing to resume later
+             if (!audioSource.paused) {
+                 audioSource.pause();
+                 audioSource.wasPlaying = true;
+             } else {
+                 audioSource.wasPlaying = false;
+             }
+             
+             // Start the continuous visual update loop
+             lastSeekX = e.clientX;
+             visualUpdateLoop(); 
+        }
+
+        function endScrub() {
+            if (!isSeeking) return;
+
+            // 1. Stop the visual update loop
+            cancelAnimationFrame(rAFId);
+            isSeeking = false;
+            document.body.classList.remove('no-select'); 
+
+            // 2. Calculate the final seek time
+            const finalPercentage = getSeekPercentage(lastSeekX);
+            const finalTime = audioSource.duration * finalPercentage;
+
+            // 3. Set audio time and resume playback if it was playing
+            audioSource.currentTime = finalTime;
+            if (audioSource.wasPlaying) {
+                 audioSource.play().catch(error => {
+                    console.warn("Autoplay resumed after seeking was prevented:", error);
+                 });
+            }
+            audioSource.wasPlaying = false;
+        }
+
+        // Attach Event Listeners
+        seekBar.addEventListener('mousedown', startScrub);
+
+        // Listen for mouse movement across the entire document
+        document.addEventListener('mousemove', (e) => {
+            if (isSeeking) {
+                // Update coordinate (the rAF loop uses this to draw the bar)
+                lastSeekX = e.clientX;
+            }
+        });
+
+        // Stop seeking when mouse button is released anywhere
+        document.addEventListener('mouseup', endScrub);
+        // --- END NEW SMOOTH SCRUBBING LOGIC ---
+
+
+        // Volume control
+        audioSource.volume = volumeSlider.value / 100; 
+        updateVolumeIcon(parseInt(volumeSlider.value)); 
+        
+        volumeSlider.addEventListener('input', (e) => {
+            const newVolume = parseInt(e.target.value);
+            audioSource.volume = newVolume / 100;
+            updateVolumeIcon(newVolume);
+            
+            if (newVolume > 0) {
+                previousVolume = newVolume;
+            }
+        });
+        
+        // Mute/Unmute Toggle
+        volumeIcon.addEventListener('click', () => {
+            if (audioSource.volume > 0) {
+                previousVolume = parseInt(volumeSlider.value); 
+                volumeSlider.value = 0;
+                audioSource.volume = 0;
+                updateVolumeIcon(0);
+            } else {
+                const newVolume = previousVolume > 0 ? previousVolume : 50; 
+                volumeSlider.value = newVolume;
+                audioSource.volume = newVolume / 100;
+                updateVolumeIcon(newVolume);
+            }
+        });
+
+
+        // --- 6. INITIALIZATION: GENERATE CARDS & BIND EVENTS (MODIFIED FOR PROGRAMMATIC DOWNLOAD) ---
+        tracksData.forEach((track, index) => {
+            const card = document.createElement('div');
+            card.className = 'track-card';
+            card.setAttribute('data-id', track.id);
+
+            // MODIFIED: Replaced <a> tag with <button> to facilitate programmatic download
+            card.innerHTML = `
+                <img src="${track.image}" alt="Album Art for ${track.title}" class="track-image">
+                <div class="play-icon-overlay"><i class="fas fa-play"></i></div>
+                <div class="track-info">
+                    <div class="track-title">${track.title}</div>
+                    <div class="track-artist">${track.artist}</div>
+                </div>
+                <button class="download-button" data-uri="${track.uri}" data-title="${track.title}" data-artist="${track.artist}">
+                    Download
+                </button>
+            `;
+            
+            // Add right-click prevention to the card
+            disableRightClick(card); 
+
+            // Find the new download button
+            const downloadButton = card.querySelector('.download-button');
+            
+            // NEW LOGIC: Event listener for the download button
+            downloadButton.addEventListener('click', async (event) => {
+                // Stop the click event from propagating to the card's play function
+                event.stopPropagation(); 
+                
+                const uri = downloadButton.getAttribute('data-uri');
+                const title = downloadButton.getAttribute('data-title');
+                const artist = downloadButton.getAttribute('data-artist');
+                
+                // Create a clean filename
+                const filename = `${title.replace(/\s/g, '_')}_${artist.replace(/\s/g, '_')}.mp3`;
+                
+                // Call the new async download function
+                await forceDownload(uri, filename, downloadButton);
+            });
+
+            // Existing: Event listener for the rest of the card (for playing the track)
+            card.addEventListener('click', (event) => {
+                // Only play if the target is NOT the download button
+                if (!event.target.classList.contains('download-button')) {
+                    playTrack(track, index);
+                }
+            });
+
+            trackList.appendChild(card);
+        });
+
+        // Add right-click prevention to player images and modal album art
+        disableRightClick(playerImage);
+        disableRightClick(modalAlbumArt);
+
+    </script>
+
+    </body>
+</html>
