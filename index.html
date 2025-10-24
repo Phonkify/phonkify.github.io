@@ -781,6 +781,51 @@
         }
         /* --- END Playback Rate Control Styles --- */
 
+        /* --- 404 Error Screen --- */
+        #error-404-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-gray);
+            color: var(--text-color);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000; /* On top of everything */
+            text-align: center;
+            padding: 20px;
+        }
+        #error-404-screen.show {
+            display: flex;
+        }
+        #error-404-screen h1 {
+            font-size: 5em;
+            color: var(--spotify-green);
+            margin-bottom: 10px;
+        }
+        #error-404-screen p {
+            font-size: 1.5em;
+            color: var(--subtle-text);
+            margin-bottom: 30px;
+        }
+        #error-404-screen .home-button {
+            padding: 12px 25px;
+            background-color: var(--spotify-green);
+            color: var(--dark-gray);
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        #error-404-screen .home-button:hover {
+            background-color: var(--text-color);
+            transform: scale(1.05);
+        }
+        /* --- END 404 Error Screen --- */
+
 
         /* * RESPONSIVE ADJUSTMENTS FOR MOBILE (<= 768px) */
         @media (max-width: 768px) {
@@ -995,6 +1040,12 @@
 
     <div id="custom-toast"></div>
 
+    <div id="error-404-screen">
+        <h1>404</h1>
+        <p>Oops! The track you're looking for doesn't exist.</p>
+        <a href="index.html" class="home-button">Back to Phonkify</a>
+    </div>
+
 
     <script>
         // --- 1. TRACK DATA (Example Data) ---
@@ -1148,10 +1199,23 @@
              mainHeading.textContent = `Now Playing: ${track.title}`;
         }
 
+        // --- MODIFIED FUNCTION ---
         function resetDocumentMetadata() {
-             document.title = originalTitle;
-             dynamicIcon.href = originalIconHref;
-             mainHeading.textContent = originalHeading;
+             // document.title = originalTitle; // <-- REMOVED
+             // dynamicIcon.href = originalIconHref; // <-- REMOVED
+
+             // Check search input to restore correct heading
+             const searchTerm = searchInput.value.toLowerCase().trim();
+             if (searchTerm.length > 0) {
+                 // Re-calculate the count to display the correct search heading
+                 const filteredCount = originalTrackOrder.filter(track =>
+                    track.title.toLowerCase().includes(searchTerm) ||
+                    track.artist.toLowerCase().includes(searchTerm)
+                 ).length;
+                 mainHeading.textContent = `Found ${filteredCount} Track${filteredCount !== 1 ? 's' : ''}`;
+             } else {
+                 mainHeading.textContent = originalHeading;
+             }
         }
 
         function setDynamicBackground(imageUrl) {
@@ -1245,7 +1309,8 @@
             document.body.classList.remove('modal-open');
 
             // The URL track ID is preserved here as requested.
-
+            
+            // MODIFICATION: This now only resets the heading, not the title/icon
             resetDocumentMetadata();
             setDynamicBackground(null);
         }
@@ -1262,8 +1327,8 @@
             
             updateUrlForModal(trackToPlay.id);
 
-            audioSource.src = trackToPlay.uri;
-            playPauseButton.classList.add('loading-track');
+			audioSource.src = trackToPlay.uri;
+            // playPauseButton.classList.add('loading-track'); // <-- REMOVED: Handled by 'loadstart' event
             audioSource.playbackRate = currentPlaybackRate;
             audioSource.load();
 
@@ -1301,6 +1366,7 @@
             }
         }
 
+        // --- MODIFIED FUNCTION ---
         function playNext() {
             if (currentTrackIndex === -1 || tracksData.length === 0) return;
 
@@ -1314,6 +1380,11 @@
                     audioSource.pause();
                     currentTrackIndex = -1; // Reset player state
                     highlightActiveCard();
+
+                    // MODIFICATION: Reset title and icon when playback stops
+                    document.title = originalTitle;
+                    dynamicIcon.href = originalIconHref;
+
                     return;
                 }
             }
@@ -1511,21 +1582,33 @@
         });
         // --- END CONTEXT MENU LOGIC ---
         
-        function stopLoadingAnimation() {
-            playPauseButton.classList.remove('loading-track');
-        }
+        
+        // --- LOADING ANIMATION FIX ---
+        // REMOVED: stopLoadingAnimation() function
 
         // Audio Status Listeners
-        audioSource.addEventListener('canplaythrough', stopLoadingAnimation);
-        audioSource.addEventListener('canplay', stopLoadingAnimation);
+        audioSource.addEventListener('loadstart', () => {
+            playPauseButton.classList.add('loading-track');
+        });
+
+        audioSource.addEventListener('waiting', () => {
+            playPauseButton.classList.add('loading-track');
+        });
+
+        audioSource.addEventListener('playing', () => { // When playback *actually* starts/resumes
+            playPauseButton.classList.remove('loading-track');
+        });
+        
+        // REMOVED: 'canplaythrough' and 'canplay' listeners
 
         audioSource.addEventListener('play', () => {
-            playPauseButton.classList.remove('loading-track');
+            // playPauseButton.classList.remove('loading-track'); // <-- REMOVED from here
             playPauseIcon.classList.remove('fa-play');
             playPauseIcon.classList.add('fa-pause');
             globalPlayer.classList.add('playing');
             modalPlayPauseIcon.className = 'fas fa-pause';
         });
+        // --- END LOADING ANIMATION FIX ---
 
         audioSource.addEventListener('pause', () => {
             playPauseIcon.classList.remove('fa-pause');
@@ -1925,6 +2008,16 @@
 
                      // Since playTrack uses play(), pause immediately if not user-driven
                      audioSource.pause(); 
+                 } else {
+                     // --- 404 LOGIC ---
+                     const errorScreen = document.getElementById('error-404-screen');
+                     if (errorScreen) {
+                         errorScreen.classList.add('show');
+                     }
+                     // Hide the main content and player
+                     document.querySelector('.header').style.display = 'none';
+                     document.querySelector('.container').style.display = 'none';
+                     globalPlayer.style.display = 'none';
                  }
              }
         }
