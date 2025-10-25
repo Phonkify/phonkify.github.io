@@ -1473,31 +1473,35 @@
              volumeSlider.style.setProperty('--volume-progress', `${vol}%`);
         }
 
-        function openModal() {
-            if (currentTrackIndex !== -1) {
-                const track = tracksData[currentTrackIndex];
+		function openModal() {
+            if (currentTrackIndex !== -1) {
+                const track = tracksData[currentTrackIndex];
 
-                modalAlbumArt.src = track.image;
-                modalTitle.textContent = track.title;
-                modalArtist.textContent = track.artist;
-                
-                // NEW: Update both icons
-                modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
-                modalPlayPauseIconMobile.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
+                // FIX: Clear any residual inline transform style set by the drag-to-close logic.
+                // This ensures the CSS class '.is-open' can correctly display the modal.
+                trackModal.style.transform = '';
 
-                // MODIFIED: Update new mobile shuffle/repeat buttons on open
-                modalShuffleButtonMobile.classList.toggle('active', isShuffling);
-                modalRepeatButtonMobile.classList.toggle('active', repeatState !== 'off');
+                modalAlbumArt.src = track.image;
+                modalTitle.textContent = track.title;
+                modalArtist.textContent = track.artist;
+                
+                // NEW: Update both icons
+                modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
+                modalPlayPauseIconMobile.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
 
-                updatePlaybackRate(currentPlaybackRate);
+                // MODIFIED: Update new mobile shuffle/repeat buttons on open
+                modalShuffleButtonMobile.classList.toggle('active', isShuffling);
+                modalRepeatButtonMobile.classList.toggle('active', repeatState !== 'off');
 
-                updateDocumentMetadata(track);
-                setDynamicBackground(track.image);
+                updatePlaybackRate(currentPlaybackRate);
 
-                trackModal.classList.add('is-open');
-                document.body.classList.add('modal-open');
-            }
-        }
+                updateDocumentMetadata(track);
+                setDynamicBackground(track.image);
+
+                trackModal.classList.add('is-open');
+                document.body.classList.add('modal-open');
+            }
+        }
 
         function closeModal() {
             trackModal.classList.remove('is-open');
