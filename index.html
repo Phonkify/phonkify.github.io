@@ -19,7 +19,7 @@
             --subtle-text: #b3b3b3;
             --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             --player-height: 90px;
-            --player-height-mobile: 110px;
+            --player-height-mobile: 70px; /* MODIFIED: Reduced height for mini-player */
             --dark-overlay: rgba(0, 0, 0, 0.7);
             --volume-progress: 100%;
             --dynamic-bg-image: url('https://i.redd.it/et1yntwo6dc61.jpg'); /* Default background */
@@ -200,6 +200,15 @@
             box-shadow: 0 0 20px rgba(30, 215, 96, 0.5), 0 8px 15px rgba(0, 0, 0, 0.6);
         }
 
+        /* NEW: Wrapper for image and overlay */
+        .track-image-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 4px; /* Apply radius to container if image has it */
+            overflow: hidden; /* Ensures overlay respects border radius */
+        }
+
         /* Premium Feature: Vertically Centered Play Icon Overlay */
         .play-icon-overlay {
             position: absolute;
@@ -208,8 +217,8 @@
             transform: translate(-50%, -50%);
             right: auto;
 
-            width: 48px;
-            height: 48px;
+            width: 56px; /* MODIFIED: Was 48px */
+            height: 56px; /* MODIFIED: Was 48px */
             background-color: var(--spotify-green);
             color: var(--dark-gray);
             border-radius: 50%;
@@ -220,6 +229,12 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
             pointer-events: none;
+        }
+        
+        /* NEW: Size the icon inside the overlay */
+        .play-icon-overlay i {
+            font-size: 20px;
+            margin-left: 2px; /* Optical centering for play icon */
         }
 
         /* Premium Feature: Improved Hover Animation (3D Tilt + Glow) */
@@ -238,9 +253,10 @@
             width: 100%;
             height: auto;
             border-radius: 4px;
-            margin-bottom: 15px;
+            /* margin-bottom: 15px; */ /* MODIFIED: Moved to .track-image-container */
             aspect-ratio: 1 / 1;
             object-fit: cover;
+            display: block; /* NEW: Fixes potential inline spacing issues */
         }
 
         .track-info {
@@ -319,7 +335,7 @@
             z-index: 20;
             height: var(--player-height);
             opacity: 0;
-            transition: opacity 0.3s ease, box-shadow 0.3s ease;
+            transition: opacity 0.3s ease, box-shadow 0.3s ease, height 0.3s ease; /* NEW: Added height transition */
         }
 
         #global-player.active {
@@ -441,7 +457,9 @@
             font-size: 12px;
             max-width: 450px;
         }
-        #seek-bar {
+        
+        /* MODIFIED: Renamed ID to class */
+        .seek-bar {
             flex-grow: 1;
             height: 4px;
             background: #535353;
@@ -450,7 +468,9 @@
             cursor: pointer;
             position: relative;
         }
-        #progress-bar {
+        
+        /* MODIFIED: Renamed ID to class */
+        .progress-bar {
             height: 100%;
             width: 0%;
             background: var(--text-color);
@@ -458,12 +478,12 @@
             transition: none;
             position: relative;
         }
-        #global-player.playing #progress-bar {
+        #global-player.playing .progress-bar {
             background: var(--spotify-green);
         }
 
         /* Premium Feature: Progress Bar Scrubbing Thumb */
-        #progress-bar::after {
+        .progress-bar::after {
             content: '';
             position: absolute;
             right: 0;
@@ -478,11 +498,11 @@
             pointer-events: none;
         }
 
-        #seek-bar:hover #progress-bar::after,
-        .no-select #progress-bar::after {
+        .seek-bar:hover .progress-bar::after,
+        .no-select .progress-bar::after {
             opacity: 1;
         }
-        #global-player.playing #progress-bar::after {
+        #global-player.playing .progress-bar::after {
             background: var(--spotify-green);
         }
 
@@ -574,6 +594,23 @@
             position: relative;
         }
 
+        /* --- NEW: Modal Drag Handle --- */
+        .modal-drag-handle-container {
+            display: none; /* Hidden on desktop */
+            width: 100%;
+            padding: 15px 0 0 0; /* Padding at the top */
+            cursor: grab;
+            touch-action: none; /* Prevent page scroll when dragging handle */
+        }
+        .modal-drag-handle {
+            width: 40px;
+            height: 5px;
+            background: var(--light-gray);
+            border-radius: 3px;
+            margin: 0 auto;
+        }
+        /* --- END NEW --- */
+
         .modal-image-wrapper {
             position: relative;
             width: min(80vw, 400px);
@@ -606,7 +643,15 @@
             color: var(--spotify-green);
         }
 
-        /* Modal Controls Overlay */
+        /* NEW: Styles for the seek bar inside the modal */
+        #modal-seek-bar-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 20px 0;
+            color: var(--subtle-text);
+        }
+
+        /* Modal Controls Overlay (RESTORED) */
         .modal-controls-overlay {
             position: absolute;
             top: 0;
@@ -632,6 +677,11 @@
              display: flex;
              align-items: center;
              gap: 40px;
+        }
+        
+        /* NEW: Hide mobile-only controls by default */
+        #modal-controls-mobile {
+            display: none;
         }
 
         .modal-control-button {
@@ -726,7 +776,7 @@
         /* --- Custom Toast/Notification --- */
         #custom-toast {
             position: fixed;
-            bottom: 120px;
+            bottom: 120px; /* MODIFIED: Raised to avoid mobile mini-player */
             left: 50%;
             transform: translateX(-50%);
             background-color: var(--light-gray);
@@ -742,6 +792,13 @@
             align-items: center;
             gap: 10px;
         }
+        
+        @media (max-width: 768px) {
+             #custom-toast {
+                bottom: 85px; /* MODIFIED: Adjust for 70px mini-player */
+             }
+        }
+
 
         #custom-toast.show {
             opacity: 1;
@@ -830,6 +887,7 @@
         /* * RESPONSIVE ADJUSTMENTS FOR MOBILE (<= 768px) */
         @media (max-width: 768px) {
             body {
+                /* MODIFIED: Uses new variable height */
                 padding-bottom: var(--player-height-mobile);
             }
             .header {
@@ -851,28 +909,35 @@
             .play-icon-overlay {
                  opacity: 1;
                  transform: translate(-50%, -50%);
-                 width: 36px;
-                 height: 36px;
+                 width: 44px; /* MODIFIED: Was 36px */
+                 height: 44px; /* MODIFIED: Was 36px */
+            }
+            
+            /* NEW: Size icon on mobile */
+            .play-icon-overlay i {
+                font-size: 18px;
             }
 
             .track-card:hover {
                  transform: none;
             }
 
-            /* Stacked Player Bar for Mobile */
+            /* MODIFIED: Spotify-like Mini-Player (Restored) */
             #global-player {
                 padding: 10px 15px;
-                flex-direction: column;
-                height: var(--player-height-mobile);
-                align-items: flex-start;
-                justify-content: space-around;
+                flex-direction: row; /* MODIFIED: Was column */
+                height: var(--player-height-mobile); /* MODIFIED: Now 70px */
+                align-items: center; /* MODIFIED: Center items vertically */
+                justify-content: space-between;
+                border-top: none; /* NEW: Remove panel border */
             }
             .player-info {
-                width: 100%;
+                width: auto; /* MODIFIED: Was 100% */
                 max-width: none;
-                order: 1;
-                margin-top: 5px;
-                padding-top: 5px;
+                order: 0; /* MODIFIED: Was 1 */
+                margin-top: 0; /* MODIFIED: Removed spacing */
+                padding-top: 0; /* MODIFIED: Removed spacing */
+                flex-grow: 1; /* NEW: Take up remaining space */
             }
 
             .player-info img {
@@ -889,20 +954,23 @@
             }
 
             .player-center {
-                width: 100%;
-                order: 0;
+                width: auto; /* MODIFIED: Was 100% */
+                order: 1; /* MODIFIED: Was 0 */
                 flex-direction: row;
-                justify-content: space-between;
+                justify-content: flex-end; /* MODIFIED: Was space-between */
+                flex-grow: 0; /* NEW: Don't grow */
+                margin-top: 0; /* NEW: Remove panel margin */
             }
             .custom-controls {
                 margin-bottom: 0;
                 order: 1;
-                flex-grow: 1;
+                flex-grow: 0; /* MODIFIED: Was 1 */
                 justify-content: flex-end;
             }
 
-            #shuffle-button, #repeat-button {
-                order: 0;
+            /* MODIFIED: Hide non-essential controls in mini-player */
+            #shuffle-button, #repeat-button, #previous-button, #next-button {
+                display: none;
             }
 
             /* Mobile Play Button Adjustments */
@@ -917,7 +985,7 @@
                  margin: 0 5px;
             }
 
-            /* Hide non-essential player elements on mobile */
+            /* MODIFIED: This is correct, seek bar is hidden on mini-player */
             .seek-bar-container {
                 display: none;
             }
@@ -925,23 +993,103 @@
                 display: none;
             }
 
+            /* --- NEW: Mobile Modal Panel Styles --- */
+            #track-modal {
+                top: auto;
+                bottom: 0;
+                height: auto;
+                max-height: 95vh; /* Panel won't cover the entire screen */
+                background-color: var(--mid-gray); /* Solid background */
+                border-top-left-radius: 20px;
+                border-top-right-radius: 20px;
+                transform: translateY(100%); /* Start hidden at the bottom */
+                transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+                
+                /* Override desktop 'place-items' */
+                display: block; 
+                padding: 0;
+            }
+            #track-modal.is-open {
+                transform: translateY(0); /* Slide up when open */
+                display: block; /* Ensure it's block, not grid */
+            }
+            .modal-content {
+                max-width: 100%;
+                max-height: 90vh; /* Allow content to be scrollable */
+                overflow-y: auto;
+                padding: 0 20px 20px 20px; /* Padding, but not at the top (handle is there) */
+            }
+            .modal-drag-handle-container {
+                display: block; /* Show handle on mobile */
+            }
+
+            /* MODIFIED: Hide close button on mobile per request */
+            #modal-close-button {
+                top: 25px; /* Adjust close button to be near handle */
+                right: 20px;
+                display: none; /* NEW: Hide on mobile, drag-to-close is primary */
+            }
+            /* --- END NEW PANEL STYLES --- */
+
+
             /* Modal adjustments for mobile */
+            .modal-image-wrapper {
+                margin-bottom: 20px;
+                margin-top: 10px; /* Space below drag handle */
+            }
+            
+			/* NEW: Adjust modal seek bar on mobile */
+            #modal-seek-bar-container {
+                display: flex; /* <-- ADD THIS LINE to show it */
+                max-width: 90%;
+                margin: 15px 0;
+            }
+
             .modal-title {
                 font-size: 2em;
             }
             .modal-artist {
                 font-size: 1.2em;
             }
+
+            /* MODIFIED: This rule now only sets the base size for the main 3 buttons */
             .modal-control-button {
                 width: 50px;
                 height: 50px;
                 font-size: 22px;
             }
+            
+            /* NEW: Show mobile-only controls */
+            #modal-controls-mobile {
+                display: flex;
+                justify-content: center;
+                gap: 20px; /* MODIFIED: Less gap to fit 5 buttons */
+                margin: 15px 0; /* Mobile margin */
+                align-items: center; /* MODIFIED: Align all buttons vertically */
+            }
+
+            /* MODIFIED: Add styles for new mobile toggle buttons */
+            #modal-shuffle-button-mobile,
+            #modal-repeat-button-mobile {
+                background-color: transparent;
+                color: var(--subtle-text);
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+                box-shadow: none;
+            }
+
+            #modal-shuffle-button-mobile.active,
+            #modal-repeat-button-mobile.active {
+                color: var(--spotify-green);
+            }
+            /* END MODIFIED */
 
             /* Mobile: Disable complex hover overlay */
             .modal-controls-overlay {
                 opacity: 0;
                 pointer-events: none;
+                display: none; /* NEW: Fully hide the desktop controls */
             }
         }
     </style>
@@ -967,11 +1115,15 @@
         <button id="modal-close-button"><i class="fas fa-times"></i></button>
         <div class="modal-content">
 
+            <div class="modal-drag-handle-container">
+                <div class="modal-drag-handle"></div>
+            </div>
+
             <div class="modal-image-wrapper">
                 <img id="modal-album-art" class="modal-album-art" src="" alt="Album Art" draggable="false">
 
                 <div class="modal-controls-overlay">
-                    <div class="modal-controls-group">
+                    <div class="modal-controls-group" id="modal-controls-desktop">
                         <button id="modal-previous-button" class="modal-control-button"><i class="fas fa-step-backward"></i></button>
                         <button id="modal-play-pause-button" class="modal-control-button">
                             <i class="fas fa-play" id="modal-play-pause-icon"></i>
@@ -983,6 +1135,27 @@
             <div class="modal-title" id="modal-title"></div>
             <div class="modal-artist" id="modal-artist"></div>
 
+            <div class="seek-bar-container" id="modal-seek-bar-container">
+                <span class="seek-current-time">0:00</span>
+                <div class="seek-bar">
+                    <div class="progress-bar"></div>
+                </div>
+                <span class="seek-duration">0:00</span>
+            </div>
+            
+            <div class="modal-controls-group" id="modal-controls-mobile">
+                <button id="modal-shuffle-button-mobile" class="modal-control-button">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button id="modal-previous-button-mobile" class="modal-control-button"><i class="fas fa-step-backward"></i></button>
+                <button id="modal-play-pause-button-mobile" class="modal-control-button">
+                    <i class="fas fa-play" id="modal-play-pause-icon-mobile"></i>
+                </button>
+                <button id="modal-next-button-mobile" class="modal-control-button"><i class="fas fa-step-forward"></i></button>
+                <button id="modal-repeat-button-mobile" class="modal-control-button">
+                    <i class="fas fa-redo-alt"></i>
+                </button>
+            </div>
             <div class="rate-control-group">
                 <button class="rate-button" data-rate="0.75">0.75x</button>
                 <button class="rate-button active" data-rate="1.0">1.0x</button>
@@ -1014,11 +1187,11 @@
                 <button id="repeat-button" class="control-button" data-state="off"><i class="fas fa-redo-alt"></i></button>
             </div>
             <div class="seek-bar-container">
-                <span id="current-time">0:00</span>
-                <div id="seek-bar">
-                    <div id="progress-bar"></div>
+                <span id="current-time" class="seek-current-time">0:00</span>
+                <div id="seek-bar" class="seek-bar">
+                    <div id="progress-bar" class="progress-bar"></div>
                 </div>
-                <span id="duration">0:00</span>
+                <span id="duration" class="seek-duration">0:00</span>
             </div>
         </div>
 
@@ -1104,10 +1277,12 @@
         const repeatButton = document.getElementById('repeat-button');
 
         // Seek/Volume
-        const currentTimeEl = document.getElementById('current-time');
-        const durationEl = document.getElementById('duration');
-        const progressBar = document.getElementById('progress-bar');
-        const seekBar = document.getElementById('seek-bar');
+        // MODIFIED: Use querySelectorAll for shared elements
+        const allCurrentTimeEls = document.querySelectorAll('.seek-current-time');
+        const allDurationEls = document.querySelectorAll('.seek-duration');
+        const allProgressBars = document.querySelectorAll('.progress-bar');
+        const allSeekBars = document.querySelectorAll('.seek-bar');
+        
         const volumeSlider = document.getElementById('volume-slider');
         const volumeIcon = document.getElementById('volume-icon');
 
@@ -1117,10 +1292,23 @@
         const modalAlbumArt = document.getElementById('modal-album-art');
         const modalTitle = document.getElementById('modal-title');
         const modalArtist = document.getElementById('modal-artist');
+        
+        // Desktop modal controls
         const modalPlayPauseButton = document.getElementById('modal-play-pause-button');
         const modalPlayPauseIcon = document.getElementById('modal-play-pause-icon');
         const modalNextButton = document.getElementById('modal-next-button');
         const modalPreviousButton = document.getElementById('modal-previous-button');
+        
+        // NEW: Mobile modal buttons
+        const modalPlayPauseButtonMobile = document.getElementById('modal-play-pause-button-mobile');
+        const modalPlayPauseIconMobile = document.getElementById('modal-play-pause-icon-mobile');
+        const modalNextButtonMobile = document.getElementById('modal-next-button-mobile');
+        const modalPreviousButtonMobile = document.getElementById('modal-previous-button-mobile');
+        // MODIFIED: Added refs for new mobile buttons
+        const modalShuffleButtonMobile = document.getElementById('modal-shuffle-button-mobile');
+        const modalRepeatButtonMobile = document.getElementById('modal-repeat-button-mobile');
+
+
         const modalImageWrapper = document.querySelector('.modal-image-wrapper');
         const rateButtons = document.querySelectorAll('.rate-button');
 
@@ -1292,7 +1480,14 @@
                 modalAlbumArt.src = track.image;
                 modalTitle.textContent = track.title;
                 modalArtist.textContent = track.artist;
+                
+                // NEW: Update both icons
                 modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
+                modalPlayPauseIconMobile.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
+
+                // MODIFIED: Update new mobile shuffle/repeat buttons on open
+                modalShuffleButtonMobile.classList.toggle('active', isShuffling);
+                modalRepeatButtonMobile.classList.toggle('active', repeatState !== 'off');
 
                 updatePlaybackRate(currentPlaybackRate);
 
@@ -1403,30 +1598,36 @@
             }
         }
 
+        // MODIFIED: Added mobile button updates
         function cycleRepeat() {
             if (repeatState === 'off') {
                 repeatState = 'context';
                 repeatButton.classList.add('active');
+                modalRepeatButtonMobile.classList.add('active'); // ADD
                 audioSource.loop = false;
                 showCustomToast('Repeating Track List', 'fas fa-sync-alt');
             } else if (repeatState === 'context') {
                 repeatState = 'track';
                 repeatButton.classList.add('active');
+                modalRepeatButtonMobile.classList.add('active'); // ADD
                 audioSource.loop = true;
                 showCustomToast('Repeating Track', 'fas fa-redo-alt');
 
             } else { // 'track'
                 repeatState = 'off';
                 repeatButton.classList.remove('active');
+                modalRepeatButtonMobile.classList.remove('active'); // ADD
                 audioSource.loop = false;
                 showCustomToast('Repeat Off', 'fas fa-ban');
             }
             repeatButton.setAttribute('data-state', repeatState);
         }
 
+        // MODIFIED: Added mobile button updates
         function toggleShuffle() {
             isShuffling = !isShuffling;
             shuffleButton.classList.toggle('active', isShuffling);
+            modalShuffleButtonMobile.classList.toggle('active', isShuffling); // ADD
             shuffleButton.setAttribute('data-active', isShuffling);
 
             if (isShuffling) {
@@ -1434,6 +1635,7 @@
                 if (repeatState === 'context') {
                     repeatState = 'off';
                     repeatButton.classList.remove('active');
+                    modalRepeatButtonMobile.classList.remove('active'); // ADD
                     repeatButton.setAttribute('data-state', repeatState);
                     audioSource.loop = false;
                 }
@@ -1606,7 +1808,10 @@
             playPauseIcon.classList.remove('fa-play');
             playPauseIcon.classList.add('fa-pause');
             globalPlayer.classList.add('playing');
+            
+            // NEW: Update both icons
             modalPlayPauseIcon.className = 'fas fa-pause';
+            modalPlayPauseIconMobile.className = 'fas fa-pause';
         });
         // --- END LOADING ANIMATION FIX ---
 
@@ -1614,7 +1819,10 @@
             playPauseIcon.classList.remove('fa-pause');
             playPauseIcon.classList.add('fa-play');
             globalPlayer.classList.remove('playing');
+
+            // NEW: Update both icons
             modalPlayPauseIcon.className = 'fas fa-play';
+            modalPlayPauseIconMobile.className = 'fas fa-play';
         });
 
         audioSource.addEventListener('ended', () => {
@@ -1630,49 +1838,62 @@
             const duration = audioSource.duration || 0;
 
             if (!isSeeking) {
-                currentTimeEl.textContent = formatTime(currentTime);
+                // MODIFIED: Update all elements
+                const formattedTime = formatTime(currentTime);
+                allCurrentTimeEls.forEach(el => el.textContent = formattedTime);
+                
                 if (isFinite(duration) && duration > 0) {
                     const progress = (currentTime / duration) * 100;
-                    progressBar.style.width = `${progress}%`;
+                    allProgressBars.forEach(el => el.style.width = `${progress}%`);
                 }
             }
         });
 
         audioSource.addEventListener('loadedmetadata', () => {
-            durationEl.textContent = isFinite(audioSource.duration) && audioSource.duration > 0
+            // MODIFIED: Update all elements
+            const formattedDuration = isFinite(audioSource.duration) && audioSource.duration > 0
                 ? formatTime(audioSource.duration)
                 : '0:00';
+            allDurationEls.forEach(el => el.textContent = formattedDuration);
         });
 
-        // --- PROGRESS BAR SCRUBBING LOGIC (Unchanged) ---
+        // --- PROGRESS BAR SCRUBBING LOGIC (MODIFIED for Touch) ---
         let isSeeking = false;
+        let activeSeekBar = null; // NEW: Store the bar being scrubbed
         let lastSeekX = 0;
         let rAFId = null;
 
-        function getSeekPercentage(clientX) {
-            const rect = seekBar.getBoundingClientRect();
+        // MODIFIED: Takes the specific seek bar element as an argument
+        function getSeekPercentage(clientX, seekBarElement) {
+            const rect = seekBarElement.getBoundingClientRect();
             const clickX = clientX - rect.left;
             return Math.max(0, Math.min(1, clickX / rect.width));
         }
 
+        // MODIFIED: Updates the specific bar being scrubbed
         function visualUpdateLoop() {
-            if (!isSeeking || !isFinite(audioSource.duration) || audioSource.duration === 0) {
+            if (!isSeeking || !activeSeekBar || !isFinite(audioSource.duration) || audioSource.duration === 0) {
                  rAFId = null;
                  return;
             }
 
-            const percentage = getSeekPercentage(lastSeekX);
+            const percentage = getSeekPercentage(lastSeekX, activeSeekBar);
             const scrubTime = audioSource.duration * percentage;
 
-            progressBar.style.width = `${percentage * 100}%`;
-            currentTimeEl.textContent = formatTime(scrubTime);
+            // Find the progress bar and time elements relative to the active seek bar
+            activeSeekBar.querySelector('.progress-bar').style.width = `${percentage * 100}%`;
+            activeSeekBar.parentElement.querySelector('.seek-current-time').textContent = formatTime(scrubTime);
 
             rAFId = requestAnimationFrame(visualUpdateLoop);
         }
 
+        // MODIFIED: Stores which bar was clicked, handles touch/mouse
         function startScrub(e) {
-             if (e.button !== 0 || !isFinite(audioSource.duration) || audioSource.duration === 0) return;
+             // Check for mouse button or if audio is ready
+             if (e.type === 'mousedown' && e.button !== 0) return;
+             if (!isFinite(audioSource.duration) || audioSource.duration === 0) return;
 
+             activeSeekBar = e.currentTarget; // NEW: Store the active bar
              isSeeking = true;
              document.body.classList.add('no-select');
 
@@ -1683,22 +1904,27 @@
                  audioSource.wasPlaying = false;
              }
 
-             lastSeekX = e.clientX;
+             // MODIFIED: Get correct clientX for mouse or touch
+             lastSeekX = e.touches ? e.touches[0].clientX : e.clientX;
+             
              if (rAFId === null) {
                 visualUpdateLoop();
              }
         }
 
+        // MODIFIED: Uses activeSeekBar to calculate final time
         function endScrub() {
-            if (!isSeeking) return;
+            if (!isSeeking || !activeSeekBar) return;
 
             cancelAnimationFrame(rAFId);
             rAFId = null;
             isSeeking = false;
             document.body.classList.remove('no-select');
 
-            const finalPercentage = getSeekPercentage(lastSeekX);
+            const finalPercentage = getSeekPercentage(lastSeekX, activeSeekBar);
             const finalTime = audioSource.duration * finalPercentage;
+            
+            activeSeekBar = null; // NEW: Clear the active bar
 
             audioSource.currentTime = finalTime;
             if (audioSource.wasPlaying) {
@@ -1709,14 +1935,30 @@
             audioSource.wasPlaying = false;
         }
 
-        // Attach Seek Event Listeners
-        seekBar.addEventListener('mousedown', startScrub);
-        document.addEventListener('mousemove', (e) => {
-            if (isSeeking) {
-                lastSeekX = e.clientX;
-            }
+        // MODIFIED: Attach listeners to ALL seek bars (including touch)
+        allSeekBars.forEach(bar => {
+            bar.addEventListener('mousedown', startScrub);
+            bar.addEventListener('touchstart', startScrub, { passive: true }); // passive: true, as startScrub doesn't preventDefault
         });
+
+        // MODIFIED: Create a shared move handler for mouse/touch
+        function handleSeekMove(e) {
+            if (isSeeking) {
+                // Prevent page scroll *only* when seeking
+                if (e.type === 'touchmove') {
+                    e.preventDefault();
+                }
+                lastSeekX = e.touches ? e.touches[0].clientX : e.clientX;
+            }
+        }
+        
+        document.addEventListener('mousemove', handleSeekMove);
+        document.addEventListener('touchmove', handleSeekMove, { passive: false }); // passive: false to allow preventDefault
+
+        // MODIFIED: Add touch end/cancel listeners
         document.addEventListener('mouseup', endScrub);
+        document.addEventListener('touchend', endScrub);
+        document.addEventListener('touchcancel', endScrub);
         // --- END PROGRESS BAR SCRUBBING LOGIC ---
 
 
@@ -1822,10 +2064,20 @@
         nextButton.addEventListener('click', playNext);
         previousButton.addEventListener('click', playPrevious);
 
-        // Bind modal controls
+        // Bind modal controls (desktop)
         modalPlayPauseButton.addEventListener('click', togglePlayPause);
         modalNextButton.addEventListener('click', playNext);
         modalPreviousButton.addEventListener('click', playPrevious);
+        
+        // NEW: Bind modal controls (mobile)
+        modalPlayPauseButtonMobile.addEventListener('click', togglePlayPause);
+        modalNextButtonMobile.addEventListener('click', playNext);
+        modalPreviousButtonMobile.addEventListener('click', playPrevious);
+        // MODIFIED: Bind new mobile controls
+        modalShuffleButtonMobile.addEventListener('click', toggleShuffle);
+        modalRepeatButtonMobile.addEventListener('click', cycleRepeat);
+
+
         modalCloseButton.addEventListener('click', closeModal);
         playerInfoBar.addEventListener('click', () => {
             if (currentTrackIndex !== -1) {
@@ -1842,6 +2094,72 @@
             }
         });
 
+        // --- NEW: MODAL DRAG-TO-CLOSE LOGIC ---
+        let touchStartY = 0;
+        let touchMoveY = 0;
+        let isDraggingModal = false;
+        
+        function onTouchStart(e) {
+            // Only track vertical drags starting on the handle or modal content
+            // Avoid starting drag on interactive elements like sliders
+            const targetTag = e.target.tagName;
+            // MODIFIED: Also check for .seek-bar
+            if (targetTag === 'INPUT' || targetTag === 'BUTTON' || e.target.closest('.seek-bar')) {
+                isDraggingModal = false;
+                return;
+            }
+
+            isDraggingModal = true;
+            touchStartY = e.touches[0].clientY;
+            trackModal.style.transition = 'none'; // Disable transition while dragging
+        }
+        
+        function onTouchMove(e) {
+            if (!isDraggingModal) return;
+            
+            touchMoveY = e.touches[0].clientY;
+            const deltaY = touchMoveY - touchStartY;
+            
+            // Only allow dragging down
+            if (deltaY > 0) {
+                if (document.querySelector('.modal-content').scrollTop === 0) {
+                    e.preventDefault(); // Prevent page scroll ONLY if at top of modal content
+                    trackModal.style.transform = `translateY(${deltaY}px)`;
+                }
+            } else {
+                // If dragging up, let the modal content scroll
+                isDraggingModal = false;
+            }
+        }
+        
+        function onTouchEnd() {
+            if (!isDraggingModal) return;
+            
+            isDraggingModal = false;
+            trackModal.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'; // Re-enable transition
+            
+            const deltaY = touchMoveY - touchStartY;
+            const closeThreshold = trackModal.offsetHeight * 0.3; // Close if dragged 30% down
+            
+            if (deltaY > closeThreshold) {
+                closeModal(); // This will reset the transform via the .is-open class
+            } else {
+                // Snap back
+                trackModal.style.transform = 'translateY(0)';
+            }
+            
+            // Reset positions
+            touchStartY = 0;
+            touchMoveY = 0;
+        }
+
+        // Bind listeners to the modal itself to catch the touch events
+        trackModal.addEventListener('touchstart', onTouchStart, { passive: false });
+        trackModal.addEventListener('touchmove', onTouchMove, { passive: false });
+        trackModal.addEventListener('touchend', onTouchEnd);
+        trackModal.addEventListener('touchcancel', onTouchEnd);
+        // --- END NEW MODAL DRAG-TO-CLOSE LOGIC ---
+
 
         shuffleButton.addEventListener('click', toggleShuffle);
         repeatButton.addEventListener('click', cycleRepeat);
@@ -1857,9 +2175,12 @@
             const downloadFileName = `${track.title.replace(/\s/g, '_')}_${track.artist.replace(/\s/g, '_')}.mp3`;
             const originalText = 'Download';
 
+            // MODIFIED: Added .track-image-container wrapper
             card.innerHTML = `
-                <img src="${track.image}" alt="Album Art for ${track.title}" class="track-image" draggable="false">
-                <div class="play-icon-overlay"><i class="fas fa-play"></i></div>
+                <div class="track-image-container">
+                    <img src="${track.image}" alt="Album Art for ${track.title}" class="track-image" draggable="false">
+                    <div class="play-icon-overlay"><i class="fas fa-play"></i></div>
+                </div>
                 <div class="track-info">
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist}</div>
