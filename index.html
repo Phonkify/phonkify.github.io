@@ -883,6 +883,259 @@
             transform: scale(1.05);
         }
         /* --- END 404 Error Screen --- */
+        
+        /* --- NEW: Embed Modal Styles (Moved from inline) --- */
+        #embed-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 998;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        #embed-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* MODIFIED: Darker, more premium background */
+            background-color: var(--mid-gray);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            /* MODIFIED: Subtle border */
+            border: 1px solid var(--light-gray);
+            z-index: 999;
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+        }
+        #embed-modal h3 {
+            color: var(--text-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            /* MODIFIED: Darker border bottom */
+            border-bottom: 1px solid var(--dark-gray);
+            padding-bottom: 10px;
+        }
+        #embed-preview-container {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            /* MODIFIED: Pure black bg for iframe */
+            background-color: #000;
+            /* MODIFIED: Split transition for smoother update */
+            transition: height 0.3s ease, opacity 0.15s ease-out, background-color 0.3s ease, background-image 0.3s ease;
+            height: 100px; /* Default height */
+            /* MODIFIED: Subtle border */
+            border: 1px solid var(--light-gray);
+            opacity: 1; /* NEW: Add opacity for fade effect */
+            
+            /* REMOVED: Blur-related properties */
+        }
+        
+        /* REMOVED: #embed-preview-container::before rule */
+        /* REMOVED: #embed-preview-container.blur-active::before rule */
+
+        /* NEW: Make iframe sit on top */
+        #embed-preview-container iframe {
+            position: relative;
+            z-index: 2;
+            background-color: transparent; /* NEW: Ensure iframe is transparent */
+        }
+
+        .embed-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        /* NEW: Class for full-width items */
+        .embed-option-full {
+             grid-column: 1 / -1;
+        }
+        .embed-options label {
+            display: block;
+            color: var(--subtle-text);
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        /* NEW: Class for checkbox labels */
+        .embed-options label.checkbox-label {
+            display: inline-block;
+            color: var(--subtle-text);
+            font-size: 0.9em;
+            vertical-align: middle;
+            margin-bottom: 0;
+            padding-left: 10px; /* MODIFIED */
+            cursor: pointer;
+        }
+        /* MODIFIED: No longer needed for select */
+        .embed-option-input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: var(--mid-gray);
+            color: var(--text-color);
+            border: 1px solid var(--light-gray);
+        }
+        /* NEW: Style for checkboxes */
+        input[type="checkbox"].embed-option-input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background-color: var(--mid-gray);
+            border: 2px solid var(--light-gray);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            margin-right: 0; 
+            vertical-align: middle;
+        }
+        #embed-code-textarea {
+            width: 100%;
+            height: 100px;
+            background-color: var(--dark-gray);
+            color: var(--subtle-text);
+            border-radius: 4px;
+            padding: 10px;
+            /* MODIFIED: Brighter border */
+            border: 1px solid var(--light-gray);
+            font-family: monospace;
+            resize: none;
+        }
+        /* MODIFIED: Added style for copy button margin */
+        #embed-copy-code {
+            margin-top: 10px;
+        }
+        #embed-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--subtle-text);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        /* --- END Embed Modal Styles --- */
+
+        /* --- NEW: Custom Form Styles (Embed Modal) --- */
+        /* REMOVED: .select-wrapper styles */
+
+        .custom-checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        input[type="checkbox"].embed-option-input:hover {
+            border-color: var(--subtle-text);
+        }
+        input[type="checkbox"].embed-option-input:checked {
+            background-color: var(--spotify-green);
+            border-color: var(--spotify-green);
+        }
+        input[type="checkbox"].embed-option-input:checked::after {
+            content: '\f00c'; /* Font Awesome check */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 12px;
+            color: var(--dark-gray);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* --- NEW: Custom Select Dropdown --- */
+        .custom-select-wrapper {
+            position: relative;
+            width: 100%;
+            z-index: 10; /* Ensure it's above other options */
+        }
+        .custom-select-trigger {
+            width: 100%;
+            padding: 8px 30px 8px 8px; /* Space for arrow */
+            border-radius: 4px;
+            background-color: var(--mid-gray);
+            color: var(--text-color);
+            border: 1px solid var(--light-gray);
+            cursor: pointer;
+            font-size: 1em; /* Match .embed-option-input */
+            transition: border-color 0.2s ease;
+            position: relative;
+            user-select: none;
+        }
+        .custom-select-trigger::after {
+            content: '\f078'; /* Font Awesome caret-down */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.9em;
+            color: var(--subtle-text);
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .custom-select-wrapper.open .custom-select-trigger {
+            border-color: var(--spotify-green);
+        }
+        .custom-select-wrapper.open .custom-select-trigger::after {
+            transform: translateY(-50%) rotate(180deg);
+            color: var(--spotify-green);
+        }
+        
+        .custom-select-options {
+            position: absolute;
+            top: calc(100% + 5px); /* 5px gap */
+            left: 0;
+            width: 100%;
+            background-color: var(--light-gray);
+            border-radius: 6px;
+            border: 1px solid var(--mid-gray);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
+            transform-origin: top;
+            transform: scaleY(0.9);
+            z-index: 1001; /* Above modal content */
+        }
+        .custom-select-wrapper.open .custom-select-options {
+            max-height: 200px;
+            opacity: 1;
+            transform: scaleY(1);
+        }
+        
+        .custom-select-option {
+            padding: 10px 12px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.1s ease, color 0.1s ease;
+            font-size: 0.95em;
+        }
+        .custom-select-option:hover {
+            background-color: var(--mid-gray);
+        }
+        .custom-select-option.selected {
+            background-color: var(--spotify-green);
+            color: var(--dark-gray);
+            font-weight: 700;
+        }
+        /* --- END Custom Select Dropdown --- */
+        /* --- END Custom Form Styles --- */
 
 
         /* * RESPONSIVE ADJUSTMENTS FOR MOBILE (<= 768px) */
@@ -1092,6 +1345,15 @@
                 pointer-events: none;
                 display: none; /* NEW: Fully hide the desktop controls */
             }
+
+            /* NEW: Adjust embed modal for mobile */
+            #embed-modal {
+                width: 95%;
+                padding: 20px;
+            }
+            .embed-options {
+                grid-template-columns: 1fr; /* Stack options on mobile */
+            }
         }
     </style>
 </head>
@@ -1207,7 +1469,8 @@
     <div id="track-context-menu" class="context-menu">
         <div class="context-menu-item" data-action="play"><i class="fas fa-play"></i> Play Track</div>
         <div class="context-menu-item" data-action="download"><i class="fas fa-download"></i> Download</div>
-        <div class="context-menu-item" data-action="share"><i class="fas fa-share-alt"></i> Share Track</div>
+        <div class="context-menu-item" data-action="share"><i class="fas fa-link"></i> Share Track</div>
+        <div class="context-menu-item" data-action="embed"><i class="fas fa-code"></i> Embed Track</div>
         <hr>
         <div class="context-menu-item" data-action="close"><i class="fas fa-times"></i> Close Menu</div>
     </div>
@@ -1218,6 +1481,58 @@
         <h1>404</h1>
         <p>Oops! The track you're looking for doesn't exist.</p>
         <a href="https://phonkify.github.io/" class="home-button">Back to Phonkify</a>
+    </div>
+
+    <div id="embed-modal-overlay"></div>
+    <div id="embed-modal">
+        <h3>Embed Track</h3>
+        
+        <div class="embed-preview" id="embed-preview-container">
+            </div>
+
+        <div class="embed-options">
+            <div>
+                <label for="embed-theme-trigger">Theme</label>
+                <div class="custom-select-wrapper" id="embed-theme-select">
+                    <div class="custom-select-trigger" id="embed-theme-trigger" data-value="dark" tabindex="0">Dark</div>
+                    <div class="custom-select-options">
+                        <div class="custom-select-option selected" data-value="dark">Dark</div>
+                        <div class="custom-select-option" data-value="light">Light</div>
+                    </div>
+                </div>
+                </div>
+            <div>
+                <label for="embed-layout-trigger">Layout</label>
+                <div class="custom-select-wrapper" id="embed-layout-select">
+                    <div class="custom-select-trigger" id="embed-layout-trigger" data-value="spotify" tabindex="0">Spotify (80px)</div>
+                    <div class="custom-select-options">
+                        <div class="custom-select-option selected" data-value="spotify">Spotify (80px)</div>
+                        <div class="custom-select-option" data-value="compact">Compact (100px)</div>
+                        <div class="custom-select-option" data-value="tall">Tall (160px)</div>
+                    </div>
+                </div>
+                </div>
+            
+            <div class="embed-option-full custom-checkbox-wrapper">
+                <input type="checkbox" id="embed-show-art" class="embed-option-input" checked>
+                <label for="embed-show-art" class="checkbox-label">Show Album Art</label>
+            </div>
+            <div class="embed-option-full custom-checkbox-wrapper">
+                <input type="checkbox" id="embed-autoplay" class="embed-option-input">
+                <label for="embed-autoplay" class="checkbox-label">Autoplay (may be blocked by browser)</label>
+            </div>
+            
+            </div>
+
+        <div>
+            <label for="embed-code-textarea">Embed Code</label>
+            <textarea id="embed-code-textarea" readonly></textarea>
+            <button id="embed-copy-code" class="download-button">
+                <i class="fas fa-copy" style="margin-right: 5px;"></i> Copy Code
+            </button>
+        </div>
+        
+        <button id="embed-modal-close">&times;</button>
     </div>
 
 
@@ -1317,6 +1632,17 @@
         const contextMenu = document.getElementById('track-context-menu');
         let activeContextMenuTrack = null;
 
+        // NEW: Embed Modal Elements
+        const embedModalOverlay = document.getElementById('embed-modal-overlay');
+        const embedModal = document.getElementById('embed-modal');
+        const embedModalClose = document.getElementById('embed-modal-close');
+        const embedPreviewContainer = document.getElementById('embed-preview-container');
+        const embedCodeTextarea = document.getElementById('embed-code-textarea');
+        const embedCopyCodeButton = document.getElementById('embed-copy-code');
+        // MODIFIED: Now only selects checkboxes
+        const embedOptions = document.querySelectorAll('input.embed-option-input[type="checkbox"]');
+        let currentEmbedTrack = null;
+
 
         // CORE PLAYBACK STATE (Simplified)
         let originalTrackOrder = []; // Stored copy of the initial tracksData array for unshuffling
@@ -1412,6 +1738,7 @@
                 document.body.style.setProperty('--dynamic-bg-image', `url('${imageUrl}')`);
                 backgroundOverlay.classList.add('modal-bg-active');
             } else {
+                // MODIFIED: Simplified
                 document.body.style.removeProperty('--dynamic-bg-image');
                 backgroundOverlay.classList.remove('modal-bg-active');
             }
@@ -1430,6 +1757,124 @@
             }, 3000);
         }
         // --- End Custom Toast Implementation ---
+
+        // --- MODIFIED: Embed Modal Functions ---
+        function generateEmbedCode() {
+            if (!currentEmbedTrack) return;
+
+            // MODIFIED: Read from custom select triggers
+            const theme = document.getElementById('embed-theme-trigger').getAttribute('data-value');
+            const layout = document.getElementById('embed-layout-trigger').getAttribute('data-value');
+            // const bgBlur = (theme === 'blur'); // <-- REMOVED
+            
+            // Read from checkboxes
+            const autoplay = document.getElementById('embed-autoplay').checked;
+            const showArt = document.getElementById('embed-show-art').checked;
+            
+            const baseUrl = `${window.location.origin}${window.location.pathname}`;
+            let params = `?track=${currentEmbedTrack.id}&embed=true`;
+
+            // MODIFIED: Simplified logic
+            params += `&theme=${theme}`; // 'dark' or 'light'
+            params += `&layout=${layout}`;
+            
+            if (autoplay) params += `&autoplay=true`;
+            if (!showArt) params += `&art=false`;
+            
+            // Determine height based on layout
+            let height;
+            if (layout === 'tall') {
+                height = '160';
+            } else if (layout === 'spotify') {
+                height = '80';
+            } else {
+                height = '100'; // 'compact'
+            }
+            
+            const embedUrl = `${baseUrl}${params}`;
+            
+            // MODIFIED: Added allow="autoplay"
+            const embedCode = `<iframe src="${embedUrl}" width="100%" height="${height}" style="border:0; border-radius: 12px; overflow: hidden;" allow="autoplay; encrypted-media"></iframe>`;
+            
+            embedCodeTextarea.value = embedCode;
+            
+            // --- MODIFIED: Simplified preview background logic ---
+            embedPreviewContainer.style.backgroundImage = 'none';
+            embedPreviewContainer.classList.remove('blur-active');
+            embedPreviewContainer.style.backgroundColor = (theme === 'light') ? '#F9F9F9' : '#000';
+            // --- END MODIFIED ---
+
+            // --- MODIFIED: Smoother Preview Update ---
+            
+            // 1. Fade out the container
+            embedPreviewContainer.style.opacity = '0';
+            
+            // 2. After a short delay, update content and height
+            // This delay lets the fade-out animation begin
+            setTimeout(() => {
+                // Set new height (this will animate)
+                embedPreviewContainer.style.height = `${height}px`;
+                
+                // Set new content (iframe) with onload fade-in
+                // The iframe also has a delayed transition to make it smoother
+                embedPreviewContainer.innerHTML = `<iframe src="${embedUrl}" width="100%" height="100%" style="border:0; border-radius: 8px; pointer-events: none; opacity: 0; transition: opacity 0.3s ease 0.1s; background-color: transparent;" scrolling="no" onload="this.style.opacity = 1"></iframe>`;
+                
+                // 3. Fade back in (this will animate)
+                embedPreviewContainer.style.opacity = '1';
+            }, 150); // This delay lets the fade-out start
+        }
+        
+        // NEW: Helper function to reset custom selects to default
+        function resetCustomSelect(wrapperElement, defaultValue, defaultText) {
+            const trigger = wrapperElement.querySelector('.custom-select-trigger');
+            const options = wrapperElement.querySelectorAll('.custom-select-option');
+            
+            trigger.setAttribute('data-value', defaultValue);
+            trigger.textContent = defaultText;
+            
+            options.forEach(opt => {
+                opt.classList.toggle('selected', opt.getAttribute('data-value') === defaultValue);
+            });
+            wrapperElement.classList.remove('open');
+        }
+
+        function openEmbedModal(track) {
+            currentEmbedTrack = track;
+            
+            // Reset defaults
+            // MODIFIED: Reset new custom selects
+            resetCustomSelect(document.getElementById('embed-theme-select'), 'dark', 'Dark');
+            resetCustomSelect(document.getElementById('embed-layout-select'), 'spotify', 'Spotify (80px)');
+            
+            // Reset checkboxes
+            document.getElementById('embed-autoplay').checked = false;
+            document.getElementById('embed-show-art').checked = true;
+
+            // NEW: Reset preview container style
+            embedPreviewContainer.style.backgroundImage = 'none';
+            embedPreviewContainer.classList.remove('blur-active');
+            embedPreviewContainer.style.backgroundColor = '#000'; // Default dark
+            
+            generateEmbedCode();
+            embedModalOverlay.style.display = 'block';
+            embedModal.style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+
+        function closeEmbedModal() {
+            embedModalOverlay.style.display = 'none';
+            embedModal.style.display = 'none';
+            embedPreviewContainer.innerHTML = ''; // Clear iframe
+            currentEmbedTrack = null;
+            document.body.classList.remove('modal-open');
+            
+            // NEW: Close any open custom selects
+            document.querySelectorAll('.custom-select-wrapper.open').forEach(wrapper => {
+                wrapper.classList.remove('open');
+            });
+        }
+        // --- END Embed Modal Functions ---
+
 
         function updatePlaybackRate(newRate) {
             newRate = parseFloat(newRate);
@@ -1482,27 +1927,27 @@
                 // This ensures the CSS class '.is-open' can correctly display the modal.
                 trackModal.style.transform = '';
 
-                modalAlbumArt.src = track.image;
-                modalTitle.textContent = track.title;
-                modalArtist.textContent = track.artist;
-                
-                // NEW: Update both icons
-                modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
-                modalPlayPauseIconMobile.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
+              	modalAlbumArt.src = track.image;
+              	modalTitle.textContent = track.title;
+              	modalArtist.textContent = track.artist;
+              	
+              	// NEW: Update both icons
+              	modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
+              	modalPlayPauseIconMobile.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
 
-                // MODIFIED: Update new mobile shuffle/repeat buttons on open
-                modalShuffleButtonMobile.classList.toggle('active', isShuffling);
-                modalRepeatButtonMobile.classList.toggle('active', repeatState !== 'off');
+              	// MODIFIED: Update new mobile shuffle/repeat buttons on open
+              	modalShuffleButtonMobile.classList.toggle('active', isShuffling);
+              	modalRepeatButtonMobile.classList.toggle('active', repeatState !== 'off');
 
-                updatePlaybackRate(currentPlaybackRate);
+              	updatePlaybackRate(currentPlaybackRate);
 
-                updateDocumentMetadata(track);
-                setDynamicBackground(track.image);
+  	           	updateDocumentMetadata(track);
+              	setDynamicBackground(track.image);
 
-                trackModal.classList.add('is-open');
-                document.body.classList.add('modal-open');
-            }
-        }
+              	trackModal.classList.add('is-open');
+              	document.body.classList.add('modal-open');
+          	}
+      	}
 
         function closeModal() {
             trackModal.classList.remove('is-open');
@@ -1538,6 +1983,13 @@
             playerImage.style.display = 'block';
             globalPlayer.classList.add('active');
             highlightActiveCard();
+
+            // NEW: Update player info link
+            const playerInfoLink = document.getElementById('player-info-link');
+            if (playerInfoLink) {
+                const trackLink = `${window.location.origin}${window.location.pathname}?track=${trackToPlay.id}`;
+                playerInfoLink.href = trackLink;
+            }
 
             modalAlbumArt.src = trackToPlay.image;
             modalTitle.textContent = trackToPlay.title;
@@ -1779,6 +2231,10 @@
                         console.error('Could not copy text: ', err);
                     });
                     break;
+                case 'embed':
+                    // MODIFIED: Open the new embed modal
+                    openEmbedModal(activeContextMenuTrack);
+                    break;
             }
             activeContextMenuTrack = null;
         });
@@ -2007,7 +2463,18 @@
 
         // --- KEYBOARD CONTROLS (Unchanged) ---
         document.addEventListener('keydown', (e) => {
-            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+            // NEW: Ignore keydown if embed modal is open
+            if (embedModal.style.display === 'block') {
+                if (e.key === 'Escape') {
+                    closeEmbedModal();
+                }
+                return;
+            }
+            
+            // MODIFIED: Also check for custom select
+            if (document.activeElement.tagName === 'INPUT' || 
+                document.activeElement.tagName === 'TEXTAREA' ||
+                document.activeElement.classList.contains('custom-select-trigger')) {
                 return;
             }
 
@@ -2085,7 +2552,9 @@
 
         modalCloseButton.addEventListener('click', closeModal);
         playerInfoBar.addEventListener('click', () => {
-            if (currentTrackIndex !== -1) {
+            // NEW: Don't open modal if it's an embed
+            const params = new URLSearchParams(window.location.search);
+            if (currentTrackIndex !== -1 && params.get('embed') !== 'true') {
                 openModal();
             }
         });
@@ -2168,6 +2637,114 @@
 
         shuffleButton.addEventListener('click', toggleShuffle);
         repeatButton.addEventListener('click', cycleRepeat);
+
+        // --- MODIFIED: Embed Modal Listeners ---
+        
+        // REMOVED: embedThemeSelect and embedBgBlurCheckbox listeners
+
+        embedModalClose.addEventListener('click', closeEmbedModal);
+        embedModalOverlay.addEventListener('click', closeEmbedModal);
+        
+        // MODIFIED: This now only handles checkboxes
+        embedOptions.forEach(input => {
+            input.addEventListener('change', generateEmbedCode);
+        });
+
+        // --- NEW: Custom Select Dropdown Logic ---
+        document.querySelectorAll('.custom-select-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent document click listener
+                const wrapper = e.target.closest('.custom-select-wrapper');
+                // Close all *other* dropdowns
+                document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                    if (w !== wrapper) {
+                        w.classList.remove('open');
+                    }
+                });
+                // Toggle the current one
+                wrapper.classList.toggle('open');
+            });
+            // Add keyboard accessibility
+            trigger.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    trigger.click();
+                }
+            });
+        });
+
+        document.querySelectorAll('.custom-select-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const wrapper = e.target.closest('.custom-select-wrapper');
+                const trigger = wrapper.querySelector('.custom-select-trigger');
+                
+                // Update trigger
+                trigger.textContent = e.target.textContent;
+                trigger.setAttribute('data-value', e.target.getAttribute('data-value'));
+                
+                // Update 'selected' class
+                wrapper.querySelectorAll('.custom-select-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                e.target.classList.add('selected');
+                
+                // Close dropdown
+                wrapper.classList.remove('open');
+                
+                // Regenerate embed code
+                generateEmbedCode();
+            });
+        });
+
+        // NEW: Global click listener to close dropdowns
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-select-wrapper')) {
+                document.querySelectorAll('.custom-select-wrapper.open').forEach(wrapper => {
+                    wrapper.classList.remove('open');
+                });
+            }
+        });
+        // --- END Custom Select Dropdown Logic ---
+
+
+        embedCopyCodeButton.addEventListener('click', () => {
+            embedCodeTextarea.select();
+            try {
+                // Use modern clipboard API
+                navigator.clipboard.writeText(embedCodeTextarea.value).then(() => {
+                    embedCopyCodeButton.innerHTML = `<i class="fas fa-check" style="margin-right: 5px;"></i> Copied!`;
+                    showCustomToast('Embed code copied to clipboard!', 'fas fa-copy');
+                }).catch(err => {
+                    console.error('Clipboard write failed: ', err);
+                    // Fallback for document.execCommand
+                    if(document.execCommand('copy')) {
+                        embedCopyCodeButton.innerHTML = `<i class="fas fa-check" style="margin-right: 5px;"></i> Copied!`;
+                        showCustomToast('Embed code copied to clipboard!', 'fas fa-copy');
+                    } else {
+                        throw new Error('execCommand failed');
+                    }
+                });
+            } catch (err) {
+                console.error('Clipboard API error, trying execCommand: ', err);
+                try {
+                    // Fallback for older browsers
+                    if(document.execCommand('copy')) {
+                        embedCopyCodeButton.innerHTML = `<i class="fas fa-check" style="margin-right: 5px;"></i> Copied!`;
+                        showCustomToast('Embed code copied to clipboard!', 'fas fa-copy');
+                    } else {
+                         showCustomToast('Failed to copy code.', 'fas fa-times');
+                    }
+                } catch (execErr) {
+                     console.error('execCommand failed: ', execErr);
+                     showCustomToast('Failed to copy code.', 'fas fa-times');
+                }
+            }
+
+            setTimeout(() => {
+                embedCopyCodeButton.innerHTML = `<i class="fas fa-copy" style="margin-right: 5px;"></i> Copy Code`;
+            }, 2000);
+        });
+        // --- END Embed Modal Listeners ---
 
 
         // --- 6. INITIALIZATION: GENERATE CARDS, BIND EVENTS, AND SEARCH ---
@@ -2318,22 +2895,40 @@
         }
 
         // Function to handle initial load/sharing link
+        // MODIFIED: Added embed background logic & autoplay
         function checkUrlForTrack() {
-             const trackIdStr = getTrackIdFromUrl();
+             const params = new URLSearchParams(window.location.search);
+             const trackIdStr = params.get('track');
+             const isEmbed = params.get('embed') === 'true';
+             const isAutoplay = params.get('autoplay') === 'true'; // NEW
+
              if (trackIdStr !== null) {
                  const trackId = parseInt(trackIdStr);
                  // Find the index of this track in the tracksData array
                  const trackIndex = tracksData.findIndex(t => t.id === trackId);
 
                  if (trackIndex !== -1) {
+                     const trackToPlay = tracksData[trackIndex]; // Get track data
+
                      // Immediately play the track to load it into the player state
-                     playTrack(tracksData[trackIndex], trackIndex);
+                     playTrack(trackToPlay, trackIndex);
 
-                     // And open the modal
-                     openModal();
+                     // --- REMOVED: Embed Background logic ---
 
-                     // Since playTrack uses play(), pause immediately if not user-driven
-                     audioSource.pause(); 
+                     // Only open the modal if it's NOT an embed
+                     if (!isEmbed) {
+                         openModal();
+                     }
+
+                     // MODIFIED: Handle autoplay
+                     if (isAutoplay) {
+                         // We already called audioSource.play() in playTrack,
+                         // so we just let the catch handler in that function
+                         // manage any autoplay errors.
+                     } else {
+                         // Since playTrack uses play(), pause immediately if not autoplaying
+                         audioSource.pause(); 
+                     }
                  } else {
                      // --- 404 LOGIC ---
                      const errorScreen = document.getElementById('error-404-screen');
@@ -2341,16 +2936,215 @@
                          errorScreen.classList.add('show');
                      }
                      // Hide the main content and player
-                     document.querySelector('.header').style.display = 'none';
-                     document.querySelector('.container').style.display = 'none';
-                     globalPlayer.style.display = 'none';
+                     const header = document.querySelector('.header');
+                     const container = document.querySelector('.container');
+                     if (header) header.style.display = 'none';
+                     if (container) container.style.display = 'none';
+                     if (globalPlayer) globalPlayer.style.display = 'none';
                  }
              }
         }
 
         // 7. INITIALIZATION
+
+        // MODIFIED: Handle embed mode styling (REPLACED old function)
+		function handleEmbedMode() {
+			const params = new URLSearchParams(window.location.search);
+			const isEmbed = params.get('embed') === 'true';
+
+			if (isEmbed) {
+				// MODIFIED: Removed bgBlur
+				const theme = params.get('theme') || 'dark'; 
+				const layout = params.get('layout') || 'compact'; 
+				const showArt = params.get('art') !== 'false'; 
+				
+				// REMOVED: bgUrl 
+
+				let height;
+				if (layout === 'tall') height = '160px';
+				else if (layout === 'spotify') height = '80px';
+				else height = '100px';
+
+				const style = document.createElement('style');
+				style.id = 'embed-styles';
+				
+				// MODIFIED: CSS generation logic
+				let css = `
+					/* --- Base Embed Styles --- */
+					body {
+						padding-bottom: 0 !important;
+						background-color: transparent !important;
+						/* FIX 2b: Make body relative for ::before positioning */
+						position: relative; 
+						
+						/* REMOVED: Conditional background-image */
+					}
+					html, body {
+						margin: 0;
+						padding: 0;
+						background: transparent;
+						height: 100%; /* Fill iframe */
+						overflow: hidden; /* No scrollbars */
+					}
+					/* Hide everything except player and overlay (for blur) */
+					.header, .container, #track-modal, #custom-toast, #track-context-menu, #embed-modal-overlay, #embed-modal {
+						display: none !important;
+					}
+
+					.background-overlay {
+						/* FIX 2d: Hide the original overlay which uses the failing backdrop-filter */
+						display: none !important; 
+					}
+
+					/* REMOVED: body::before blur layer */
+
+					/* --- Player Card Styling --- */
+					#global-player {
+						position: relative !important;
+						bottom: auto !important;
+						height: ${height} !important;
+						margin: 0;
+						padding: 16px;
+						box-sizing: border-box; 
+						/* MODIFIED: background logic simplified */
+						background-color: var(--mid-gray);
+						/* REMOVED: backdrop-filter */
+						display: flex !important;
+						flex-direction: ${layout === 'tall' ? 'column' : 'row'};
+						justify-content: space-between;
+						align-items: ${layout === 'tall' ? 'stretch' : 'center'};
+					}
+					#global-player.active { opacity: 1; }
+
+					/* --- Player Info (Title, Artist, Image) --- */
+					.player-info {
+						width: ${layout === 'tall' ? '100%' : 'auto'};
+						max-width: none;
+						flex-shrink: 1;
+						min-width: 0;
+						margin-bottom: ${layout === 'tall' ? '10px' : '0'};
+						flex-grow: ${layout === 'spotify' ? '1' : '0'}; 
+					}
+					.player-info img {
+						display: ${showArt ? 'block' : 'none'} !important;
+						width: ${layout === 'spotify' ? '48px' : (layout === 'tall' ? '60px' : '68px')}; 
+						height: ${layout === 'spotify' ? '48px' : (layout === 'tall' ? '60px' : '68px')};
+						margin-right: ${layout === 'spotify' ? '12px' : '15px'};
+					}
+					.player-info-text {
+						margin-left: ${!showArt ? '0' : 'auto'};
+					}
+					#player-info-link {
+						display: block; 
+						overflow: hidden;
+					}
+					#player-info-link:hover #player-title { text-decoration: underline; }
+
+					/* --- Player Controls (Seek, Play) --- */
+					.player-center {
+						width: ${layout === 'tall' ? '100%' : 'auto'};
+						flex-grow: ${layout === 'compact' ? '1' : '0'}; 
+						padding-left: ${layout === 'compact' ? '15px' : '0'};
+						justify-content: ${layout === 'tall' ? 'flex-end' : 'center'}; 
+					}
+					.seek-bar-container {
+						display: ${layout === 'spotify' ? 'none' : 'flex'} !important; 
+						width: 100%;
+						max-width: none;
+					}
+					.custom-controls {
+						width: 100%;
+						justify-content: center;
+						margin-bottom: ${layout === 'spotify' ? '0' : '8px'}; 
+					}
+					#play-pause-button { 
+						margin: ${layout === 'spotify' ? '0 16px' : '0 20px'};
+					}
+
+					/* --- Hide Unwanted Buttons --- */
+					#previous-button, #next-button, #shuffle-button, #repeat-button, .volume-control {
+						display: none !important;
+					}
+				`;
+
+				// --- Theme Overrides ---
+				// MODIFIED: Removed the if(bgBlur) block
+				if (theme === 'light') {
+					// Light Theme (dark text)
+					css += `
+					#global-player {
+						background-color: #F9F9F9;
+					}
+					.track-title, #player-title {
+						color: #000000;
+					}
+					#player-info-link { color: #000000; }
+					#player-artist {
+						 color: #333333;
+					}
+					.seek-current-time, .seek-duration {
+						color: #535353;
+					}
+					.seek-bar { background: #C7C7C7; }
+					.progress-bar { background: #000000; }
+					.progress-bar::after { background: #000000; }
+					
+					#global-player.playing .progress-bar { background: #1DB954; } 
+					#global-player.playing .progress-bar::after { background: #1DB954; }
+
+					#play-pause-button {
+						background-color: #333333;
+						color: #FFFFFF;
+					}
+					/* MODIFIED: Added color: #FFFFFF to fix black-on-black hover */
+					#play-pause-button:hover {
+						background-color: #000000;
+						color: #FFFFFF;
+					}
+					#global-player.playing #play-pause-button {
+						background-color: #1DB954;
+						color: #FFFFFF;
+					}
+					`;
+				} else {
+					// Dark Theme (default, light text)
+					css += `
+					#global-player {
+						/* MODIFIED: Explicitly set background for dark theme */
+						background-color: var(--mid-gray);
+					}
+					#player-info-link { color: var(--text-color); }
+					#player-artist { color: var(--subtle-text); }
+					/* Add explicit color rules for dark theme, just in case */
+					.track-title, #player-title { color: var(--text-color); }
+					.seek-current-time, .seek-duration { color: var(--subtle-text); }
+					.seek-bar { background: #535353; }
+					.progress-bar { background: var(--text-color); }
+					.progress-bar::after { background: var(--text-color); }
+					#global-player.playing .progress-bar { background: var(--spotify-green); }
+					#global-player.playing .progress-bar::after { background: var(--spotify-green); }
+					#play-pause-button {
+						background-color: var(--text-color);
+						color: var(--dark-gray);
+					}
+					#play-pause-button:hover {
+						background-color: var(--spotify-green);
+					}
+					#global-player.playing #play-pause-button {
+						background-color: var(--spotify-green);
+						color: var(--dark-gray);
+					}
+					`;
+				}
+
+				style.textContent = css;
+				document.head.appendChild(style);
+			}
+		}
+
         initTrackList();
         checkUrlForTrack();
+        handleEmbedMode(); // Apply embed styles on load
     </script>
 
     </body>
