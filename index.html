@@ -6,6 +6,8 @@
     <title id="original-title">Phonkify</title>
     <link id="dynamic-icon" rel="icon" type="image/png" href="https://i.ibb.co/JwTGGmM7/cropped-circle-image-10.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- ADDED: Lottie Player Script -->
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.5/dist/dotlottie-wc.js" type="module"></script>
     <style>
         /*
         * Global Reset and Variables (Spotify Theme)
@@ -420,6 +422,8 @@
             transition: transform 0.3s ease, background-color 0.2s ease, box-shadow 0.5s ease;
             margin: 0 20px;
             padding: 0;
+            position: relative; /* For Lottie positioning */
+            overflow: hidden; /* Hide overflowing lottie parts */
         }
         #play-pause-button:hover {
             transform: scale(1.05);
@@ -429,6 +433,7 @@
         #play-pause-button:active {
             transform: scale(0.95);
         }
+
 
         /* --- Loading Animation Styles --- */
         @keyframes pulse-shadow {
@@ -808,13 +813,25 @@
         /* --- END Custom Toast/Notification --- */
 
         /* --- Playback Rate Control Styles (In Modal) --- */
+        /* MODIFIED: Redesigned for sliding thumb animation */
         .rate-control-group {
             margin-top: 20px;
             display: flex;
-            gap: 10px;
             background-color: var(--mid-gray);
             padding: 5px;
             border-radius: 20px;
+            position: relative; /* For the thumb */
+        }
+
+        .rate-slider-thumb {
+            position: absolute;
+            top: 5px;
+            left: 5px; /* Initial position, will be updated by JS */
+            height: calc(100% - 10px);
+            background-color: var(--spotify-green);
+            border-radius: 16px;
+            transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1;
         }
 
         .rate-button {
@@ -825,7 +842,9 @@
             border-radius: 20px;
             font-size: 0.9em;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: color 0.2s ease;
+            position: relative;
+            z-index: 2; /* Position text above the sliding thumb */
         }
 
         .rate-button:hover {
@@ -833,7 +852,6 @@
         }
 
         .rate-button.active {
-            background-color: var(--spotify-green);
             color: var(--dark-gray);
             font-weight: 700;
         }
@@ -858,6 +876,12 @@
         }
         #error-404-screen.show {
             display: flex;
+        }
+        /* ADDED: Lottie animation style */
+        #error-404-screen dotlottie-wc {
+            width: 300px;
+            height: 300px;
+            margin-bottom: -40px;
         }
         #error-404-screen h1 {
             font-size: 5em;
@@ -929,18 +953,31 @@
             overflow: hidden;
             /* MODIFIED: Pure black bg for iframe */
             background-color: #000;
-            /* MODIFIED: Split transition for smoother update */
-            transition: height 0.3s ease, opacity 0.15s ease-out, background-color 0.3s ease, background-image 0.3s ease;
+            /* MODIFIED: Faster, smoother transition */
+            transition: height 0.2s ease, background-color 0.2s ease, background-image 0.2s ease;
             height: 100px; /* Default height */
             /* MODIFIED: Subtle border */
             border: 1px solid var(--light-gray);
-            opacity: 1; /* NEW: Add opacity for fade effect */
             
-            /* REMOVED: Blur-related properties */
+            /* NEW: Properties for blur background effect */
+            background-size: cover;
+            background-position: center;
+            position: relative;
         }
         
-        /* REMOVED: #embed-preview-container::before rule */
-        /* REMOVED: #embed-preview-container.blur-active::before rule */
+        /* NEW: Overlay for the blur effect to darken it */
+        #embed-preview-container.blur-active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1;
+        }
 
         /* NEW: Make iframe sit on top */
         #embed-preview-container iframe {
@@ -975,7 +1012,8 @@
             padding-left: 10px; /* MODIFIED */
             cursor: pointer;
         }
-        /* MODIFIED: No longer needed for select */
+
+        /* MODIFIED: Base input styles */
         .embed-option-input {
             width: 100%;
             padding: 8px;
@@ -984,6 +1022,7 @@
             color: var(--text-color);
             border: 1px solid var(--light-gray);
         }
+        
         /* NEW: Style for checkboxes */
         input[type="checkbox"].embed-option-input {
             -webkit-appearance: none;
@@ -1060,7 +1099,10 @@
         .custom-select-wrapper {
             position: relative;
             width: 100%;
-            z-index: 10; /* Ensure it's above other options */
+        }
+        /* FIXED: Add z-index to wrapper when open */
+        .custom-select-wrapper.open {
+            z-index: 10;
         }
         .custom-select-trigger {
             width: 100%;
@@ -1358,7 +1400,6 @@
     </style>
 </head>
 <body>
-
     <div class="background-overlay"></div>
 
     <header class="header">
@@ -1419,7 +1460,10 @@
                     <i class="fas fa-redo-alt"></i>
                 </button>
             </div>
+            
+            <!-- MODIFIED: HTML structure for sliding animation -->
             <div class="rate-control-group">
+                <div class="rate-slider-thumb"></div>
                 <button class="rate-button" data-rate="0.75">0.75x</button>
                 <button class="rate-button active" data-rate="1.0">1.0x</button>
                 <button class="rate-button" data-rate="1.25">1.25x</button>
@@ -1431,10 +1475,12 @@
     <div id="global-player">
         <div class="player-info" id="player-info-bar">
             <img id="player-image" src="" alt="Album Art" style="display:none;" draggable="false">
-            <div class="player-info-text">
-                <div id="player-title" class="track-title" style="margin-bottom: 0;">Select a Track</div>
-                <div id="player-artist" class="track-artist" style="margin-bottom: 0;">To begin playback</div>
-            </div>
+            <a id="player-info-link" href="#" target="_self" rel="noopener noreferrer" style="text-decoration: none; color: inherit; display: flex; align-items: center; overflow: hidden;">
+                <div class="player-info-text">
+                    <div id="player-title" class="track-title" style="margin-bottom: 0;">Select a Track</div>
+                    <div id="player-artist" class="track-artist" style="margin-bottom: 0;">To begin playback</div>
+                </div>
+            </a>
         </div>
 
         <div class="player-center">
@@ -1478,6 +1524,7 @@
     <div id="custom-toast"></div>
 
     <div id="error-404-screen">
+        <dotlottie-wc src="https://lottie.host/083eace7-5921-40f8-8b3c-c958203b1851/MpMllKILRs.lottie" autoplay loop></dotlottie-wc>
         <h1>404</h1>
         <p>Oops! The track you're looking for doesn't exist.</p>
         <a href="https://phonkify.github.io/" class="home-button">Back to Phonkify</a>
@@ -1498,6 +1545,7 @@
                     <div class="custom-select-options">
                         <div class="custom-select-option selected" data-value="dark">Dark</div>
                         <div class="custom-select-option" data-value="light">Light</div>
+                        <div class="custom-select-option" data-value="blur">Blur</div>
                     </div>
                 </div>
                 </div>
@@ -1639,8 +1687,8 @@
         const embedPreviewContainer = document.getElementById('embed-preview-container');
         const embedCodeTextarea = document.getElementById('embed-code-textarea');
         const embedCopyCodeButton = document.getElementById('embed-copy-code');
-        // MODIFIED: Now only selects checkboxes
-        const embedOptions = document.querySelectorAll('input.embed-option-input[type="checkbox"]');
+        // MODIFIED: Now selects all inputs for broader event handling
+        const embedOptionsInputs = document.querySelectorAll('.embed-options .embed-option-input');
         let currentEmbedTrack = null;
 
 
@@ -1651,6 +1699,7 @@
         let repeatState = 'off'; // 'off', 'track', 'context'
         let previousVolume = parseInt(volumeSlider.value);
         let currentPlaybackRate = 1.0;
+        let volumeAnimationInterval = null; // For volume animation
 
 
         // --- 3. HELPER FUNCTIONS ---
@@ -1703,8 +1752,6 @@
             window.history.pushState({ trackId: trackId }, '', url);
         }
 
-        // REMOVED: removeTrackIdFromUrl() is no longer called in closeModal, preserving the URL.
-
         async function updateDocumentMetadata(track) {
              document.title = `${track.title} - ${track.artist} | Phonkify`;
 
@@ -1714,15 +1761,9 @@
              mainHeading.textContent = `Now Playing: ${track.title}`;
         }
 
-        // --- MODIFIED FUNCTION ---
         function resetDocumentMetadata() {
-             // document.title = originalTitle; // <-- REMOVED
-             // dynamicIcon.href = originalIconHref; // <-- REMOVED
-
-             // Check search input to restore correct heading
              const searchTerm = searchInput.value.toLowerCase().trim();
              if (searchTerm.length > 0) {
-                 // Re-calculate the count to display the correct search heading
                  const filteredCount = originalTrackOrder.filter(track =>
                     track.title.toLowerCase().includes(searchTerm) ||
                     track.artist.toLowerCase().includes(searchTerm)
@@ -1738,7 +1779,6 @@
                 document.body.style.setProperty('--dynamic-bg-image', `url('${imageUrl}')`);
                 backgroundOverlay.classList.add('modal-bg-active');
             } else {
-                // MODIFIED: Simplified
                 document.body.style.removeProperty('--dynamic-bg-image');
                 backgroundOverlay.classList.remove('modal-bg-active');
             }
@@ -1762,69 +1802,52 @@
         function generateEmbedCode() {
             if (!currentEmbedTrack) return;
 
-            // MODIFIED: Read from custom select triggers
             const theme = document.getElementById('embed-theme-trigger').getAttribute('data-value');
             const layout = document.getElementById('embed-layout-trigger').getAttribute('data-value');
-            // const bgBlur = (theme === 'blur'); // <-- REMOVED
+            const bgBlur = (theme === 'blur');
             
-            // Read from checkboxes
             const autoplay = document.getElementById('embed-autoplay').checked;
             const showArt = document.getElementById('embed-show-art').checked;
             
             const baseUrl = `${window.location.origin}${window.location.pathname}`;
             let params = `?track=${currentEmbedTrack.id}&embed=true`;
 
-            // MODIFIED: Simplified logic
-            params += `&theme=${theme}`; // 'dark' or 'light'
+            params += `&theme=${theme}`;
             params += `&layout=${layout}`;
             
             if (autoplay) params += `&autoplay=true`;
             if (!showArt) params += `&art=false`;
             
-            // Determine height based on layout
-            let height;
-            if (layout === 'tall') {
-                height = '160';
-            } else if (layout === 'spotify') {
-                height = '80';
-            } else {
-                height = '100'; // 'compact'
+            if (bgBlur) {
+                params += `&bgUrl=${encodeURIComponent(currentEmbedTrack.image)}`;
             }
+            
+            let height;
+            if (layout === 'tall') height = '160';
+            else if (layout === 'spotify') height = '80';
+            else height = '100'; // 'compact'
             
             const embedUrl = `${baseUrl}${params}`;
             
-            // MODIFIED: Added allow="autoplay"
             const embedCode = `<iframe src="${embedUrl}" width="100%" height="${height}" style="border:0; border-radius: 12px; overflow: hidden;" allow="autoplay; encrypted-media"></iframe>`;
             
             embedCodeTextarea.value = embedCode;
             
-            // --- MODIFIED: Simplified preview background logic ---
-            embedPreviewContainer.style.backgroundImage = 'none';
-            embedPreviewContainer.classList.remove('blur-active');
-            embedPreviewContainer.style.backgroundColor = (theme === 'light') ? '#F9F9F9' : '#000';
-            // --- END MODIFIED ---
-
-            // --- MODIFIED: Smoother Preview Update ---
+            if (bgBlur) {
+                embedPreviewContainer.style.backgroundImage = `url('${currentEmbedTrack.image}')`;
+                embedPreviewContainer.classList.add('blur-active');
+                embedPreviewContainer.style.backgroundColor = '';
+            } else {
+                embedPreviewContainer.style.backgroundImage = 'none';
+                embedPreviewContainer.classList.remove('blur-active');
+                embedPreviewContainer.style.backgroundColor = (theme === 'light') ? '#F9F9F9' : '#000';
+            }
             
-            // 1. Fade out the container
-            embedPreviewContainer.style.opacity = '0';
+            embedPreviewContainer.style.height = `${height}px`;
             
-            // 2. After a short delay, update content and height
-            // This delay lets the fade-out animation begin
-            setTimeout(() => {
-                // Set new height (this will animate)
-                embedPreviewContainer.style.height = `${height}px`;
-                
-                // Set new content (iframe) with onload fade-in
-                // The iframe also has a delayed transition to make it smoother
-                embedPreviewContainer.innerHTML = `<iframe src="${embedUrl}" width="100%" height="100%" style="border:0; border-radius: 8px; pointer-events: none; opacity: 0; transition: opacity 0.3s ease 0.1s; background-color: transparent;" scrolling="no" onload="this.style.opacity = 1"></iframe>`;
-                
-                // 3. Fade back in (this will animate)
-                embedPreviewContainer.style.opacity = '1';
-            }, 150); // This delay lets the fade-out start
+            embedPreviewContainer.innerHTML = `<iframe src="${embedUrl}" width="100%" height="100%" style="border:0; border-radius: 8px; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; background-color: transparent;" scrolling="no" onload="this.style.opacity = 1"></iframe>`;
         }
         
-        // NEW: Helper function to reset custom selects to default
         function resetCustomSelect(wrapperElement, defaultValue, defaultText) {
             const trigger = wrapperElement.querySelector('.custom-select-trigger');
             const options = wrapperElement.querySelectorAll('.custom-select-option');
@@ -1841,19 +1864,15 @@
         function openEmbedModal(track) {
             currentEmbedTrack = track;
             
-            // Reset defaults
-            // MODIFIED: Reset new custom selects
             resetCustomSelect(document.getElementById('embed-theme-select'), 'dark', 'Dark');
             resetCustomSelect(document.getElementById('embed-layout-select'), 'spotify', 'Spotify (80px)');
             
-            // Reset checkboxes
             document.getElementById('embed-autoplay').checked = false;
             document.getElementById('embed-show-art').checked = true;
 
-            // NEW: Reset preview container style
             embedPreviewContainer.style.backgroundImage = 'none';
             embedPreviewContainer.classList.remove('blur-active');
-            embedPreviewContainer.style.backgroundColor = '#000'; // Default dark
+            embedPreviewContainer.style.backgroundColor = '#000';
             
             generateEmbedCode();
             embedModalOverlay.style.display = 'block';
@@ -1864,17 +1883,29 @@
         function closeEmbedModal() {
             embedModalOverlay.style.display = 'none';
             embedModal.style.display = 'none';
-            embedPreviewContainer.innerHTML = ''; // Clear iframe
+            embedPreviewContainer.innerHTML = '';
             currentEmbedTrack = null;
             document.body.classList.remove('modal-open');
             
-            // NEW: Close any open custom selects
             document.querySelectorAll('.custom-select-wrapper.open').forEach(wrapper => {
                 wrapper.classList.remove('open');
             });
         }
         // --- END Embed Modal Functions ---
 
+        // --- NEW: Function to animate the playback rate slider ---
+        function moveRateSlider(activeButton) {
+            const thumb = document.querySelector('.rate-slider-thumb');
+            if (!thumb || !activeButton) return;
+
+            const container = activeButton.parentElement;
+            
+            const newLeft = activeButton.offsetLeft;
+            const newWidth = activeButton.offsetWidth;
+
+            thumb.style.width = `${newWidth}px`;
+            thumb.style.left = `${newLeft}px`;
+        }
 
         function updatePlaybackRate(newRate) {
             newRate = parseFloat(newRate);
@@ -1882,13 +1913,19 @@
                 audioSource.playbackRate = newRate;
                 currentPlaybackRate = newRate;
             }
-
+            
+            let activeButton = null;
             rateButtons.forEach(button => {
-                button.classList.remove('active');
-                if (parseFloat(button.getAttribute('data-rate')) === newRate) {
-                    button.classList.add('active');
+                const isActive = parseFloat(button.getAttribute('data-rate')) === newRate;
+                button.classList.toggle('active', isActive);
+                if (isActive) {
+                    activeButton = button;
                 }
             });
+            
+            if (activeButton) {
+                moveRateSlider(activeButton);
+            }
         }
 
 
@@ -1898,8 +1935,7 @@
             });
 
             if (currentTrackIndex !== -1) {
-                const activeTrack = tracksData[currentTrackIndex];
-                const activeCard = document.querySelector(`.track-card[data-id="${activeTrack.id}"]`);
+                const activeCard = document.querySelector(`.track-card[data-id="${tracksData[currentTrackIndex].id}"]`);
                 if (activeCard) {
                     activeCard.classList.add('active-track');
                 }
@@ -1919,23 +1955,44 @@
              volumeSlider.style.setProperty('--volume-progress', `${vol}%`);
         }
 
+        // --- NEW: Volume Animation Logic ---
+        function animateVolume(targetVolume) {
+            clearInterval(volumeAnimationInterval);
+
+            const startVolume = parseInt(volumeSlider.value);
+            const duration = 200; // ms
+            const stepTime = 10; // ms
+            const totalSteps = duration / stepTime;
+            const volumeChange = targetVolume - startVolume;
+            let currentStep = 0;
+
+            volumeAnimationInterval = setInterval(() => {
+                currentStep++;
+                if (currentStep >= totalSteps) {
+                    clearInterval(volumeAnimationInterval);
+                    updateVolumeUI(targetVolume);
+                    audioSource.volume = targetVolume / 100;
+                    return;
+                }
+                const newVolume = startVolume + (volumeChange * (currentStep / totalSteps));
+                updateVolumeUI(newVolume);
+                audioSource.volume = newVolume / 100;
+            }, stepTime);
+        }
+
 		function openModal() {
             if (currentTrackIndex !== -1) {
                 const track = tracksData[currentTrackIndex];
 
-                // FIX: Clear any residual inline transform style set by the drag-to-close logic.
-                // This ensures the CSS class '.is-open' can correctly display the modal.
                 trackModal.style.transform = '';
 
               	modalAlbumArt.src = track.image;
               	modalTitle.textContent = track.title;
               	modalArtist.textContent = track.artist;
               	
-              	// NEW: Update both icons
               	modalPlayPauseIcon.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
               	modalPlayPauseIconMobile.className = audioSource.paused ? 'fas fa-play' : 'fas fa-pause';
 
-              	// MODIFIED: Update new mobile shuffle/repeat buttons on open
               	modalShuffleButtonMobile.classList.toggle('active', isShuffling);
               	modalRepeatButtonMobile.classList.toggle('active', repeatState !== 'off');
 
@@ -1946,22 +2003,24 @@
 
               	trackModal.classList.add('is-open');
               	document.body.classList.add('modal-open');
+
+                const activeButton = document.querySelector('.rate-button.active');
+                if (activeButton) {
+                    setTimeout(() => moveRateSlider(activeButton), 50);
+                }
           	}
       	}
 
         function closeModal() {
             trackModal.classList.remove('is-open');
             document.body.classList.remove('modal-open');
-
-            // The URL track ID is preserved here as requested.
             
-            // MODIFICATION: This now only resets the heading, not the title/icon
             resetDocumentMetadata();
             setDynamicBackground(null);
         }
 
 
-        // --- 4. PLAYER CORE LOGIC (Updated to use simplified tracksData & Index) ---
+        // --- 4. PLAYER CORE LOGIC ---
 
         function playTrack(track, index) {
             const trackToPlay = tracksData[index];
@@ -1973,7 +2032,14 @@
             updateUrlForModal(trackToPlay.id);
 
 			audioSource.src = trackToPlay.uri;
-            // playPauseButton.classList.add('loading-track'); // <-- REMOVED: Handled by 'loadstart' event
+            
+            const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
+            if (isEmbed) {
+                audioSource.loop = true;
+            } else {
+                audioSource.loop = (repeatState === 'track');
+            }
+
             audioSource.playbackRate = currentPlaybackRate;
             audioSource.load();
 
@@ -1984,11 +2050,18 @@
             globalPlayer.classList.add('active');
             highlightActiveCard();
 
-            // NEW: Update player info link
             const playerInfoLink = document.getElementById('player-info-link');
             if (playerInfoLink) {
-                const trackLink = `${window.location.origin}${window.location.pathname}?track=${trackToPlay.id}`;
-                playerInfoLink.href = trackLink;
+                if (isEmbed) {
+                    const trackLink = `${window.location.origin}${window.location.pathname}?track=${trackToPlay.id}`;
+                    playerInfoLink.href = trackLink;
+                    playerInfoLink.target = '_top';
+                    playerInfoLink.onclick = (e) => e.stopPropagation();
+                } else {
+                    playerInfoLink.href = '#'; 
+                    playerInfoLink.target = '_self';
+                    playerInfoLink.onclick = (e) => e.preventDefault();
+                }
             }
 
             modalAlbumArt.src = trackToPlay.image;
@@ -2001,7 +2074,6 @@
             updateDocumentMetadata(trackToPlay);
 
             audioSource.play()
-                .then(() => {})
                 .catch(error => {
                     console.warn("Autoplay was prevented. Please click the play button.", error);
                 });
@@ -2009,7 +2081,6 @@
 
         function togglePlayPause() {
             if (currentTrackIndex === -1 && tracksData.length > 0) {
-                 // Start playback with the first track if nothing is playing
                  playTrack(tracksData[0], 0);
             } else if (audioSource.paused || audioSource.ended) {
                 audioSource.play();
@@ -2017,132 +2088,111 @@
                 audioSource.pause();
             }
         }
+        
+        // --- REWRITTEN: Shuffle and Playback Logic ---
+        function playRandomTrack() {
+            if (tracksData.length <= 1) return;
 
-        // --- MODIFIED FUNCTION ---
-        function playNext() {
-            if (currentTrackIndex === -1 || tracksData.length === 0) return;
-
-            let nextIndex = currentTrackIndex + 1;
-
-            if (nextIndex >= tracksData.length) {
-                if (repeatState === 'context') {
-                    nextIndex = 0; // Loop back to start of track list
-                } else {
-                    // Stop playback if at the end
-                    audioSource.pause();
-                    currentTrackIndex = -1; // Reset player state
-                    highlightActiveCard();
-
-                    // MODIFICATION: Reset title and icon when playback stops
-                    document.title = originalTitle;
-                    dynamicIcon.href = originalIconHref;
-
-                    return;
-                }
-            }
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * tracksData.length);
+            } while (nextIndex === currentTrackIndex);
 
             playTrack(tracksData[nextIndex], nextIndex);
         }
 
-        function playPrevious() {
+        function playNext() {
+            const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
+            if (isEmbed) return;
+
+            if (isShuffling) {
+                playRandomTrack();
+                return;
+            }
+
             if (currentTrackIndex === -1 || tracksData.length === 0) return;
+
+            let nextIndex = currentTrackIndex + 1;
+            if (nextIndex >= tracksData.length) {
+                if (repeatState === 'context') {
+                    nextIndex = 0;
+                } else {
+                    audioSource.pause();
+                    currentTrackIndex = -1;
+                    highlightActiveCard();
+                    document.title = originalTitle;
+                    dynamicIcon.href = originalIconHref;
+                    return;
+                }
+            }
+            playTrack(tracksData[nextIndex], nextIndex);
+        }
+
+        function playPrevious() {
+            const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
+            if (isEmbed) return;
 
             if (audioSource.currentTime > 3) {
                 audioSource.currentTime = 0;
+            } else if (isShuffling) {
+                playRandomTrack();
             } else {
+                if (currentTrackIndex === -1 || tracksData.length === 0) return;
                 let prevIndex = (currentTrackIndex - 1 + tracksData.length) % tracksData.length;
                 playTrack(tracksData[prevIndex], prevIndex);
             }
         }
 
-        // MODIFIED: Added mobile button updates
         function cycleRepeat() {
             if (repeatState === 'off') {
                 repeatState = 'context';
+                if (isShuffling) {
+                    toggleShuffle(); // This will also show a toast
+                }
                 repeatButton.classList.add('active');
-                modalRepeatButtonMobile.classList.add('active'); // ADD
+                modalRepeatButtonMobile.classList.add('active');
                 audioSource.loop = false;
                 showCustomToast('Repeating Track List', 'fas fa-sync-alt');
             } else if (repeatState === 'context') {
                 repeatState = 'track';
+                 if (isShuffling) {
+                    toggleShuffle();
+                }
                 repeatButton.classList.add('active');
-                modalRepeatButtonMobile.classList.add('active'); // ADD
+                modalRepeatButtonMobile.classList.add('active');
                 audioSource.loop = true;
                 showCustomToast('Repeating Track', 'fas fa-redo-alt');
-
-            } else { // 'track'
+            } else {
                 repeatState = 'off';
                 repeatButton.classList.remove('active');
-                modalRepeatButtonMobile.classList.remove('active'); // ADD
+                modalRepeatButtonMobile.classList.remove('active');
                 audioSource.loop = false;
                 showCustomToast('Repeat Off', 'fas fa-ban');
             }
             repeatButton.setAttribute('data-state', repeatState);
         }
 
-        // MODIFIED: Added mobile button updates
         function toggleShuffle() {
             isShuffling = !isShuffling;
             shuffleButton.classList.toggle('active', isShuffling);
-            modalShuffleButtonMobile.classList.toggle('active', isShuffling); // ADD
+            modalShuffleButtonMobile.classList.toggle('active', isShuffling);
             shuffleButton.setAttribute('data-active', isShuffling);
 
             if (isShuffling) {
-                // Disable repeat 'context' if shuffle is ON
-                if (repeatState === 'context') {
-                    repeatState = 'off';
-                    repeatButton.classList.remove('active');
-                    modalRepeatButtonMobile.classList.remove('active'); // ADD
-                    repeatButton.setAttribute('data-state', repeatState);
-                    audioSource.loop = false;
-                }
-                
-                const currentTrack = currentTrackIndex !== -1 ? tracksData[currentTrackIndex] : null; 
-                
-                // Work with a copy of the original array
-                let tracksToShuffle = [...originalTrackOrder]; 
-
-                // Find and remove the current track (if playing)
-                if (currentTrack) {
-                    const currentIndexInOriginal = tracksToShuffle.findIndex(t => t.id === currentTrack.id);
-                    if (currentIndexInOriginal !== -1) {
-                        tracksToShuffle.splice(currentIndexInOriginal, 1);
-                    }
-                }
-
-                // Fisher-Yates shuffle for remaining tracks
-                for (let i = tracksToShuffle.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [tracksToShuffle[i], tracksToShuffle[j]] = [tracksToShuffle[j], tracksToShuffle[i]];
-                }
-
-                // Rebuild tracksData with the current track (if playing) at index 0 + shuffled remainder
-                if (currentTrack) {
-                    tracksData = [currentTrack, ...tracksToShuffle];
-                    currentTrackIndex = 0; 
-                } else {
-                    tracksData = tracksToShuffle;
-                    currentTrackIndex = 0;
-                }
-
                 showCustomToast('Shuffle activated', 'fas fa-random');
-
-            } else {
-                // Reset to original order, find where the current song now lands
-                const currentTrack = currentTrackIndex !== -1 ? tracksData[currentTrackIndex] : null;
-                tracksData = [...originalTrackOrder]; // Restore the original list
-                
-                if (currentTrack) {
-                    currentTrackIndex = tracksData.findIndex(t => t.id === currentTrack.id);
-                } else {
-                    currentTrackIndex = -1;
+                if (repeatState !== 'off') {
+                    repeatState = 'off';
+                    audioSource.loop = false;
+                    repeatButton.classList.remove('active');
+                    modalRepeatButtonMobile.classList.remove('active');
+                    repeatButton.setAttribute('data-state', 'off');
+                    setTimeout(() => showCustomToast('Repeat has been disabled', 'fas fa-ban'), 300);
                 }
-
+            } else {
                 showCustomToast('Shuffle deactivated', 'fas fa-arrow-right');
             }
-            
-            highlightActiveCard();
         }
+        // --- END REWRITTEN LOGIC ---
 
         function seekBy(seconds) {
              if (currentTrackIndex === -1) return;
@@ -2160,17 +2210,14 @@
 
         // --- 5. EVENT LISTENERS AND UI BINDING ---
 
-        // --- CONTEXT MENU LOGIC (REIMPLEMENTED) ---
         function showContextMenu(event, track) {
-            event.preventDefault(); // Prevent default browser context menu
-            contextMenu.classList.remove('show'); // Hide any previously open menu
+            event.preventDefault(); 
+            contextMenu.classList.remove('show');
             activeContextMenuTrack = track;
 
-            // Position the menu
             let x = event.clientX;
             let y = event.clientY;
             
-            // Adjust position if menu goes off-screen (basic check)
             if (x + contextMenu.offsetWidth > window.innerWidth) {
                 x = window.innerWidth - contextMenu.offsetWidth - 5;
             }
@@ -2183,7 +2230,6 @@
             contextMenu.classList.add('show');
         }
 
-        // Close context menu on any outside click or scroll
         document.addEventListener('click', () => {
              contextMenu.classList.remove('show');
              activeContextMenuTrack = null;
@@ -2193,12 +2239,11 @@
              activeContextMenuTrack = null;
         });
         
-        // Handle context menu item clicks
         contextMenu.addEventListener('click', (event) => {
             const menuItem = event.target.closest('.context-menu-item');
             if (!menuItem || !activeContextMenuTrack) return;
 
-            event.stopPropagation(); // Prevent the document click listener from firing immediately
+            event.stopPropagation(); 
 
             const action = menuItem.getAttribute('data-action');
             contextMenu.classList.remove('show');
@@ -2208,13 +2253,12 @@
                 return;
             }
 
-            // Find the index of the track in the current playback list (tracksData)
-            const trackIndex = tracksData.findIndex(t => t.id === activeContextMenuTrack.id);
+            const trackIndex = originalTrackOrder.findIndex(t => t.id === activeContextMenuTrack.id);
 
             switch (action) {
                 case 'play':
                     if (trackIndex !== -1) {
-                        playTrack(tracksData[trackIndex], trackIndex);
+                        playTrack(originalTrackOrder[trackIndex], trackIndex);
                     }
                     break;
                 case 'download':
@@ -2232,24 +2276,16 @@
                     });
                     break;
                 case 'embed':
-                    // MODIFIED: Open the new embed modal
                     openEmbedModal(activeContextMenuTrack);
                     break;
             }
             activeContextMenuTrack = null;
         });
 
-        // Prevent context menu from showing the *browser* menu on itself
         contextMenu.addEventListener('contextmenu', (e) => {
              e.preventDefault();
         });
-        // --- END CONTEXT MENU LOGIC ---
         
-        
-        // --- LOADING ANIMATION FIX ---
-        // REMOVED: stopLoadingAnimation() function
-
-        // Audio Status Listeners
         audioSource.addEventListener('loadstart', () => {
             playPauseButton.classList.add('loading-track');
         });
@@ -2258,48 +2294,39 @@
             playPauseButton.classList.add('loading-track');
         });
 
-        audioSource.addEventListener('playing', () => { // When playback *actually* starts/resumes
+        audioSource.addEventListener('playing', () => {
             playPauseButton.classList.remove('loading-track');
         });
         
-        // REMOVED: 'canplaythrough' and 'canplay' listeners
-
         audioSource.addEventListener('play', () => {
-            // playPauseButton.classList.remove('loading-track'); // <-- REMOVED from here
             playPauseIcon.classList.remove('fa-play');
             playPauseIcon.classList.add('fa-pause');
             globalPlayer.classList.add('playing');
             
-            // NEW: Update both icons
             modalPlayPauseIcon.className = 'fas fa-pause';
             modalPlayPauseIconMobile.className = 'fas fa-pause';
         });
-        // --- END LOADING ANIMATION FIX ---
 
         audioSource.addEventListener('pause', () => {
             playPauseIcon.classList.remove('fa-pause');
             playPauseIcon.classList.add('fa-play');
             globalPlayer.classList.remove('playing');
 
-            // NEW: Update both icons
             modalPlayPauseIcon.className = 'fas fa-play';
             modalPlayPauseIconMobile.className = 'fas fa-play';
         });
 
         audioSource.addEventListener('ended', () => {
-            // Repeat 'track' handled by audioSource.loop
-            if (repeatState === 'context' || currentTrackIndex < tracksData.length - 1) {
+            if (repeatState === 'context' || currentTrackIndex < tracksData.length - 1 || isShuffling) {
                  playNext();
             }
         });
 
-        // Time and Progress Update
         audioSource.addEventListener('timeupdate', () => {
             const currentTime = audioSource.currentTime;
             const duration = audioSource.duration || 0;
 
             if (!isSeeking) {
-                // MODIFIED: Update all elements
                 const formattedTime = formatTime(currentTime);
                 allCurrentTimeEls.forEach(el => el.textContent = formattedTime);
                 
@@ -2311,27 +2338,23 @@
         });
 
         audioSource.addEventListener('loadedmetadata', () => {
-            // MODIFIED: Update all elements
             const formattedDuration = isFinite(audioSource.duration) && audioSource.duration > 0
                 ? formatTime(audioSource.duration)
                 : '0:00';
             allDurationEls.forEach(el => el.textContent = formattedDuration);
         });
 
-        // --- PROGRESS BAR SCRUBBING LOGIC (MODIFIED for Touch) ---
         let isSeeking = false;
-        let activeSeekBar = null; // NEW: Store the bar being scrubbed
+        let activeSeekBar = null;
         let lastSeekX = 0;
         let rAFId = null;
 
-        // MODIFIED: Takes the specific seek bar element as an argument
         function getSeekPercentage(clientX, seekBarElement) {
             const rect = seekBarElement.getBoundingClientRect();
             const clickX = clientX - rect.left;
             return Math.max(0, Math.min(1, clickX / rect.width));
         }
 
-        // MODIFIED: Updates the specific bar being scrubbed
         function visualUpdateLoop() {
             if (!isSeeking || !activeSeekBar || !isFinite(audioSource.duration) || audioSource.duration === 0) {
                  rAFId = null;
@@ -2341,20 +2364,17 @@
             const percentage = getSeekPercentage(lastSeekX, activeSeekBar);
             const scrubTime = audioSource.duration * percentage;
 
-            // Find the progress bar and time elements relative to the active seek bar
             activeSeekBar.querySelector('.progress-bar').style.width = `${percentage * 100}%`;
             activeSeekBar.parentElement.querySelector('.seek-current-time').textContent = formatTime(scrubTime);
 
             rAFId = requestAnimationFrame(visualUpdateLoop);
         }
 
-        // MODIFIED: Stores which bar was clicked, handles touch/mouse
         function startScrub(e) {
-             // Check for mouse button or if audio is ready
              if (e.type === 'mousedown' && e.button !== 0) return;
              if (!isFinite(audioSource.duration) || audioSource.duration === 0) return;
 
-             activeSeekBar = e.currentTarget; // NEW: Store the active bar
+             activeSeekBar = e.currentTarget;
              isSeeking = true;
              document.body.classList.add('no-select');
 
@@ -2365,7 +2385,6 @@
                  audioSource.wasPlaying = false;
              }
 
-             // MODIFIED: Get correct clientX for mouse or touch
              lastSeekX = e.touches ? e.touches[0].clientX : e.clientX;
              
              if (rAFId === null) {
@@ -2373,7 +2392,6 @@
              }
         }
 
-        // MODIFIED: Uses activeSeekBar to calculate final time
         function endScrub() {
             if (!isSeeking || !activeSeekBar) return;
 
@@ -2385,7 +2403,7 @@
             const finalPercentage = getSeekPercentage(lastSeekX, activeSeekBar);
             const finalTime = audioSource.duration * finalPercentage;
             
-            activeSeekBar = null; // NEW: Clear the active bar
+            activeSeekBar = null;
 
             audioSource.currentTime = finalTime;
             if (audioSource.wasPlaying) {
@@ -2396,16 +2414,13 @@
             audioSource.wasPlaying = false;
         }
 
-        // MODIFIED: Attach listeners to ALL seek bars (including touch)
         allSeekBars.forEach(bar => {
             bar.addEventListener('mousedown', startScrub);
-            bar.addEventListener('touchstart', startScrub, { passive: true }); // passive: true, as startScrub doesn't preventDefault
+            bar.addEventListener('touchstart', startScrub, { passive: true });
         });
 
-        // MODIFIED: Create a shared move handler for mouse/touch
         function handleSeekMove(e) {
             if (isSeeking) {
-                // Prevent page scroll *only* when seeking
                 if (e.type === 'touchmove') {
                     e.preventDefault();
                 }
@@ -2414,20 +2429,17 @@
         }
         
         document.addEventListener('mousemove', handleSeekMove);
-        document.addEventListener('touchmove', handleSeekMove, { passive: false }); // passive: false to allow preventDefault
+        document.addEventListener('touchmove', handleSeekMove, { passive: false });
 
-        // MODIFIED: Add touch end/cancel listeners
         document.addEventListener('mouseup', endScrub);
         document.addEventListener('touchend', endScrub);
         document.addEventListener('touchcancel', endScrub);
-        // --- END PROGRESS BAR SCRUBBING LOGIC ---
 
-
-        // Volume control (Unchanged)
         audioSource.volume = volumeSlider.value / 100;
         updateVolumeUI(volumeSlider.value);
 
         volumeSlider.addEventListener('input', (e) => {
+            clearInterval(volumeAnimationInterval); // Stop animation if user is dragging
             const newVolume = parseInt(e.target.value);
             audioSource.volume = newVolume / 100;
             updateVolumeUI(newVolume);
@@ -2437,23 +2449,17 @@
             }
         });
 
-        // Mute/Unmute Toggle (Unchanged)
         function toggleMute() {
             if (audioSource.volume > 0) {
                 previousVolume = parseInt(volumeSlider.value);
-                volumeSlider.value = 0;
-                audioSource.volume = 0;
-                updateVolumeUI(0);
+                animateVolume(0);
             } else {
                 const newVolume = previousVolume > 0 ? previousVolume : 50;
-                volumeSlider.value = newVolume;
-                audioSource.volume = newVolume / 100;
-                updateVolumeUI(newVolume);
+                animateVolume(newVolume);
             }
         }
         volumeIcon.addEventListener('click', toggleMute);
 
-        // Playback Rate Button Listener (Unchanged)
         rateButtons.forEach(button => {
             button.addEventListener('click', (e) => {
                 const newRate = e.target.getAttribute('data-rate');
@@ -2461,9 +2467,7 @@
             });
         });
 
-        // --- KEYBOARD CONTROLS (Unchanged) ---
         document.addEventListener('keydown', (e) => {
-            // NEW: Ignore keydown if embed modal is open
             if (embedModal.style.display === 'block') {
                 if (e.key === 'Escape') {
                     closeEmbedModal();
@@ -2471,7 +2475,6 @@
                 return;
             }
             
-            // MODIFIED: Also check for custom select
             if (document.activeElement.tagName === 'INPUT' || 
                 document.activeElement.tagName === 'TEXTAREA' ||
                 document.activeElement.classList.contains('custom-select-trigger')) {
@@ -2506,15 +2509,13 @@
                 case 'ArrowUp':
                     e.preventDefault();
                     let volUp = Math.min(100, parseInt(volumeSlider.value) + 5);
-                    audioSource.volume = volUp / 100;
-                    updateVolumeUI(volUp);
+                    animateVolume(volUp);
                     previousVolume = volUp;
                     break;
                 case 'ArrowDown':
                     e.preventDefault();
                     let volDown = Math.max(0, parseInt(volumeSlider.value) - 5);
-                    audioSource.volume = volDown / 100;
-                    updateVolumeUI(volDown);
+                    animateVolume(volDown);
                     if (volDown > 0) previousVolume = volDown;
                     break;
                 case 'n':
@@ -2529,55 +2530,43 @@
                     return;
             }
         });
-        // --- END KEYBOARD CONTROLS ---
 
-        // Bind primary control buttons
         playPauseButton.addEventListener('click', togglePlayPause);
         nextButton.addEventListener('click', playNext);
         previousButton.addEventListener('click', playPrevious);
 
-        // Bind modal controls (desktop)
         modalPlayPauseButton.addEventListener('click', togglePlayPause);
         modalNextButton.addEventListener('click', playNext);
         modalPreviousButton.addEventListener('click', playPrevious);
         
-        // NEW: Bind modal controls (mobile)
         modalPlayPauseButtonMobile.addEventListener('click', togglePlayPause);
         modalNextButtonMobile.addEventListener('click', playNext);
         modalPreviousButtonMobile.addEventListener('click', playPrevious);
-        // MODIFIED: Bind new mobile controls
         modalShuffleButtonMobile.addEventListener('click', toggleShuffle);
         modalRepeatButtonMobile.addEventListener('click', cycleRepeat);
 
 
         modalCloseButton.addEventListener('click', closeModal);
         playerInfoBar.addEventListener('click', () => {
-            // NEW: Don't open modal if it's an embed
             const params = new URLSearchParams(window.location.search);
             if (currentTrackIndex !== -1 && params.get('embed') !== 'true') {
                 openModal();
             }
         });
 
-        // MODAL RIGHT-CLICK TO CLOSE (FIXED)
         trackModal.addEventListener('contextmenu', (e) => {
-            // Check if the click occurred on the modal backdrop (not on the centered modal-content)
             if (e.target === trackModal) {
-                 e.preventDefault(); // Prevent browser context menu
+                 e.preventDefault();
                  closeModal();
             }
         });
 
-        // --- NEW: MODAL DRAG-TO-CLOSE LOGIC ---
         let touchStartY = 0;
         let touchMoveY = 0;
         let isDraggingModal = false;
         
         function onTouchStart(e) {
-            // Only track vertical drags starting on the handle or modal content
-            // Avoid starting drag on interactive elements like sliders
             const targetTag = e.target.tagName;
-            // MODIFIED: Also check for .seek-bar
             if (targetTag === 'INPUT' || targetTag === 'BUTTON' || e.target.closest('.seek-bar')) {
                 isDraggingModal = false;
                 return;
@@ -2585,7 +2574,7 @@
 
             isDraggingModal = true;
             touchStartY = e.touches[0].clientY;
-            trackModal.style.transition = 'none'; // Disable transition while dragging
+            trackModal.style.transition = 'none';
         }
         
         function onTouchMove(e) {
@@ -2594,14 +2583,12 @@
             touchMoveY = e.touches[0].clientY;
             const deltaY = touchMoveY - touchStartY;
             
-            // Only allow dragging down
             if (deltaY > 0) {
                 if (document.querySelector('.modal-content').scrollTop === 0) {
-                    e.preventDefault(); // Prevent page scroll ONLY if at top of modal content
+                    e.preventDefault();
                     trackModal.style.transform = `translateY(${deltaY}px)`;
                 }
             } else {
-                // If dragging up, let the modal content scroll
                 isDraggingModal = false;
             }
         }
@@ -2610,61 +2597,48 @@
             if (!isDraggingModal) return;
             
             isDraggingModal = false;
-            trackModal.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'; // Re-enable transition
+            trackModal.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
             
             const deltaY = touchMoveY - touchStartY;
-            const closeThreshold = trackModal.offsetHeight * 0.3; // Close if dragged 30% down
+            const closeThreshold = trackModal.offsetHeight * 0.3;
             
             if (deltaY > closeThreshold) {
-                closeModal(); // This will reset the transform via the .is-open class
+                closeModal();
             } else {
-                // Snap back
                 trackModal.style.transform = 'translateY(0)';
             }
             
-            // Reset positions
             touchStartY = 0;
             touchMoveY = 0;
         }
 
-        // Bind listeners to the modal itself to catch the touch events
         trackModal.addEventListener('touchstart', onTouchStart, { passive: false });
         trackModal.addEventListener('touchmove', onTouchMove, { passive: false });
         trackModal.addEventListener('touchend', onTouchEnd);
         trackModal.addEventListener('touchcancel', onTouchEnd);
-        // --- END NEW MODAL DRAG-TO-CLOSE LOGIC ---
-
 
         shuffleButton.addEventListener('click', toggleShuffle);
         repeatButton.addEventListener('click', cycleRepeat);
 
-        // --- MODIFIED: Embed Modal Listeners ---
-        
-        // REMOVED: embedThemeSelect and embedBgBlurCheckbox listeners
-
         embedModalClose.addEventListener('click', closeEmbedModal);
         embedModalOverlay.addEventListener('click', closeEmbedModal);
         
-        // MODIFIED: This now only handles checkboxes
-        embedOptions.forEach(input => {
+        embedOptionsInputs.forEach(input => {
             input.addEventListener('change', generateEmbedCode);
+            input.addEventListener('input', generateEmbedCode); // For color picker
         });
 
-        // --- NEW: Custom Select Dropdown Logic ---
         document.querySelectorAll('.custom-select-trigger').forEach(trigger => {
             trigger.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent document click listener
+                e.stopPropagation();
                 const wrapper = e.target.closest('.custom-select-wrapper');
-                // Close all *other* dropdowns
                 document.querySelectorAll('.custom-select-wrapper').forEach(w => {
                     if (w !== wrapper) {
                         w.classList.remove('open');
                     }
                 });
-                // Toggle the current one
                 wrapper.classList.toggle('open');
             });
-            // Add keyboard accessibility
             trigger.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -2678,25 +2652,20 @@
                 const wrapper = e.target.closest('.custom-select-wrapper');
                 const trigger = wrapper.querySelector('.custom-select-trigger');
                 
-                // Update trigger
                 trigger.textContent = e.target.textContent;
                 trigger.setAttribute('data-value', e.target.getAttribute('data-value'));
                 
-                // Update 'selected' class
                 wrapper.querySelectorAll('.custom-select-option').forEach(opt => {
                     opt.classList.remove('selected');
                 });
                 e.target.classList.add('selected');
                 
-                // Close dropdown
                 wrapper.classList.remove('open');
                 
-                // Regenerate embed code
                 generateEmbedCode();
             });
         });
 
-        // NEW: Global click listener to close dropdowns
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.custom-select-wrapper')) {
                 document.querySelectorAll('.custom-select-wrapper.open').forEach(wrapper => {
@@ -2704,19 +2673,15 @@
                 });
             }
         });
-        // --- END Custom Select Dropdown Logic ---
-
 
         embedCopyCodeButton.addEventListener('click', () => {
             embedCodeTextarea.select();
             try {
-                // Use modern clipboard API
                 navigator.clipboard.writeText(embedCodeTextarea.value).then(() => {
                     embedCopyCodeButton.innerHTML = `<i class="fas fa-check" style="margin-right: 5px;"></i> Copied!`;
                     showCustomToast('Embed code copied to clipboard!', 'fas fa-copy');
                 }).catch(err => {
                     console.error('Clipboard write failed: ', err);
-                    // Fallback for document.execCommand
                     if(document.execCommand('copy')) {
                         embedCopyCodeButton.innerHTML = `<i class="fas fa-check" style="margin-right: 5px;"></i> Copied!`;
                         showCustomToast('Embed code copied to clipboard!', 'fas fa-copy');
@@ -2727,7 +2692,6 @@
             } catch (err) {
                 console.error('Clipboard API error, trying execCommand: ', err);
                 try {
-                    // Fallback for older browsers
                     if(document.execCommand('copy')) {
                         embedCopyCodeButton.innerHTML = `<i class="fas fa-check" style="margin-right: 5px;"></i> Copied!`;
                         showCustomToast('Embed code copied to clipboard!', 'fas fa-copy');
@@ -2744,12 +2708,11 @@
                 embedCopyCodeButton.innerHTML = `<i class="fas fa-copy" style="margin-right: 5px;"></i> Copy Code`;
             }, 2000);
         });
-        // --- END Embed Modal Listeners ---
 
 
-        // --- 6. INITIALIZATION: GENERATE CARDS, BIND EVENTS, AND SEARCH ---
+        // --- 6. INITIALIZATION AND RENDERING ---
 
-        function createTrackCard(track, originalIndex) {
+        function createTrackCard(track) {
             const card = document.createElement('div');
             card.className = 'track-card';
             card.setAttribute('data-id', track.id);
@@ -2757,7 +2720,6 @@
             const downloadFileName = `${track.title.replace(/\s/g, '_')}_${track.artist.replace(/\s/g, '_')}.mp3`;
             const originalText = 'Download';
 
-            // MODIFIED: Added .track-image-container wrapper
             card.innerHTML = `
                 <div class="track-image-container">
                     <img src="${track.image}" alt="Album Art for ${track.title}" class="track-image" draggable="false">
@@ -2772,24 +2734,19 @@
                 </button>
             `;
 
-            // Normal click to play
             card.addEventListener('click', (event) => {
                 if (!event.target.closest('.download-trigger-button')) {
-                    // Find where this specific track lives in the *current* tracksData array (important for shuffle)
-                    const indexInList = tracksData.findIndex(t => t.id === track.id);
+                    const indexInList = originalTrackOrder.findIndex(t => t.id === track.id);
                     if (indexInList !== -1) {
-                         playTrack(tracksData[indexInList], indexInList);
+                         playTrack(originalTrackOrder[indexInList], indexInList);
                     }
                 }
             });
 
-            // Right-click for custom context menu (FIXED)
             card.addEventListener('contextmenu', (event) => {
                  showContextMenu(event, track);
             });
 
-
-            // Download Logic with Animation (Unchanged)
             const downloadButton = card.querySelector('.download-trigger-button');
             downloadButton.addEventListener('click', async (event) => {
                 event.stopPropagation();
@@ -2804,18 +2761,14 @@
                 try {
                     const response = await fetch(uri);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
                     const blob = await response.blob();
-
                     const blobUrl = URL.createObjectURL(blob);
                     const tempLink = document.createElement('a');
                     tempLink.href = blobUrl;
                     tempLink.download = filename;
-
                     document.body.appendChild(tempLink);
                     tempLink.click();
                     document.body.removeChild(tempLink);
-
                     URL.revokeObjectURL(blobUrl);
 
                     downloadButton.classList.remove('loading');
@@ -2830,7 +2783,6 @@
 
                 } catch (error) {
                     console.error('Download failed:', error);
-
                     downloadButton.classList.remove('loading');
                     downloadButton.innerHTML = `<i class="fas fa-times"></i> Failed`;
                     downloadButton.style.backgroundColor = '#FF4500';
@@ -2845,22 +2797,26 @@
 
             trackList.appendChild(card);
         }
+        
+        function renderTrackGrid() {
+            trackList.innerHTML = '';
+            tracksData.forEach((track) => {
+                createTrackCard(track);
+            });
+            highlightActiveCard();
+        }
 
-        // Search/Filter Logic (Unchanged)
         function filterTracks(searchTerm) {
             const term = searchTerm.toLowerCase().trim();
-
             trackList.innerHTML = '';
 
-            // Filter against the original list to ensure all tracks can be found, regardless of shuffle state
             const filteredTracks = originalTrackOrder.filter(track =>
                 track.title.toLowerCase().includes(term) ||
                 track.artist.toLowerCase().includes(term)
             );
 
             filteredTracks.forEach((track) => {
-                const originalIndex = tracksData.findIndex(t => t.id === track.id);
-                createTrackCard(track, originalIndex);
+                createTrackCard(track);
             });
 
             const heading = document.querySelector('.content-heading');
@@ -2871,7 +2827,6 @@
                     heading.textContent = originalHeading;
                 }
             }
-
             highlightActiveCard();
         }
 
@@ -2883,59 +2838,37 @@
             }, 300);
         });
 
-
-        // Initial track list and order generation
         function initTrackList() {
-            trackList.innerHTML = '';
-            tracksData.forEach((track, index) => {
-                createTrackCard(track, index);
-            });
-            // Initialize the original order array
-            originalTrackOrder = [...tracksData];
+            originalTrackOrder = [...tracksData]; // Keep a stable, original order
+            renderTrackGrid(); // Render based on the original order
         }
 
-        // Function to handle initial load/sharing link
-        // MODIFIED: Added embed background logic & autoplay
         function checkUrlForTrack() {
              const params = new URLSearchParams(window.location.search);
              const trackIdStr = params.get('track');
              const isEmbed = params.get('embed') === 'true';
-             const isAutoplay = params.get('autoplay') === 'true'; // NEW
+             const isAutoplay = params.get('autoplay') === 'true';
 
              if (trackIdStr !== null) {
                  const trackId = parseInt(trackIdStr);
-                 // Find the index of this track in the tracksData array
                  const trackIndex = tracksData.findIndex(t => t.id === trackId);
 
                  if (trackIndex !== -1) {
-                     const trackToPlay = tracksData[trackIndex]; // Get track data
-
-                     // Immediately play the track to load it into the player state
+                     const trackToPlay = tracksData[trackIndex];
                      playTrack(trackToPlay, trackIndex);
 
-                     // --- REMOVED: Embed Background logic ---
-
-                     // Only open the modal if it's NOT an embed
                      if (!isEmbed) {
                          openModal();
                      }
 
-                     // MODIFIED: Handle autoplay
-                     if (isAutoplay) {
-                         // We already called audioSource.play() in playTrack,
-                         // so we just let the catch handler in that function
-                         // manage any autoplay errors.
-                     } else {
-                         // Since playTrack uses play(), pause immediately if not autoplaying
+                     if (!isAutoplay) {
                          audioSource.pause(); 
                      }
                  } else {
-                     // --- 404 LOGIC ---
                      const errorScreen = document.getElementById('error-404-screen');
                      if (errorScreen) {
                          errorScreen.classList.add('show');
                      }
-                     // Hide the main content and player
                      const header = document.querySelector('.header');
                      const container = document.querySelector('.container');
                      if (header) header.style.display = 'none';
@@ -2947,18 +2880,17 @@
 
         // 7. INITIALIZATION
 
-        // MODIFIED: Handle embed mode styling (REPLACED old function)
+        // MODIFIED: Simplified Embed Mode handler
 		function handleEmbedMode() {
 			const params = new URLSearchParams(window.location.search);
 			const isEmbed = params.get('embed') === 'true';
 
 			if (isEmbed) {
-				// MODIFIED: Removed bgBlur
-				const theme = params.get('theme') || 'dark'; 
-				const layout = params.get('layout') || 'compact'; 
-				const showArt = params.get('art') !== 'false'; 
-				
-				// REMOVED: bgUrl 
+				const theme = params.get('theme') || 'dark';
+				const layout = params.get('layout') || 'compact';
+				const showArt = params.get('art') !== 'false';
+                const bgUrl = params.get('bgUrl');
+                const bgBlur = (theme === 'blur' && bgUrl);
 
 				let height;
 				if (layout === 'tall') height = '160px';
@@ -2968,172 +2900,129 @@
 				const style = document.createElement('style');
 				style.id = 'embed-styles';
 				
-				// MODIFIED: CSS generation logic
 				let css = `
+                    :root { --embed-accent-color: #1ED760; }
 					/* --- Base Embed Styles --- */
-					body {
-						padding-bottom: 0 !important;
-						background-color: transparent !important;
-						/* FIX 2b: Make body relative for ::before positioning */
-						position: relative; 
-						
-						/* REMOVED: Conditional background-image */
-					}
 					html, body {
-						margin: 0;
-						padding: 0;
-						background: transparent;
-						height: 100%; /* Fill iframe */
-						overflow: hidden; /* No scrollbars */
+						margin: 0; padding: 0;
+						height: 100%;
+						overflow: hidden;
+                        background-color: transparent !important;
 					}
-					/* Hide everything except player and overlay (for blur) */
-					.header, .container, #track-modal, #custom-toast, #track-context-menu, #embed-modal-overlay, #embed-modal {
+                    body {
+						padding-bottom: 0 !important;
+                        position: relative; 
+                        background-size: cover;
+                        background-position: center;
+                        ${bgBlur ? `background-image: url('${bgUrl}');` : ''}
+                    }
+					/* Hide everything except player */
+					.header, .container, #track-modal, #custom-toast, #track-context-menu, #embed-modal-overlay, #embed-modal, .background-overlay, .volume-control {
 						display: none !important;
 					}
 
-					.background-overlay {
-						/* FIX 2d: Hide the original overlay which uses the failing backdrop-filter */
-						display: none !important; 
-					}
-
-					/* REMOVED: body::before blur layer */
+                    /* Blur overlay effect */
+                    body::before {
+                        content: '';
+                        position: absolute;
+                        top: 0; left: 0; right: 0; bottom: 0;
+                        ${bgBlur ? `
+                            background-color: rgba(0,0,0,0.5);
+                            backdrop-filter: blur(8px);
+                            -webkit-backdrop-filter: blur(8px);
+                        ` : ''}
+                        z-index: -1;
+                    }
 
 					/* --- Player Card Styling --- */
 					#global-player {
 						position: relative !important;
 						bottom: auto !important;
 						height: ${height} !important;
-						margin: 0;
-						padding: 16px;
+						margin: 0; padding: 16px;
 						box-sizing: border-box; 
-						/* MODIFIED: background logic simplified */
-						background-color: var(--mid-gray);
-						/* REMOVED: backdrop-filter */
+						background-color: ${bgBlur ? 'transparent' : 'var(--mid-gray)'};
 						display: flex !important;
 						flex-direction: ${layout === 'tall' ? 'column' : 'row'};
 						justify-content: space-between;
-						align-items: ${layout === 'tall' ? 'stretch' : 'center'};
+						align-items: center;
 					}
 					#global-player.active { opacity: 1; }
 
 					/* --- Player Info (Title, Artist, Image) --- */
 					.player-info {
 						width: ${layout === 'tall' ? '100%' : 'auto'};
-						max-width: none;
-						flex-shrink: 1;
-						min-width: 0;
+						max-width: none; flex-shrink: 1; min-width: 0;
 						margin-bottom: ${layout === 'tall' ? '10px' : '0'};
-						flex-grow: ${layout === 'spotify' ? '1' : '0'}; 
+						flex-grow: 1; 
+                        align-items: center;
 					}
 					.player-info img {
 						display: ${showArt ? 'block' : 'none'} !important;
 						width: ${layout === 'spotify' ? '48px' : (layout === 'tall' ? '60px' : '68px')}; 
 						height: ${layout === 'spotify' ? '48px' : (layout === 'tall' ? '60px' : '68px')};
 						margin-right: ${layout === 'spotify' ? '12px' : '15px'};
+                        transition: transform 0.3s ease; /* Hover effect */
 					}
-					.player-info-text {
-						margin-left: ${!showArt ? '0' : 'auto'};
-					}
-					#player-info-link {
-						display: block; 
-						overflow: hidden;
-					}
+                    #player-info-link:hover .player-info img {
+                        transform: scale(1.08); /* Hover effect */
+                    }
+					.player-info-text { margin-left: ${!showArt ? '0' : 'auto'}; }
+					#player-info-link { display: flex; overflow: hidden; }
 					#player-info-link:hover #player-title { text-decoration: underline; }
 
 					/* --- Player Controls (Seek, Play) --- */
 					.player-center {
 						width: ${layout === 'tall' ? '100%' : 'auto'};
-						flex-grow: ${layout === 'compact' ? '1' : '0'}; 
-						padding-left: ${layout === 'compact' ? '15px' : '0'};
+						flex-grow: ${layout === 'compact' || layout === 'tall' ? 1 : 0};
+                        flex-shrink: 1;
+                        min-width: 0;
+						padding: 0 10px;
 						justify-content: ${layout === 'tall' ? 'flex-end' : 'center'}; 
+                        align-items: center;
+                        flex-direction: column;
+                        display: flex;
 					}
 					.seek-bar-container {
 						display: ${layout === 'spotify' ? 'none' : 'flex'} !important; 
-						width: 100%;
-						max-width: none;
+						width: 100%; max-width: none;
 					}
 					.custom-controls {
-						width: 100%;
-						justify-content: center;
+						width: 100%; justify-content: center;
 						margin-bottom: ${layout === 'spotify' ? '0' : '8px'}; 
 					}
-					#play-pause-button { 
-						margin: ${layout === 'spotify' ? '0 16px' : '0 20px'};
-					}
-
+					#play-pause-button { margin: ${layout === 'spotify' ? '0 10px' : '0 15px'}; }
+                    
 					/* --- Hide Unwanted Buttons --- */
-					#previous-button, #next-button, #shuffle-button, #repeat-button, .volume-control {
+					#previous-button, #next-button, #shuffle-button, #repeat-button {
 						display: none !important;
 					}
 				`;
 
-				// --- Theme Overrides ---
-				// MODIFIED: Removed the if(bgBlur) block
 				if (theme === 'light') {
-					// Light Theme (dark text)
 					css += `
-					#global-player {
-						background-color: #F9F9F9;
-					}
-					.track-title, #player-title {
-						color: #000000;
-					}
-					#player-info-link { color: #000000; }
-					#player-artist {
-						 color: #333333;
-					}
-					.seek-current-time, .seek-duration {
-						color: #535353;
-					}
+					#global-player { background-color: #F9F9F9; }
+					.track-title, #player-title, #player-info-link { color: #000000; }
+					#player-artist { color: #333333; }
+					.seek-current-time, .seek-duration, #volume-icon { color: #535353; }
 					.seek-bar { background: #C7C7C7; }
-					.progress-bar { background: #000000; }
-					.progress-bar::after { background: #000000; }
-					
-					#global-player.playing .progress-bar { background: #1DB954; } 
-					#global-player.playing .progress-bar::after { background: #1DB954; }
-
-					#play-pause-button {
-						background-color: #333333;
-						color: #FFFFFF;
-					}
-					/* MODIFIED: Added color: #FFFFFF to fix black-on-black hover */
-					#play-pause-button:hover {
-						background-color: #000000;
-						color: #FFFFFF;
-					}
-					#global-player.playing #play-pause-button {
-						background-color: #1DB954;
-						color: #FFFFFF;
-					}
+					.progress-bar, .progress-bar::after { background: #000000; }
+					#global-player.playing .progress-bar, #global-player.playing .progress-bar::after { background: var(--embed-accent-color); } 
+					#play-pause-button { background-color: #333333; color: #FFFFFF; }
+					#play-pause-button:hover { background-color: #000000; color: #FFFFFF; }
+					#global-player.playing #play-pause-button { background-color: var(--embed-accent-color); color: #FFFFFF; }
 					`;
-				} else {
-					// Dark Theme (default, light text)
+				} else { // Dark and Blur themes share these base colors
 					css += `
-					#global-player {
-						/* MODIFIED: Explicitly set background for dark theme */
-						background-color: var(--mid-gray);
-					}
-					#player-info-link { color: var(--text-color); }
+					#player-info-link, .track-title, #player-title { color: var(--text-color); }
 					#player-artist { color: var(--subtle-text); }
-					/* Add explicit color rules for dark theme, just in case */
-					.track-title, #player-title { color: var(--text-color); }
 					.seek-current-time, .seek-duration { color: var(--subtle-text); }
 					.seek-bar { background: #535353; }
-					.progress-bar { background: var(--text-color); }
-					.progress-bar::after { background: var(--text-color); }
-					#global-player.playing .progress-bar { background: var(--spotify-green); }
-					#global-player.playing .progress-bar::after { background: var(--spotify-green); }
-					#play-pause-button {
-						background-color: var(--text-color);
-						color: var(--dark-gray);
-					}
-					#play-pause-button:hover {
-						background-color: var(--spotify-green);
-					}
-					#global-player.playing #play-pause-button {
-						background-color: var(--spotify-green);
-						color: var(--dark-gray);
-					}
+					.progress-bar, .progress-bar::after { background: var(--text-color); }
+					#global-player.playing .progress-bar, #global-player.playing .progress-bar::after { background: var(--embed-accent-color); }
+					#play-pause-button { background-color: var(--text-color); color: var(--dark-gray); }
+					#play-pause-button:hover { background-color: var(--embed-accent-color); }
+					#global-player.playing #play-pause-button { background-color: var(--embed-accent-color); color: var(--dark-gray); }
 					`;
 				}
 
@@ -3144,7 +3033,7 @@
 
         initTrackList();
         checkUrlForTrack();
-        handleEmbedMode(); // Apply embed styles on load
+        handleEmbedMode();
     </script>
 
     </body>
