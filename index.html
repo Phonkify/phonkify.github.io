@@ -623,6 +623,13 @@
             height: min(80vw, 400px);
             border-radius: 8px;
             margin-bottom: 40px;
+            overflow: hidden; /* NEW: To contain visualizer and overlays */
+            transition: transform 0.3s ease; /* FIXED: Add transition to the wrapper */
+        }
+        
+        /* FIXED: Apply hover transform to the wrapper, not the children */
+        .modal-image-wrapper:hover {
+             transform: translateY(-5px);
         }
 
         .modal-album-art {
@@ -630,11 +637,37 @@
             height: 100%;
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-            transition: transform 0.3s ease;
         }
 
-        .modal-image-wrapper:hover .modal-album-art {
-             transform: translateY(-5px);
+        /* NEW: Visualizer Styling */
+        #visualizer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* NEW: Fade out visualizer on hover */
+        .modal-image-wrapper:hover #visualizer {
+            opacity: 0;
+        }
+
+        /* NEW: Image Fade Overlay */
+        .image-fade-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px; /* Taller than visualizer */
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+            z-index: 1;
+            pointer-events: none;
+            border-radius: 8px;
         }
 
         .modal-title {
@@ -669,14 +702,13 @@
             background-color: rgba(0, 0, 0, 0.6);
             border-radius: 8px;
             opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: opacity 0.3s ease; /* FIXED: Removed transform */
             pointer-events: none;
         }
 
         .modal-image-wrapper:hover .modal-controls-overlay {
             opacity: 1;
             pointer-events: auto;
-            transform: translateY(-5px);
         }
 
         .modal-controls-group {
@@ -753,6 +785,37 @@
             opacity: 1;
             transform: scale(1);
         }
+        
+        /* NEW: For submenus */
+        .context-menu-item.has-submenu {
+            position: relative;
+        }
+        .context-menu-item.has-submenu::after {
+            content: '\f0da'; /* Font Awesome chevron-right */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--subtle-text);
+        }
+        .submenu {
+            position: absolute;
+            top: -5px; /* Align with parent item */
+            left: 100%;
+            display: none;
+            /* Inherit styles */
+            background-color: var(--light-gray);
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            padding: 5px 0;
+            min-width: 160px;
+        }
+        .context-menu-item:hover > .submenu {
+            display: block;
+        }
+
 
         .context-menu-item {
             padding: 10px 15px;
@@ -1425,6 +1488,9 @@
 
             <div class="modal-image-wrapper">
                 <img id="modal-album-art" class="modal-album-art" src="" alt="Album Art" draggable="false">
+                <!-- NEW: Visualizer and Overlay -->
+                <div class="image-fade-overlay"></div>
+                <canvas id="visualizer"></canvas>
 
                 <div class="modal-controls-overlay">
                     <div class="modal-controls-group" id="modal-controls-desktop">
@@ -1438,7 +1504,7 @@
             </div>
             <div class="modal-title" id="modal-title"></div>
             <div class="modal-artist" id="modal-artist"></div>
-
+            
             <div class="seek-bar-container" id="modal-seek-bar-container">
                 <span class="seek-current-time">0:00</span>
                 <div class="seek-bar">
@@ -1509,17 +1575,35 @@
             <input type="range" id="volume-slider" min="0" max="100" value="100">
         </div>
 
-        <audio id="audio-source"></audio>
+        <audio id="audio-source" crossorigin="anonymous"></audio>
     </div>
 
     <div id="track-context-menu" class="context-menu">
         <div class="context-menu-item" data-action="play"><i class="fas fa-play"></i> Play Track</div>
         <div class="context-menu-item" data-action="download"><i class="fas fa-download"></i> Download</div>
-        <div class="context-menu-item" data-action="share"><i class="fas fa-link"></i> Share Track</div>
+        <div class="context-menu-item has-submenu" data-action="share">
+            <i class="fas fa-share-alt"></i> Share...
+            <div class="submenu">
+                <div class="context-menu-item" data-action="share-link"><i class="fas fa-link"></i> Copy Link</div>
+                <div class="context-menu-item" data-action="share-twitter"><i class="fab fa-twitter"></i> Share on Twitter</div>
+                <div class="context-menu-item" data-action="share-facebook"><i class="fab fa-facebook"></i> Share on Facebook</div>
+            </div>
+        </div>
         <div class="context-menu-item" data-action="embed"><i class="fas fa-code"></i> Embed Track</div>
+        <hr>
+        <div class="context-menu-item has-submenu" data-action="sleep">
+            <i class="fas fa-clock"></i> Sleep Timer
+             <div class="submenu">
+                <div class="context-menu-item" data-action="sleep-off"><i class="fas fa-ban"></i> Off</div>
+                <div class="context-menu-item" data-action="sleep-15">15 Minutes</div>
+                <div class="context-menu-item" data-action="sleep-30">30 Minutes</div>
+                <div class="context-menu-item" data-action="sleep-60">60 Minutes</div>
+            </div>
+        </div>
         <hr>
         <div class="context-menu-item" data-action="close"><i class="fas fa-times"></i> Close Menu</div>
     </div>
+
 
     <div id="custom-toast"></div>
 
@@ -1548,18 +1632,31 @@
                         <div class="custom-select-option" data-value="blur">Blur</div>
                     </div>
                 </div>
-                </div>
+            </div>
             <div>
                 <label for="embed-layout-trigger">Layout</label>
                 <div class="custom-select-wrapper" id="embed-layout-select">
                     <div class="custom-select-trigger" id="embed-layout-trigger" data-value="spotify" tabindex="0">Spotify (80px)</div>
                     <div class="custom-select-options">
+                        <div class="custom-select-option" data-value="minimal">Minimal (40px)</div>
                         <div class="custom-select-option selected" data-value="spotify">Spotify (80px)</div>
                         <div class="custom-select-option" data-value="compact">Compact (100px)</div>
                         <div class="custom-select-option" data-value="tall">Tall (160px)</div>
                     </div>
                 </div>
+            </div>
+            <!-- NEW: More Embed Options -->
+             <div>
+                <label for="embed-font-size-trigger">Font Size</label>
+                <div class="custom-select-wrapper" id="embed-font-size-select">
+                    <div class="custom-select-trigger" id="embed-font-size-trigger" data-value="medium" tabindex="0">Medium</div>
+                    <div class="custom-select-options">
+                        <div class="custom-select-option" data-value="small">Small</div>
+                        <div class="custom-select-option selected" data-value="medium">Medium</div>
+                        <div class="custom-select-option" data-value="large">Large</div>
+                    </div>
                 </div>
+            </div>
             
             <div class="embed-option-full custom-checkbox-wrapper">
                 <input type="checkbox" id="embed-show-art" class="embed-option-input" checked>
@@ -1587,8 +1684,8 @@
     <script>
         // --- 1. TRACK DATA (Example Data) ---
         const tracksData = [
-                        { id: 0, title: 'Clima Lindo', artist: 'GXMZ', image: 'https://i1.sndcdn.com/artworks-8a6Y3eJt2ffv-0-t500x500.jpg', uri: 'https://dl.dropboxusercontent.com/scl/fi/oigcn7f589bj7qp416ps0/CLIMA_LINDO_GXMZ-1.mp3?rlkey=hykej9zak2b900md3puupjs86' },
-            { id: 1, title: 'Fragment ', artist: 'Slxughter', image: 'https://i1.sndcdn.com/artworks-fyxokc9yZzlkXBdT-8h6nZA-t500x500.png', uri: 'https://dl.dropboxusercontent.com/scl/fi/x4uotsgkewmseprnwiva9/fragment-slowed.mp3?rlkey=7g4nzl07sdvd2xmtohwdehrfl' },
+            { id: 0, title: 'Clima Lindo', artist: 'GXMZ', image: 'https://i1.sndcdn.com/artworks-8a6Y3eJt2ffv-0-t500x500.jpg', uri: 'https://dl.dropboxusercontent.com/scl/fi/oigcn7f589bj7qp416ps0/CLIMA_LINDO_GXMZ-1.mp3?rlkey=hykej9zak2b900md3puupjs86' },
+            { id: 1, title: 'Fragment', artist: 'Slxughter', image: 'https://i1.sndcdn.com/artworks-fyxokc9yZzlkXBdT-8h6nZA-t500x500.png', uri: 'https://dl.dropboxusercontent.com/scl/fi/x4uotsgkewmseprnwiva9/fragment-slowed.mp3?rlkey=7g4nzl07sdvd2xmtohwdehrfl' },
             { id: 2, title: 'Starly', artist: 'Lonown', image: 'https://cdn-images.dzcdn.net/images/cover/ed477f0737ddc6881772336d962fcd34/1900x1900-000000-80-0-0.jpg', uri: 'https://dl.dropboxusercontent.com/scl/fi/9pfcui9v98p02s0js4nli/SpotiDownloader.com-starly-Slowed-LONOWN.mp3?rlkey=rtovf6vdngqjypuf9zl8epu94' },
             { id: 3, title: 'SOL', artist: 'Ogryzek', image: 'https://i1.sndcdn.com/artworks-gU8nVMS0Wu2h-0-t500x500.jpg', uri: 'https://dl.dropboxusercontent.com/scl/fi/9zgk3lol3hufy5942bovl/SpotiDownloader.com-SOL-Super-Slowed-Ogryzek.mp3?rlkey=sjey7odrd2sl6azgj493r3az1' },
             { id: 4, title: 'Aura', artist: 'Ogryzek', image: 'https://i.scdn.co/image/ab67616d00001e02dbf396d074fd53f8a9c6537e', uri: 'https://dl.dropboxusercontent.com/scl/fi/al36hdscae4r516pathcf/SpotiDownloader.com-AURA-Super-Slowed-Reverb-Ogryzek-1.mp3?rlkey=isrifek2xnmwdksq37ncbpndf' },
@@ -1668,13 +1765,21 @@
         const modalPlayPauseIconMobile = document.getElementById('modal-play-pause-icon-mobile');
         const modalNextButtonMobile = document.getElementById('modal-next-button-mobile');
         const modalPreviousButtonMobile = document.getElementById('modal-previous-button-mobile');
-        // MODIFIED: Added refs for new mobile buttons
         const modalShuffleButtonMobile = document.getElementById('modal-shuffle-button-mobile');
         const modalRepeatButtonMobile = document.getElementById('modal-repeat-button-mobile');
 
 
         const modalImageWrapper = document.querySelector('.modal-image-wrapper');
         const rateButtons = document.querySelectorAll('.rate-button');
+        
+        // Audio Visualizer Elements
+        const visualizerCanvas = document.getElementById('visualizer');
+        const visualizerCtx = visualizerCanvas.getContext('2d');
+        let audioContext;
+        let analyser;
+        let source;
+        let bufferLength;
+        let dataArray;
 
         // Context Menu Elements
         const contextMenu = document.getElementById('track-context-menu');
@@ -1687,8 +1792,7 @@
         const embedPreviewContainer = document.getElementById('embed-preview-container');
         const embedCodeTextarea = document.getElementById('embed-code-textarea');
         const embedCopyCodeButton = document.getElementById('embed-copy-code');
-        // MODIFIED: Now selects all inputs for broader event handling
-        const embedOptionsInputs = document.querySelectorAll('.embed-options .embed-option-input');
+        const embedOptionsInputs = document.querySelectorAll('.embed-options .embed-option-input, .custom-select-trigger');
         let currentEmbedTrack = null;
 
 
@@ -1700,6 +1804,64 @@
         let previousVolume = parseInt(volumeSlider.value);
         let currentPlaybackRate = 1.0;
         let volumeAnimationInterval = null; // For volume animation
+        let sleepTimerId = null;
+        
+        
+        // Audio Visualizer Setup
+        function setupVisualizer() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                source = audioContext.createMediaElementSource(audioSource);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                analyser.fftSize = 256;
+                bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+            }
+        }
+        
+        // NEW: Helper function to draw rectangles with rounded tops
+        function drawRoundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height);
+            ctx.lineTo(x, y + height);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawVisualizer() {
+            requestAnimationFrame(drawVisualizer);
+            if (!analyser) return;
+            analyser.getByteFrequencyData(dataArray);
+
+            visualizerCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+
+            let barWidth = (visualizerCanvas.width / bufferLength) * 1.5;
+            let barHeight;
+            let x = 0;
+            const radius = 3; 
+
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i] * 0.4; // Scale down the height
+
+                if (barHeight > 0) {
+                    const gradient = visualizerCtx.createLinearGradient(0, visualizerCanvas.height, 0, visualizerCanvas.height - barHeight);
+                    gradient.addColorStop(0, 'rgba(30, 215, 96, 0.7)');
+                    gradient.addColorStop(1, 'rgba(40, 235, 110, 0.9)');
+                    visualizerCtx.fillStyle = gradient;
+                    
+                    drawRoundedRect(visualizerCtx, x, visualizerCanvas.height - barHeight, barWidth, barHeight, radius);
+                }
+
+                x += barWidth + 2; // Add spacing between bars
+            }
+        }
 
 
         // --- 3. HELPER FUNCTIONS ---
@@ -1804,6 +1966,7 @@
 
             const theme = document.getElementById('embed-theme-trigger').getAttribute('data-value');
             const layout = document.getElementById('embed-layout-trigger').getAttribute('data-value');
+            const fontSize = document.getElementById('embed-font-size-trigger').getAttribute('data-value');
             const bgBlur = (theme === 'blur');
             
             const autoplay = document.getElementById('embed-autoplay').checked;
@@ -1814,6 +1977,7 @@
 
             params += `&theme=${theme}`;
             params += `&layout=${layout}`;
+            params += `&fontSize=${fontSize}`;
             
             if (autoplay) params += `&autoplay=true`;
             if (!showArt) params += `&art=false`;
@@ -1825,6 +1989,7 @@
             let height;
             if (layout === 'tall') height = '160';
             else if (layout === 'spotify') height = '80';
+            else if (layout === 'minimal') height = '40';
             else height = '100'; // 'compact'
             
             const embedUrl = `${baseUrl}${params}`;
@@ -1866,6 +2031,7 @@
             
             resetCustomSelect(document.getElementById('embed-theme-select'), 'dark', 'Dark');
             resetCustomSelect(document.getElementById('embed-layout-select'), 'spotify', 'Spotify (80px)');
+            resetCustomSelect(document.getElementById('embed-font-size-select'), 'medium', 'Medium');
             
             document.getElementById('embed-autoplay').checked = false;
             document.getElementById('embed-show-art').checked = true;
@@ -2239,14 +2405,30 @@
              activeContextMenuTrack = null;
         });
         
+        // NEW: Sleep Timer Function
+        function setSleepTimer(minutes) {
+            clearTimeout(sleepTimerId);
+            if (minutes > 0) {
+                sleepTimerId = setTimeout(() => {
+                    audioSource.pause();
+                    showCustomToast(`Sleep timer finished`, 'fas fa-stopwatch');
+                }, minutes * 60 * 1000);
+                showCustomToast(`Playback will stop in ${minutes} minutes`, 'fas fa-clock');
+            } else {
+                sleepTimerId = null;
+                showCustomToast('Sleep timer canceled', 'fas fa-ban');
+            }
+        }
+        
         contextMenu.addEventListener('click', (event) => {
             const menuItem = event.target.closest('.context-menu-item');
             if (!menuItem || !activeContextMenuTrack) return;
-
-            event.stopPropagation(); 
-
+            
             const action = menuItem.getAttribute('data-action');
-            contextMenu.classList.remove('show');
+            if (!action.includes('submenu')) {
+                 event.stopPropagation(); 
+                 contextMenu.classList.remove('show');
+            }
 
             if (action === 'close') {
                 activeContextMenuTrack = null;
@@ -2254,6 +2436,8 @@
             }
 
             const trackIndex = originalTrackOrder.findIndex(t => t.id === activeContextMenuTrack.id);
+            const shareUrl = `${window.location.origin}${window.location.pathname}?track=${activeContextMenuTrack.id}`;
+            const shareText = `Check out this track: ${activeContextMenuTrack.title} by ${activeContextMenuTrack.artist}`;
 
             switch (action) {
                 case 'play':
@@ -2267,19 +2451,29 @@
                         downloadButton.click();
                     }
                     break;
-                case 'share':
-                    const shareUrl = `${window.location.origin}${window.location.pathname}?track=${activeContextMenuTrack.id}`;
+                case 'share-link':
                     navigator.clipboard.writeText(shareUrl).then(() => {
                         showCustomToast('Share link copied to clipboard!', 'fas fa-link');
-                    }).catch(err => {
-                        console.error('Could not copy text: ', err);
-                    });
+                    }).catch(err => console.error('Could not copy text: ', err));
+                    break;
+                case 'share-twitter':
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+                    break;
+                case 'share-facebook':
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
                     break;
                 case 'embed':
                     openEmbedModal(activeContextMenuTrack);
                     break;
+                case 'sleep-off': setSleepTimer(0); break;
+                case 'sleep-15': setSleepTimer(15); break;
+                case 'sleep-30': setSleepTimer(30); break;
+                case 'sleep-60': setSleepTimer(60); break;
             }
-            activeContextMenuTrack = null;
+
+            if (!action.includes('submenu') && !action.startsWith('sleep')) {
+                 activeContextMenuTrack = null;
+            }
         });
 
         contextMenu.addEventListener('contextmenu', (e) => {
@@ -2305,6 +2499,8 @@
             
             modalPlayPauseIcon.className = 'fas fa-pause';
             modalPlayPauseIconMobile.className = 'fas fa-pause';
+            setupVisualizer();
+            drawVisualizer();
         });
 
         audioSource.addEventListener('pause', () => {
@@ -2544,7 +2740,6 @@
         modalPreviousButtonMobile.addEventListener('click', playPrevious);
         modalShuffleButtonMobile.addEventListener('click', toggleShuffle);
         modalRepeatButtonMobile.addEventListener('click', cycleRepeat);
-
 
         modalCloseButton.addEventListener('click', closeModal);
         playerInfoBar.addEventListener('click', () => {
@@ -2888,12 +3083,14 @@
 			if (isEmbed) {
 				const theme = params.get('theme') || 'dark';
 				const layout = params.get('layout') || 'compact';
+                const fontSize = params.get('fontSize') || 'medium';
 				const showArt = params.get('art') !== 'false';
                 const bgUrl = params.get('bgUrl');
                 const bgBlur = (theme === 'blur' && bgUrl);
 
 				let height;
-				if (layout === 'tall') height = '160px';
+                if (layout === 'minimal') height = '40px';
+				else if (layout === 'tall') height = '160px';
 				else if (layout === 'spotify') height = '80px';
 				else height = '100px';
 
@@ -2939,7 +3136,7 @@
 						position: relative !important;
 						bottom: auto !important;
 						height: ${height} !important;
-						margin: 0; padding: 16px;
+						margin: 0; padding: 10px;
 						box-sizing: border-box; 
 						background-color: ${bgBlur ? 'transparent' : 'var(--mid-gray)'};
 						display: flex !important;
@@ -2951,6 +3148,7 @@
 
 					/* --- Player Info (Title, Artist, Image) --- */
 					.player-info {
+                        display: ${layout === 'minimal' ? 'none' : 'flex'} !important;
 						width: ${layout === 'tall' ? '100%' : 'auto'};
 						max-width: none; flex-shrink: 1; min-width: 0;
 						margin-bottom: ${layout === 'tall' ? '10px' : '0'};
@@ -2973,8 +3171,8 @@
 
 					/* --- Player Controls (Seek, Play) --- */
 					.player-center {
-						width: ${layout === 'tall' ? '100%' : 'auto'};
-						flex-grow: ${layout === 'compact' || layout === 'tall' ? 1 : 0};
+						width: ${layout === 'tall' || layout === 'minimal' ? '100%' : 'auto'};
+						flex-grow: ${layout === 'compact' || layout === 'tall' || layout === 'minimal' ? 1 : 0};
                         flex-shrink: 1;
                         min-width: 0;
 						padding: 0 10px;
@@ -2984,14 +3182,14 @@
                         display: flex;
 					}
 					.seek-bar-container {
-						display: ${layout === 'spotify' ? 'none' : 'flex'} !important; 
+						display: ${layout === 'spotify' || layout === 'minimal' ? 'none' : 'flex'} !important; 
 						width: 100%; max-width: none;
 					}
 					.custom-controls {
 						width: 100%; justify-content: center;
-						margin-bottom: ${layout === 'spotify' ? '0' : '8px'}; 
+						margin-bottom: ${layout === 'spotify' || layout === 'minimal' ? '0' : '8px'}; 
 					}
-					#play-pause-button { margin: ${layout === 'spotify' ? '0 10px' : '0 15px'}; }
+					#play-pause-button { margin: ${layout === 'spotify' || layout === 'minimal' ? '0' : '0 15px'}; }
                     
 					/* --- Hide Unwanted Buttons --- */
 					#previous-button, #next-button, #shuffle-button, #repeat-button {
@@ -3025,6 +3223,13 @@
 					#global-player.playing #play-pause-button { background-color: var(--embed-accent-color); color: var(--dark-gray); }
 					`;
 				}
+                
+                // Font size adjustments
+                if (fontSize === 'small') {
+                    css += '#player-title { font-size: 0.8em; } #player-artist { font-size: 0.7em; }';
+                } else if (fontSize === 'large') {
+                     css += '#player-title { font-size: 1.2em; } #player-artist { font-size: 1em; }';
+                }
 
 				style.textContent = css;
 				document.head.appendChild(style);
