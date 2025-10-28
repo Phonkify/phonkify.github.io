@@ -1596,11 +1596,9 @@
     <main class="container">
         <h2 class="content-heading" id="main-heading">Top 20 Best Phonk</h2>
         <div class="track-grid" id="track-list">
-            <!-- Track cards will be injected here by JavaScript -->
-        </div>
+            </div>
     </main>
 
-    <!-- "Now Playing" Modal -->
     <div id="track-modal">
         <button id="modal-close-button"><i class="fas fa-times"></i></button>
         <div class="modal-content">
@@ -1611,10 +1609,10 @@
 
             <div class="modal-image-wrapper">
                 <img id="modal-album-art" class="modal-album-art" src="" alt="Album Art" draggable="false">
+                <!-- NEW: Visualizer and Overlay -->
                 <div class="image-fade-overlay"></div>
                 <canvas id="visualizer"></canvas>
 
-                <!-- Desktop Controls Overlay -->
                 <div class="modal-controls-overlay">
                     <div class="modal-controls-group" id="modal-controls-desktop">
                         <button id="modal-previous-button" class="modal-control-button"><i class="fas fa-step-backward"></i></button>
@@ -1628,7 +1626,6 @@
             <div class="modal-title" id="modal-title"></div>
             <div class="modal-artist" id="modal-artist"></div>
             
-            <!-- Seek Bar for Modal -->
             <div class="seek-bar-container" id="modal-seek-bar-container">
                 <span class="seek-current-time">0:00</span>
                 <div class="seek-bar">
@@ -1637,7 +1634,6 @@
                 <span class="seek-duration">0:00</span>
             </div>
             
-            <!-- Mobile Controls Group -->
             <div class="modal-controls-group" id="modal-controls-mobile">
                 <button id="modal-shuffle-button-mobile" class="modal-control-button">
                     <i class="fas fa-random"></i>
@@ -1652,7 +1648,7 @@
                 </button>
             </div>
             
-            <!-- Playback Rate Controls -->
+            <!-- MODIFIED: HTML structure for sliding animation -->
             <div class="rate-control-group">
                 <div class="rate-slider-thumb"></div>
                 <button class="rate-button" data-rate="0.75">0.75x</button>
@@ -1663,7 +1659,6 @@
         </div>
     </div>
 
-    <!-- Global Persistent Player Bar -->
     <div id="global-player">
         <div class="player-info" id="player-info-bar">
             <img id="player-image" src="" alt="Album Art" style="display:none;" draggable="false">
@@ -1679,9 +1674,11 @@
             <div class="custom-controls">
                 <button id="shuffle-button" class="control-button" data-active="false"><i class="fas fa-random"></i></button>
                 <button id="previous-button" class="control-button"><i class="fas fa-step-backward"></i></button>
+
                 <button id="play-pause-button">
                     <i class="fas fa-play"></i>
                 </button>
+
                 <button id="next-button" class="control-button"><i class="fas fa-step-forward"></i></button>
                 <button id="repeat-button" class="control-button" data-state="off"><i class="fas fa-redo-alt"></i></button>
             </div>
@@ -1702,7 +1699,6 @@
         <audio id="audio-source" crossorigin="anonymous"></audio>
     </div>
 
-    <!-- Desktop Context Menu -->
     <div id="track-context-menu" class="context-menu">
         <div class="context-menu-item" data-action="play"><i class="fas fa-play"></i> Play Track</div>
         <div class="context-menu-item" data-action="download"><i class="fas fa-download"></i> Download</div>
@@ -1729,10 +1725,10 @@
         <div class="context-menu-item" data-action="close"><i class="fas fa-times"></i> Close Menu</div>
     </div>
 
-    <!-- Custom Toast Notification -->
+
     <div id="custom-toast"></div>
 
-    <!-- Mobile Context Menu (Bottom Sheet) -->
+    <!-- NEW: Mobile Context Menu (YouTube Style Bottom Sheet) -->
     <div id="mobile-context-menu-overlay"></div>
     <div id="mobile-context-menu">
         <div class="mobile-menu-header">
@@ -1750,7 +1746,7 @@
         </div>
     </div>
 
-    <!-- 404 Error Screen -->
+
     <div id="error-404-screen">
         <dotlottie-wc src="https://lottie.host/083eace7-5921-40f8-8b3c-c958203b1851/MpMllKILRs.lottie" autoplay loop></dotlottie-wc>
         <h1>404</h1>
@@ -1758,7 +1754,6 @@
         <a href="https://phonkify.github.io/" class="home-button">Back to Phonkify</a>
     </div>
 
-    <!-- Embed Modal -->
     <div id="embed-modal-overlay"></div>
     <div id="embed-modal">
         <h3>Embed Track</h3>
@@ -1830,7 +1825,7 @@
         <button id="embed-modal-close">&times;</button>
     </div>
 
-    <!-- JavaScript remains the same as it already powers these new features -->
+
     <script>
         // --- 1. TRACK DATA (Example Data) ---
         const tracksData = [
@@ -3085,5 +3080,6 @@
         checkUrlForTrack();
         handleEmbedMode();
     </script>
-</body>
+
+    </body>
 </html>
