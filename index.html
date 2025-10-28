@@ -14,6 +14,10 @@
 
     <link id="dynamic-icon" rel="icon" type="image/png" href="https://i.ibb.co/JwTGGmM7/cropped-circle-image-10.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- ADDED: Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <!-- ADDED: Lottie Player Script -->
     <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.5/dist/dotlottie-wc.js" type="module"></script>
     <style>
@@ -21,15 +25,15 @@
         * Global Reset and Variables (Spotify Theme)
         */
         :root {
-            --spotify-green: #1ED760;
-            --dark-gray: #0E0E0E;
-            --mid-gray: #181818;
-            --light-gray: #242424;
+            --spotify-green: #1DB954; /* MODIFIED: New green */
+            --dark-gray: #121212; /* MODIFIED: Darker background */
+            --mid-gray: #1A1A1A; /* MODIFIED: Darker mid */
+            --light-gray: #282828; /* MODIFIED: Darker light */
             --text-color: #ffffff;
             --subtle-text: #b3b3b3;
-            --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            --player-height: 90px;
-            --player-height-mobile: 70px; /* MODIFIED: Reduced height for mini-player */
+            --font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif; /* MODIFIED: New Font */
+            --player-height: 95px; /* MODIFIED: Taller player */
+            --player-height-mobile: 70px;
             --dark-overlay: rgba(0, 0, 0, 0.7);
             --volume-progress: 100%;
             --dynamic-bg-image: url('https://i.redd.it/et1yntwo6dc61.jpg'); /* Default background */
@@ -124,8 +128,10 @@
         * Header & Main Layout
         */
         .header {
-            background-color: rgba(24, 24, 24, 0.8);
-            padding: 20px 40px;
+            background: rgba(18, 18, 18, 0.85); /* MODIFIED: Solid color instead of gradient */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 40px; /* MODIFIED: Adjusted padding */
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
@@ -136,8 +142,9 @@
         }
         .header h1 {
             color: var(--spotify-green);
-            font-size: 1.8em;
-            font-weight: 900;
+            font-size: 2em; /* MODIFIED: Larger font size */
+            font-weight: 700;
+            letter-spacing: -1px; /* MODIFIED: Tighter letter spacing */
             flex-shrink: 0;
         }
 
@@ -194,21 +201,21 @@
         * Refined Track Card Styling
         */
         .track-card {
-            background-color: rgba(36, 36, 36, 0.8);
-            border-radius: 6px;
+            background-color: var(--mid-gray); /* MODIFIED: New color */
+            border-radius: 8px; /* MODIFIED: More rounded */
             padding: 16px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
-            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; /* MODIFIED: Added border-color */
             cursor: pointer;
             position: relative;
-            border: 2px solid transparent;
+            border: 1px solid transparent; /* MODIFIED: Changed to 1px */
         }
 
         /* Premium Feature: Active Track Glow */
         .track-card.active-track {
-            border: 2px solid var(--spotify-green);
-            background-color: #383838;
-            box-shadow: 0 0 20px rgba(30, 215, 96, 0.5), 0 8px 15px rgba(0, 0, 0, 0.6);
+            border-color: var(--spotify-green); /* MODIFIED: Changed from border to border-color */
+            background-color: var(--light-gray); /* MODIFIED: New color */
+            box-shadow: 0 0 15px rgba(29, 185, 84, 0.4), 0 8px 15px rgba(0, 0, 0, 0.6); /* MODIFIED: Refined shadow */
         }
 
         /* NEW: Wrapper for image and overlay */
@@ -228,8 +235,8 @@
             transform: translate(-50%, -50%);
             right: auto;
 
-            width: 56px; /* MODIFIED: Was 48px */
-            height: 56px; /* MODIFIED: Was 48px */
+            width: 56px;
+            height: 56px;
             background-color: var(--spotify-green);
             color: var(--dark-gray);
             border-radius: 50%;
@@ -248,7 +255,7 @@
             margin-left: 2px; /* Optical centering for play icon */
         }
 
-        /* Premium Feature: Improved Hover Animation (3D Tilt + Glow) */
+        /* MODIFIED: Improved Hover Animation */
         .track-card:hover {
             background-color: rgba(46, 46, 46, 0.9);
             transform: perspective(1000px) rotateX(1deg) rotateY(1deg) scale(1.02);
@@ -257,22 +264,20 @@
 
         .track-card:hover .play-icon-overlay {
              opacity: 1;
-             transform: translate(-50%, -50%) translateY(-5px);
+             transform: translate(-50%, -50%) scale(1.05); /* MODIFIED: Simpler animation */
         }
 
         .track-image {
             width: 100%;
             height: auto;
             border-radius: 4px;
-            /* margin-bottom: 15px; */ /* MODIFIED: Moved to .track-image-container */
             aspect-ratio: 1 / 1;
             object-fit: cover;
-            display: block; /* NEW: Fixes potential inline spacing issues */
+            display: block;
         }
 
         .track-info {
             height: 50px;
-            /* NEW: For mobile menu button */
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -363,7 +368,10 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: rgba(24, 24, 24, 0.95);
+            background-color: rgba(18, 18, 18, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--light-gray);
             padding: 0 16px;
             display: flex;
             justify-content: space-between;
@@ -372,7 +380,7 @@
             z-index: 20;
             height: var(--player-height);
             opacity: 0;
-            transition: opacity 0.3s ease, box-shadow 0.3s ease, height 0.3s ease; /* NEW: Added height transition */
+            transition: opacity 0.3s ease, box-shadow 0.3s ease, height 0.3s ease;
         }
 
         #global-player.active {
@@ -472,13 +480,13 @@
         /* --- Loading Animation Styles --- */
         @keyframes pulse-shadow {
             0% {
-                box-shadow: 0 0 0 0 rgba(30, 215, 96, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5);
             }
             50% {
-                box-shadow: 0 0 0 12px rgba(30, 215, 96, 0), 0 4px 10px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 0 0 12px rgba(29, 185, 84, 0), 0 4px 10px rgba(0, 0, 0, 0.5);
             }
             100% {
-                box-shadow: 0 0 0 0 rgba(30, 215, 96, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5);
             }
         }
 
@@ -890,7 +898,7 @@
         /* --- Custom Toast/Notification --- */
         #custom-toast {
             position: fixed;
-            bottom: 120px; /* MODIFIED: Raised to avoid mobile mini-player */
+            bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
             background-color: var(--light-gray);
@@ -900,7 +908,6 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            /* MODIFIED: Increased z-index to show above modal */
             z-index: 105;
             font-weight: 600;
             display: flex;
@@ -988,7 +995,6 @@
 
 
         /* --- Playback Rate Control Styles (In Modal) --- */
-        /* MODIFIED: Redesigned for sliding thumb animation */
         .rate-control-group {
             margin-top: 20px;
             display: flex;
@@ -1052,7 +1058,6 @@
         #error-404-screen.show {
             display: flex;
         }
-        /* ADDED: Lottie animation style */
         #error-404-screen dotlottie-wc {
             width: 300px;
             height: 300px;
@@ -1108,7 +1113,7 @@
             border: 1px solid var(--light-gray);
             z-index: 999;
             width: 90%;
-            max-width: 900px; /* MODIFIED: Increased width for preview */
+            max-width: 900px;
             padding: 25px;
         }
         #embed-modal h3 {
@@ -1120,7 +1125,6 @@
             padding-bottom: 10px;
         }
 
-        /* NEW: Main body layout for the modal */
         .embed-modal-body {
             display: flex;
             gap: 30px;
@@ -1153,13 +1157,29 @@
             flex-grow: 1;
             min-height: 200px;
             transition: all 0.3s ease;
+            position: relative; /* ADDED: For loader positioning */
         }
         #embed-preview-iframe {
             border: none;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            transition: width 0.3s ease, height 0.3s ease;
+            /* MODIFIED: Removed transition for instant update */
+        }
+
+        /* ADDED: Styles for the new loader */
+        .embed-preview-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--spotify-green);
+            font-size: 2em;
+            z-index: 5;
+            display: none; /* Hidden by default */
+        }
+        .embed-preview-loader .fa-spinner {
+            animation: spin 1.2s linear infinite;
         }
         
         .embed-options {
@@ -1350,11 +1370,10 @@
         /* * RESPONSIVE ADJUSTMENTS FOR MOBILE (<= 768px) */
         @media (max-width: 768px) {
             body {
-                /* MODIFIED: Uses new variable height */
                 padding-bottom: var(--player-height-mobile);
             }
              #custom-toast {
-                bottom: 85px; /* MODIFIED: Adjust for 70px mini-player */
+                bottom: 85px;
                 width: calc(100% - 40px);
                 max-width: 400px;
              }
@@ -1377,40 +1396,44 @@
             .play-icon-overlay {
                  opacity: 1;
                  transform: translate(-50%, -50%);
-                 width: 44px; /* MODIFIED: Was 36px */
-                 height: 44px; /* MODIFIED: Was 36px */
+                 width: 44px;
+                 height: 44px;
             }
             
-            /* NEW: Size icon on mobile */
             .play-icon-overlay i {
                 font-size: 18px;
             }
 
             .track-card:hover {
-                 transform: none;
+                 transform: none; /* Disable hover transform on mobile */
+                 background-color: var(--mid-gray);
+                 box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
+                 border-color: transparent;
+            }
+            .track-card.active-track:hover {
+                border-color: var(--spotify-green);
             }
 
-            /* NEW: Show mobile menu button */
+
             .track-menu-button {
                 display: block;
             }
 
-            /* MODIFIED: Spotify-like Mini-Player (Restored) */
             #global-player {
                 padding: 10px 15px;
-                flex-direction: row; /* MODIFIED: Was column */
-                height: var(--player-height-mobile); /* MODIFIED: Now 70px */
-                align-items: center; /* MODIFIED: Center items vertically */
+                flex-direction: row;
+                height: var(--player-height-mobile);
+                align-items: center;
                 justify-content: space-between;
-                border-top: none; /* NEW: Remove panel border */
+                border-top: none;
             }
             .player-info {
-                width: auto; /* MODIFIED: Was 100% */
+                width: auto;
                 max-width: none;
-                order: 0; /* MODIFIED: Was 1 */
-                margin-top: 0; /* MODIFIED: Removed spacing */
-                padding-top: 0; /* MODIFIED: Removed spacing */
-                flex-grow: 1; /* NEW: Take up remaining space */
+                order: 0;
+                margin-top: 0;
+                padding-top: 0;
+                flex-grow: 1;
             }
 
             .player-info img {
@@ -1427,26 +1450,24 @@
             }
 
             .player-center {
-                width: auto; /* MODIFIED: Was 100% */
-                order: 1; /* MODIFIED: Was 0 */
+                width: auto;
+                order: 1;
                 flex-direction: row;
-                justify-content: flex-end; /* MODIFIED: Was space-between */
-                flex-grow: 0; /* NEW: Don't grow */
-                margin-top: 0; /* NEW: Remove panel margin */
+                justify-content: flex-end;
+                flex-grow: 0;
+                margin-top: 0;
             }
             .custom-controls {
                 margin-bottom: 0;
                 order: 1;
-                flex-grow: 0; /* MODIFIED: Was 1 */
+                flex-grow: 0;
                 justify-content: flex-end;
             }
 
-            /* MODIFIED: Hide non-essential controls in mini-player */
             #shuffle-button, #repeat-button, #previous-button, #next-button {
                 display: none;
             }
 
-            /* Mobile Play Button Adjustments */
             #play-pause-button {
                 width: 36px;
                 height: 36px;
@@ -1458,7 +1479,6 @@
                  margin: 0 5px;
             }
 
-            /* MODIFIED: This is correct, seek bar is hidden on mini-player */
             .seek-bar-container {
                 display: none;
             }
@@ -1471,36 +1491,34 @@
                 top: auto;
                 bottom: 0;
                 height: auto;
-                max-height: 95vh; /* Panel won't cover the entire screen */
-                background-color: var(--mid-gray); /* Solid background */
+                max-height: 95vh;
+                background-color: var(--mid-gray);
                 border-top-left-radius: 20px;
                 border-top-right-radius: 20px;
-                transform: translateY(100%); /* Start hidden at the bottom */
+                transform: translateY(100%);
                 transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
                 
-                /* Override desktop 'place-items' */
                 display: block; 
                 padding: 0;
             }
             #track-modal.is-open {
-                transform: translateY(0); /* Slide up when open */
-                display: block; /* Ensure it's block, not grid */
+                transform: translateY(0);
+                display: block;
             }
             .modal-content {
                 max-width: 100%;
-                max-height: 90vh; /* Allow content to be scrollable */
+                max-height: 90vh;
                 overflow-y: auto;
-                padding: 0 20px 20px 20px; /* Padding, but not at the top (handle is there) */
+                padding: 0 20px 20px 20px;
             }
             .modal-drag-handle-container {
-                display: block; /* Show handle on mobile */
+                display: block;
             }
 
-            /* MODIFIED: Hide close button on mobile per request */
             #modal-close-button {
-                top: 25px; /* Adjust close button to be near handle */
+                top: 25px;
                 right: 20px;
-                display: none; /* NEW: Hide on mobile, drag-to-close is primary */
+                display: none;
             }
             /* --- END NEW PANEL STYLES --- */
 
@@ -1508,13 +1526,12 @@
             /* Modal adjustments for mobile */
             .modal-image-wrapper {
                 margin-bottom: 20px;
-                margin-top: 10px; /* Space below drag handle */
-                cursor: pointer; /* NEW: Indicate interactivity */
+                margin-top: 10px;
+                cursor: pointer;
             }
             
-			/* NEW: Adjust modal seek bar on mobile */
-            #modal-seek-bar-container {
-                display: flex; /* <-- ADD THIS LINE to show it */
+			#modal-seek-bar-container {
+                display: flex;
                 max-width: 90%;
                 margin: 15px 0;
             }
@@ -1526,23 +1543,20 @@
                 font-size: 1.2em;
             }
 
-            /* MODIFIED: This rule now only sets the base size for the main 3 buttons */
             .modal-control-button {
                 width: 50px;
                 height: 50px;
                 font-size: 22px;
             }
             
-            /* NEW: Show mobile-only controls */
             #modal-controls-mobile {
                 display: flex;
                 justify-content: center;
-                gap: 20px; /* MODIFIED: Less gap to fit 5 buttons */
-                margin: 15px 0; /* Mobile margin */
-                align-items: center; /* MODIFIED: Align all buttons vertically */
+                gap: 20px;
+                margin: 15px 0;
+                align-items: center;
             }
 
-            /* MODIFIED: Add styles for new mobile toggle buttons */
             #modal-shuffle-button-mobile,
             #modal-repeat-button-mobile {
                 background-color: transparent;
@@ -1557,16 +1571,13 @@
             #modal-repeat-button-mobile.active {
                 color: var(--spotify-green);
             }
-            /* END MODIFIED */
 
-            /* Mobile: Disable complex hover overlay */
             .modal-controls-overlay {
                 opacity: 0;
                 pointer-events: none;
-                display: none; /* NEW: Fully hide the desktop controls */
+                display: none;
             }
             
-            /* NEW: Adjust embed modal for mobile */
             #embed-modal {
                 width: 95%;
                 padding: 20px;
@@ -1578,7 +1589,7 @@
                 flex-direction: column;
             }
             .embed-options {
-                grid-template-columns: 1fr; /* Stack options on mobile */
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1609,7 +1620,6 @@
 
             <div class="modal-image-wrapper">
                 <img id="modal-album-art" class="modal-album-art" src="" alt="Album Art" draggable="false">
-                <!-- NEW: Visualizer and Overlay -->
                 <div class="image-fade-overlay"></div>
                 <canvas id="visualizer"></canvas>
 
@@ -1648,7 +1658,6 @@
                 </button>
             </div>
             
-            <!-- MODIFIED: HTML structure for sliding animation -->
             <div class="rate-control-group">
                 <div class="rate-slider-thumb"></div>
                 <button class="rate-button" data-rate="0.75">0.75x</button>
@@ -1728,7 +1737,6 @@
 
     <div id="custom-toast"></div>
 
-    <!-- NEW: Mobile Context Menu (YouTube Style Bottom Sheet) -->
     <div id="mobile-context-menu-overlay"></div>
     <div id="mobile-context-menu">
         <div class="mobile-menu-header">
@@ -1818,6 +1826,10 @@
             <div class="embed-modal-preview">
                 <div class="embed-preview-header">Live Preview</div>
                 <div class="embed-preview-container">
+                    <!-- ADDED: Loader Element -->
+                    <div class="embed-preview-loader">
+                        <i class="fas fa-spinner"></i>
+                    </div>
                     <iframe id="embed-preview-iframe" width="300" height="80" src=""></iframe>
                 </div>
             </div>
@@ -1866,7 +1878,6 @@
         const customToast = document.getElementById('custom-toast');
 
 
-        // Dynamic Metadata Elements
         const mainHeading = document.getElementById('main-heading');
         const dynamicIcon = document.getElementById('dynamic-icon');
         const originalTitle = document.title;
@@ -1874,7 +1885,6 @@
         const originalHeading = mainHeading.textContent;
 
 
-        // Controls
         const playPauseButton = document.getElementById('play-pause-button');
         const playPauseIcon = playPauseButton.querySelector('i');
         const nextButton = document.getElementById('next-button');
@@ -1882,8 +1892,6 @@
         const shuffleButton = document.getElementById('shuffle-button');
         const repeatButton = document.getElementById('repeat-button');
 
-        // Seek/Volume
-        // MODIFIED: Use querySelectorAll for shared elements
         const allCurrentTimeEls = document.querySelectorAll('.seek-current-time');
         const allDurationEls = document.querySelectorAll('.seek-duration');
         const allProgressBars = document.querySelectorAll('.progress-bar');
@@ -1892,20 +1900,17 @@
         const volumeSlider = document.getElementById('volume-slider');
         const volumeIcon = document.getElementById('volume-icon');
 
-        // Modal Elements
         const trackModal = document.getElementById('track-modal');
         const modalCloseButton = document.getElementById('modal-close-button');
         const modalAlbumArt = document.getElementById('modal-album-art');
         const modalTitle = document.getElementById('modal-title');
         const modalArtist = document.getElementById('modal-artist');
         
-        // Desktop modal controls
         const modalPlayPauseButton = document.getElementById('modal-play-pause-button');
         const modalPlayPauseIcon = document.getElementById('modal-play-pause-icon');
         const modalNextButton = document.getElementById('modal-next-button');
         const modalPreviousButton = document.getElementById('modal-previous-button');
         
-        // NEW: Mobile modal buttons
         const modalPlayPauseButtonMobile = document.getElementById('modal-play-pause-button-mobile');
         const modalPlayPauseIconMobile = document.getElementById('modal-play-pause-icon-mobile');
         const modalNextButtonMobile = document.getElementById('modal-next-button-mobile');
@@ -1917,7 +1922,6 @@
         const modalImageWrapper = document.querySelector('.modal-image-wrapper');
         const rateButtons = document.querySelectorAll('.rate-button');
         
-        // Audio Visualizer Elements
         const visualizerCanvas = document.getElementById('visualizer');
         const visualizerCtx = visualizerCanvas.getContext('2d');
         let audioContext;
@@ -1926,11 +1930,9 @@
         let bufferLength;
         let dataArray;
 
-        // Context Menu Elements
         const contextMenu = document.getElementById('track-context-menu');
         let activeContextMenuTrack = null;
         
-        // NEW: Mobile Context Menu Elements
         const mobileContextMenuOverlay = document.getElementById('mobile-context-menu-overlay');
         const mobileContextMenu = document.getElementById('mobile-context-menu');
         const mobileMenuImage = document.getElementById('mobile-menu-image');
@@ -1939,25 +1941,25 @@
         let activeMobileMenuTrack = null;
 
 
-        // MODIFIED: Embed Modal Elements
         const embedModalOverlay = document.getElementById('embed-modal-overlay');
         const embedModal = document.getElementById('embed-modal');
         const embedModalClose = document.getElementById('embed-modal-close');
         const embedCodeTextarea = document.getElementById('embed-code-textarea');
         const embedCopyCodeButton = document.getElementById('embed-copy-code');
         const embedOptionsInputs = document.querySelectorAll('.embed-options .embed-option-input, .custom-select-trigger');
-        const embedPreviewIframe = document.getElementById('embed-preview-iframe'); // NEW
+        const embedPreviewIframe = document.getElementById('embed-preview-iframe');
         let currentEmbedTrack = null;
+        let previewLoadTimer = null; // ADDED: For embed loader timeout
 
 
         // CORE PLAYBACK STATE (Simplified)
-        let originalTrackOrder = []; // Stored copy of the initial tracksData array for unshuffling
-        let currentTrackIndex = -1; // Index into the currently active tracksData array
+        let originalTrackOrder = [];
+        let currentTrackIndex = -1;
         let isShuffling = false;
         let repeatState = 'off'; // 'off', 'track', 'context'
         let previousVolume = parseInt(volumeSlider.value);
         let currentPlaybackRate = 1.0;
-        let volumeAnimationInterval = null; // For volume animation
+        let volumeAnimationInterval = null;
         let sleepTimerId = null;
         
         
@@ -2009,8 +2011,8 @@
 
                 if (barHeight > 0) {
                     const gradient = context.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
-                    gradient.addColorStop(0, 'rgba(30, 215, 96, 0.7)');
-                    gradient.addColorStop(1, 'rgba(40, 235, 110, 0.9)');
+                    gradient.addColorStop(0, 'rgba(29, 185, 84, 0.7)');
+                    gradient.addColorStop(1, 'rgba(39, 205, 104, 0.9)');
                     context.fillStyle = gradient;
                     
                     drawRoundedRect(context, x, canvas.height - barHeight, barWidth, barHeight, radius);
@@ -2134,7 +2136,7 @@
             }, 3000);
         }
 
-        // --- MODIFIED: Embed Modal Functions ---
+        // --- Embed Modal Functions ---
         function getEmbedUrl() {
             if (!currentEmbedTrack) return '';
             const theme = document.getElementById('embed-theme-trigger').getAttribute('data-value');
@@ -2168,8 +2170,15 @@
             embedCodeTextarea.value = embedCode;
         }
 
+        // MODIFIED: Function for embed preview with fake loading
         function updateEmbedPreview() {
             if (!currentEmbedTrack) return;
+            const loader = document.querySelector('.embed-preview-loader');
+            const iframe = document.getElementById('embed-preview-iframe');
+
+            loader.style.display = 'block';
+            iframe.style.visibility = 'hidden';
+
             const layout = document.getElementById('embed-layout-trigger').getAttribute('data-value');
             let height, width = '100%';
             if (layout === 'tall') height = '160';
@@ -2177,11 +2186,17 @@
             else if (layout === 'art-only') { height = '300'; width = '300'; }
             else height = '100'; // compact
 
-            embedPreviewIframe.style.height = `${height}px`;
-            embedPreviewIframe.style.width = `${width}px`;
+            iframe.style.height = `${height}px`;
+            iframe.style.width = `${width}px`;
+            iframe.src = getEmbedUrl();
 
-            embedPreviewIframe.src = getEmbedUrl();
+            clearTimeout(previewLoadTimer);
+            previewLoadTimer = setTimeout(() => {
+                loader.style.display = 'none';
+                iframe.style.visibility = 'visible';
+            }, 1500);
         }
+
 
         function handleEmbedOptionChange() {
             generateEmbedCode();
@@ -2216,14 +2231,13 @@
             embedModalOverlay.style.display = 'none';
             embedModal.style.display = 'none';
             currentEmbedTrack = null;
-            embedPreviewIframe.src = 'about:blank'; // Clear preview
+            embedPreviewIframe.src = 'about:blank';
             document.body.classList.remove('modal-open');
             document.querySelectorAll('.custom-select-wrapper.open').forEach(wrapper => {
                 wrapper.classList.remove('open');
             });
         }
-        // --- END Embed Modal Functions ---
-
+        
         function moveRateSlider(activeButton) {
             const thumb = document.querySelector('.rate-slider-thumb');
             if (!thumb || !activeButton) return;
@@ -2311,7 +2325,7 @@
       	}
 
         function closeModal() {
-            trackModal.style.transform = ''; // BUG FIX: Reset inline transform before closing
+            trackModal.style.transform = '';
             trackModal.classList.remove('is-open');
             document.body.classList.remove('modal-open');
             resetDocumentMetadata();
@@ -2537,7 +2551,6 @@
 
         contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
 
-        // NEW: Mobile Context Menu Logic
         function openMobileContextMenu(track) {
             activeMobileMenuTrack = track;
             mobileMenuImage.src = track.image;
@@ -2721,7 +2734,6 @@
         });
         trackModal.addEventListener('contextmenu', (e) => { if (e.target === trackModal) { e.preventDefault(); closeModal(); } });
 
-        // MODIFIED: Enhanced mobile panel swipe and tap gestures
         let touchStartY = 0, touchMoveY = 0, isDraggingModal = false, dragThreshold = 5;
         function onTouchStart(e) {
             const targetTag = e.target.tagName;
@@ -2733,7 +2745,6 @@
             touchStartY = e.touches[0].clientY;
             touchMoveY = touchStartY;
             isDraggingModal = true;
-            // Only disable transition if we are truly at the top of the scrollable content
             if (document.querySelector('.modal-content').scrollTop === 0) {
                 trackModal.style.transition = 'none';
             }
@@ -2744,16 +2755,14 @@
             const currentY = e.touches[0].clientY;
             const deltaY = currentY - touchStartY;
             
-            // Only allow dragging down, and only if content is scrolled to top
             if (deltaY > 0 && document.querySelector('.modal-content').scrollTop === 0) {
                 e.preventDefault();
                 trackModal.style.transform = `translateY(${deltaY}px)`;
                 touchMoveY = currentY;
             } else if (deltaY < 0) {
-                // If user tries to scroll up, let the native scroll take over and stop dragging
                 isDraggingModal = false;
-                trackModal.style.transform = ''; // Reset transform
-                trackModal.style.transition = ''; // Restore transition
+                trackModal.style.transform = '';
+                trackModal.style.transition = '';
             }
         }
         function onTouchEnd(event) {
@@ -2762,12 +2771,10 @@
             trackModal.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
             const deltaY = touchMoveY - touchStartY;
 
-            // Check for tap on image
             if (deltaY < dragThreshold && event.target.closest('.modal-image-wrapper')) {
                 togglePlayPause();
             }
 
-            // Check for swipe-to-close
             if (deltaY > trackModal.offsetHeight * 0.3) {
                 closeModal();
             } else {
@@ -2855,7 +2862,6 @@
                 </div>
                 <button class="download-trigger-button download-button" data-uri="${track.uri}" data-filename="${downloadFileName}">${originalText}</button>`;
 
-            // Main click to play
             card.addEventListener('click', (event) => {
                 if (!event.target.closest('.download-trigger-button') && !event.target.closest('.track-menu-button')) {
                     const indexInList = originalTrackOrder.findIndex(t => t.id === track.id);
@@ -2863,15 +2869,12 @@
                 }
             });
 
-            // Desktop right-click
             card.addEventListener('contextmenu', (event) => {
-                // Use a simple check for touch support to differentiate
                 if (!('ontouchstart' in window)) {
                     showContextMenu(event, track);
                 }
             });
 
-            // Mobile menu button click
             const menuButton = card.querySelector('.track-menu-button');
             menuButton.addEventListener('click', (event) => {
                 event.stopPropagation();
@@ -2990,7 +2993,7 @@
             style.id = 'embed-styles';
             
             let css = `
-                :root { --embed-accent-color: #1ED760; }
+                :root { --embed-accent-color: #1DB954; }
                 html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: transparent !important; }
                 body { padding-bottom: 0 !important; position: relative; background-size: cover; background-position: center; ${bgBlur ? `background-image: url('${bgUrl}');` : ''} }
                 .header, .container, #track-modal, #custom-toast, #track-context-menu, #mobile-context-menu, #mobile-context-menu-overlay, #embed-modal-overlay, #embed-modal, .background-overlay, .volume-control { display: none !important; }
@@ -3029,12 +3032,16 @@
                     #embed-content-wrapper #player-artist { color: #DDD !important; }
                     #embed-content-wrapper .custom-controls { display: none !important; }
                     #embed-content-wrapper .seek-bar-container { display: flex !important; align-items: center; width: 100%; gap: 12px; margin-bottom: 0; }
-                    #art-only-play-button { width: 48px; height: 48px; background: var(--embed-accent-color); color: #FFF; border-radius: 50%; border: none; display: grid; place-items: center; flex-shrink: 0; cursor: pointer; font-size: 1.2em; }
+                    #art-only-play-button { width: 48px; height: 48px; background: var(--embed-accent-color); color: #FFF; border-radius: 50%; border: none; display: grid; place-items: center; flex-shrink: 0; cursor: pointer; font-size: 1.2em; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.3s ease; }
+                    #art-only-play-button:hover { transform: scale(1.05); background-color: #1DF760; }
+                    #art-only-play-button:active { transform: scale(0.95); }
                     #art-only-play-button .fa-play { margin-left: 3px; }
                     .seek-and-time-wrapper { flex-grow: 1; min-width: 0; }
                     .seek-and-time-wrapper .seek-bar { width: 100%; margin: 0; background: rgba(255,255,255,0.3); }
                     .seek-and-time-wrapper .progress-bar, .seek-and-time-wrapper .progress-bar::after { background: #FFF; }
                     .time-display { display: flex; justify-content: space-between; font-size: 12px; color: #DDD; margin-top: 5px; }
+                    @keyframes pulse-shadow-embed { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5), 0 4px 10px rgba(0,0,0,0.4); } 50% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0), 0 4px 10px rgba(0,0,0,0.4); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5), 0 4px 10px rgba(0,0,0,0.4); } }
+                    #art-only-play-button.loading-track { animation: pulse-shadow-embed 1.5s infinite; }
                 `;
                 const script = document.createElement('script');
                 script.textContent = `
@@ -3057,12 +3064,17 @@
                         const originalDuration = originalSeekBarContainer.querySelector('.seek-duration');
                         timeDisplay.appendChild(originalCurrentTime); timeDisplay.appendChild(originalDuration);
                         seekAndTimeWrapper.appendChild(originalSeekBar); seekAndTimeWrapper.appendChild(timeDisplay);
+                        
                         const playButton = document.createElement('button'); playButton.id = 'art-only-play-button';
                         const mainPlayIcon = player.querySelector('#play-pause-button i');
+                        const mainPlayButton = document.getElementById('play-pause-button');
                         playButton.innerHTML = mainPlayIcon.outerHTML;
-                        playButton.addEventListener('click', () => document.getElementById('play-pause-button').click());
+                        playButton.addEventListener('click', () => mainPlayButton.click());
                         const newPlayIcon = playButton.querySelector('i');
-                        new MutationObserver(() => { newPlayIcon.className = mainPlayIcon.className; }).observe(mainPlayIcon, { attributes: true });
+                        
+                        new MutationObserver(() => { newPlayIcon.className = mainPlayIcon.className; }).observe(mainPlayIcon, { attributes: true, attributeFilter: ['class'] });
+                        new MutationObserver(() => { playButton.classList.toggle('loading-track', mainPlayButton.classList.contains('loading-track')); }).observe(mainPlayButton, { attributes: true, attributeFilter: ['class'] });
+
                         originalSeekBarContainer.innerHTML = '';
                         originalSeekBarContainer.appendChild(playButton); originalSeekBarContainer.appendChild(seekAndTimeWrapper);
                         wrapper.appendChild(playerInfo); wrapper.appendChild(playerCenter);
