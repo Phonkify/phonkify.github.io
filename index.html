@@ -2311,6 +2311,7 @@
       	}
 
         function closeModal() {
+            trackModal.style.transform = ''; // BUG FIX: Reset inline transform before closing
             trackModal.classList.remove('is-open');
             document.body.classList.remove('modal-open');
             resetDocumentMetadata();
