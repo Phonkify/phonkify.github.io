@@ -874,7 +874,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            z-index: 21;
+            z-index: 105; /* MODIFIED: Increased z-index to appear over modal */
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -893,6 +893,94 @@
             transform: translateX(-50%) translateY(-5px);
         }
         /* --- END Custom Toast/Notification --- */
+        
+        /* --- NEW: Mobile Context Menu --- */
+        #mobile-context-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        #mobile-context-menu-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #mobile-context-menu {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--light-gray);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            z-index: 1001;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            padding-bottom: 20px; /* Safe area for bottom */
+        }
+
+        #mobile-context-menu.show {
+            transform: translateY(0);
+        }
+
+        .mobile-context-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--mid-gray);
+        }
+        
+        .mobile-context-header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+
+        .mobile-context-header-info .track-title {
+            font-size: 1.1em;
+            margin-bottom: 2px;
+        }
+
+        .mobile-context-header-info .track-artist {
+            font-size: 0.9em;
+            color: var(--subtle-text);
+        }
+        
+        .mobile-context-menu-list {
+            list-style: none;
+            padding: 10px 0;
+        }
+
+        .mobile-context-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .mobile-context-menu-item:active {
+            background-color: var(--mid-gray);
+        }
+
+        .mobile-context-menu-item i {
+            margin-right: 20px;
+            width: 20px;
+            text-align: center;
+            color: var(--subtle-text);
+        }
+        /* --- END Mobile Context Menu --- */
+
 
         /* --- Playback Rate Control Styles (In Modal) --- */
         /* MODIFIED: Redesigned for sliding thumb animation */
@@ -1291,6 +1379,12 @@
             .track-card:hover {
                  transform: none;
             }
+            
+            /* Hide desktop context menu on mobile */
+            .context-menu {
+                display: none !important;
+            }
+
 
             /* MODIFIED: Spotify-like Mini-Player (Restored) */
             #global-player {
@@ -1467,8 +1561,6 @@
                 width: 95%;
                 padding: 20px;
                 max-width: 95%;
-                max-height: 85vh;
-                overflow-y: auto;
             }
             .embed-modal-body {
                 flex-direction: column;
@@ -1619,6 +1711,21 @@
         </div>
         <hr>
         <div class="context-menu-item" data-action="close"><i class="fas fa-times"></i> Close Menu</div>
+    </div>
+    
+    <!-- NEW: Mobile Context Menu -->
+    <div id="mobile-context-menu-overlay"></div>
+    <div id="mobile-context-menu">
+        <div class="mobile-context-header">
+            <img id="mobile-context-image" src="" alt="">
+            <div class="mobile-context-header-info">
+                <div id="mobile-context-title" class="track-title"></div>
+                <div id="mobile-context-artist" class="track-artist"></div>
+            </div>
+        </div>
+        <ul class="mobile-context-menu-list" id="mobile-context-menu-list">
+            <!-- Items will be injected by JS -->
+        </ul>
     </div>
 
 
@@ -1806,6 +1913,15 @@
         // Context Menu Elements
         const contextMenu = document.getElementById('track-context-menu');
         let activeContextMenuTrack = null;
+        
+        // NEW: Mobile Context Menu Elements
+        const mobileContextMenuOverlay = document.getElementById('mobile-context-menu-overlay');
+        const mobileContextMenu = document.getElementById('mobile-context-menu');
+        const mobileContextImage = document.getElementById('mobile-context-image');
+        const mobileContextTitle = document.getElementById('mobile-context-title');
+        const mobileContextArtist = document.getElementById('mobile-context-artist');
+        const mobileContextMenuList = document.getElementById('mobile-context-menu-list');
+
 
         // MODIFIED: Embed Modal Elements
         const embedModalOverlay = document.getElementById('embed-modal-overlay');
@@ -2340,9 +2456,66 @@
 
 
         // --- 5. EVENT LISTENERS AND UI BINDING ---
+        
+        // NEW: Mobile Context Menu Logic
+        function showMobileContextMenu(track) {
+            activeContextMenuTrack = track;
+            mobileContextImage.src = track.image;
+            mobileContextTitle.textContent = track.title;
+            mobileContextArtist.textContent = track.artist;
+            
+            // Build menu items
+            mobileContextMenuList.innerHTML = `
+                <li class="mobile-context-menu-item" data-action="play"><i class="fas fa-play"></i> Play Track</li>
+                <li class="mobile-context-menu-item" data-action="download"><i class="fas fa-download"></i> Download</li>
+                <li class="mobile-context-menu-item" data-action="share-native"><i class="fas fa-share-alt"></i> Share</li>
+                <li class="mobile-context-menu-item" data-action="embed"><i class="fas fa-code"></i> Embed Track</li>
+            `;
+            
+            mobileContextMenuOverlay.classList.add('show');
+            mobileContextMenu.classList.add('show');
+        }
+
+        function hideMobileContextMenu() {
+            mobileContextMenuOverlay.classList.remove('show');
+            mobileContextMenu.classList.remove('show');
+            activeContextMenuTrack = null;
+        }
+
+        function handleContextMenuAction(action) {
+            if (!activeContextMenuTrack) return;
+            const trackIndex = originalTrackOrder.findIndex(t => t.id === activeContextMenuTrack.id);
+            const shareUrl = `${window.location.origin}${window.location.pathname}?track=${activeContextMenuTrack.id}`;
+            const shareText = `Check out this track: ${activeContextMenuTrack.title} by ${activeContextMenuTrack.artist}`;
+            
+            switch (action) {
+                case 'play': if (trackIndex !== -1) playTrack(originalTrackOrder[trackIndex], trackIndex); break;
+                case 'download': document.querySelector(`.track-card[data-id="${activeContextMenuTrack.id}"] .download-trigger-button`)?.click(); break;
+                case 'share-link': navigator.clipboard.writeText(shareUrl).then(() => showCustomToast('Share link copied to clipboard!', 'fas fa-link')); break;
+                case 'share-native':
+                    if (navigator.share) navigator.share({ title: `${activeContextMenuTrack.title} - ${activeContextMenuTrack.artist}`, text: shareText, url: shareUrl });
+                    else navigator.clipboard.writeText(shareUrl).then(() => showCustomToast('Share API not supported. Link copied instead!', 'fas fa-link'));
+                    break;
+                case 'embed': openEmbedModal(activeContextMenuTrack); break;
+                case 'sleep-off': setSleepTimer(0); break;
+                case 'sleep-15': setSleepTimer(15); break;
+                case 'sleep-30': setSleepTimer(30); break;
+                case 'sleep-60': setSleepTimer(60); break;
+            }
+            hideMobileContextMenu();
+            contextMenu.classList.remove('show');
+            activeContextMenuTrack = null;
+        }
 
         function showContextMenu(event, track) {
-            event.preventDefault(); 
+            event.preventDefault();
+            
+            // NEW: Mobile detection
+            if (window.innerWidth <= 768) {
+                showMobileContextMenu(track);
+                return;
+            }
+            
             contextMenu.classList.remove('show');
             activeContextMenuTrack = track;
             let x = event.clientX, y = event.clientY;
@@ -2355,6 +2528,16 @@
 
         document.addEventListener('click', () => { contextMenu.classList.remove('show'); activeContextMenuTrack = null; });
         document.addEventListener('scroll', () => { contextMenu.classList.remove('show'); activeContextMenuTrack = null; });
+        
+        mobileContextMenuOverlay.addEventListener('click', hideMobileContextMenu);
+        mobileContextMenuList.addEventListener('click', (e) => {
+            const item = e.target.closest('.mobile-context-menu-item');
+            if (item) {
+                const action = item.getAttribute('data-action');
+                handleContextMenuAction(action);
+            }
+        });
+
         
         function setSleepTimer(minutes) {
             clearTimeout(sleepTimerId);
@@ -2374,27 +2557,9 @@
             const menuItem = event.target.closest('.context-menu-item');
             if (!menuItem || !activeContextMenuTrack) return;
             const action = menuItem.getAttribute('data-action');
-            if (!action.includes('submenu')) { event.stopPropagation(); contextMenu.classList.remove('show'); }
-            if (action === 'close') { activeContextMenuTrack = null; return; }
-            const trackIndex = originalTrackOrder.findIndex(t => t.id === activeContextMenuTrack.id);
-            const shareUrl = `${window.location.origin}${window.location.pathname}?track=${activeContextMenuTrack.id}`;
-            const shareText = `Check out this track: ${activeContextMenuTrack.title} by ${activeContextMenuTrack.artist}`;
-
-            switch (action) {
-                case 'play': if (trackIndex !== -1) playTrack(originalTrackOrder[trackIndex], trackIndex); break;
-                case 'download': document.querySelector(`.track-card[data-id="${activeContextMenuTrack.id}"] .download-trigger-button`)?.click(); break;
-                case 'share-link': navigator.clipboard.writeText(shareUrl).then(() => showCustomToast('Share link copied to clipboard!', 'fas fa-link')); break;
-                case 'share-native':
-                    if (navigator.share) navigator.share({ title: `${activeContextMenuTrack.title} - ${activeContextMenuTrack.artist}`, text: shareText, url: shareUrl });
-                    else navigator.clipboard.writeText(shareUrl).then(() => showCustomToast('Share API not supported. Link copied instead!', 'fas fa-link'));
-                    break;
-                case 'embed': openEmbedModal(activeContextMenuTrack); break;
-                case 'sleep-off': setSleepTimer(0); break;
-                case 'sleep-15': setSleepTimer(15); break;
-                case 'sleep-30': setSleepTimer(30); break;
-                case 'sleep-60': setSleepTimer(60); break;
-            }
-            if (!action.includes('submenu') && !action.startsWith('sleep')) activeContextMenuTrack = null;
+            if (!action.includes('submenu')) event.stopPropagation();
+            if (action === 'close') { contextMenu.classList.remove('show'); activeContextMenuTrack = null; return; }
+            handleContextMenuAction(action);
         });
 
         contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -2554,27 +2719,44 @@
             if (currentTrackIndex !== -1 && new URLSearchParams(window.location.search).get('embed') !== 'true') openModal();
         });
         trackModal.addEventListener('contextmenu', (e) => { if (e.target === trackModal) { e.preventDefault(); closeModal(); } });
-
-        let touchStartY = 0, touchMoveY = 0, isDraggingModal = false;
+        
+        // MODIFIED: Advanced Mobile Panel Drag Logic
+        let touchStartY = 0, currentY = 0, isDraggingModal = false;
         function onTouchStart(e) {
             const targetTag = e.target.tagName;
-            if (targetTag === 'INPUT' || targetTag === 'BUTTON' || e.target.closest('.seek-bar')) { isDraggingModal = false; return; }
-            isDraggingModal = true; touchStartY = e.touches[0].clientY; trackModal.style.transition = 'none';
+            const isDraggableArea = e.target.closest('.modal-drag-handle-container') || e.target.closest('.modal-image-wrapper') || e.target.closest('.modal-title') || e.target.closest('.modal-artist');
+            if (targetTag === 'INPUT' || targetTag === 'BUTTON' || e.target.closest('.seek-bar') || !isDraggableArea || document.querySelector('.modal-content').scrollTop > 0) {
+                isDraggingModal = false; return;
+            }
+            isDraggingModal = true;
+            touchStartY = e.touches[0].clientY;
+            trackModal.style.transition = 'none';
         }
         function onTouchMove(e) {
             if (!isDraggingModal) return;
-            touchMoveY = e.touches[0].clientY;
-            const deltaY = touchMoveY - touchStartY;
-            if (deltaY > 0) { if (document.querySelector('.modal-content').scrollTop === 0) { e.preventDefault(); trackModal.style.transform = `translateY(${deltaY}px)`; } }
-            else isDraggingModal = false;
+            currentY = e.touches[0].clientY;
+            const deltaY = currentY - touchStartY;
+            // Only allow dragging down
+            if (deltaY > 0) {
+                e.preventDefault();
+                trackModal.style.transform = `translateY(${deltaY}px)`;
+            }
         }
         function onTouchEnd() {
-            if (!isDraggingModal) return; isDraggingModal = false;
+            if (!isDraggingModal) return;
+            isDraggingModal = false;
             trackModal.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
-            if ((touchMoveY - touchStartY) > trackModal.offsetHeight * 0.3) closeModal();
-            else trackModal.style.transform = 'translateY(0)';
-            touchStartY = 0; touchMoveY = 0;
+            const deltaY = currentY - touchStartY;
+            const threshold = trackModal.offsetHeight * 0.4;
+            if (deltaY > threshold) {
+                closeModal();
+            } else {
+                trackModal.style.transform = 'translateY(0)';
+            }
+            touchStartY = 0;
+            currentY = 0;
         }
+
         trackModal.addEventListener('touchstart', onTouchStart, { passive: false });
         trackModal.addEventListener('touchmove', onTouchMove, { passive: false });
         trackModal.addEventListener('touchend', onTouchEnd);
@@ -2772,7 +2954,7 @@
                 :root { --embed-accent-color: #1ED760; }
                 html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: transparent !important; }
                 body { padding-bottom: 0 !important; position: relative; background-size: cover; background-position: center; ${bgBlur ? `background-image: url('${bgUrl}');` : ''} }
-                .header, .container, #track-modal, #custom-toast, #track-context-menu, #embed-modal-overlay, #embed-modal, .background-overlay, .volume-control { display: none !important; }
+                .header, .container, #track-modal, #custom-toast, #track-context-menu, #embed-modal-overlay, #embed-modal, .background-overlay, .volume-control, #mobile-context-menu, #mobile-context-menu-overlay { display: none !important; }
                 body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; ${bgBlur ? `background-color: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);` : ''} z-index: -1; }
                 #global-player { position: relative !important; bottom: auto !important; height: ${height} !important; ${layout === 'art-only' ? 'width: 300px;' : ''} margin: 0; box-sizing: border-box; background-color: ${bgBlur ? 'transparent' : 'var(--mid-gray)'}; display: flex !important; flex-direction: ${layout === 'tall' ? 'column' : 'row'}; justify-content: space-between; align-items: center; border-radius: 12px; overflow: hidden; }
                 #global-player.active { opacity: 1; }
