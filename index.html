@@ -272,7 +272,33 @@
 
         .track-info {
             height: 50px;
+            /* NEW: For mobile menu button */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
+
+        .track-info-text {
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        /* NEW: Mobile Menu Button */
+        .track-menu-button {
+            display: none; /* Hidden by default, shown on mobile */
+            background: none;
+            border: none;
+            color: var(--subtle-text);
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 8px;
+            transition: color 0.2s ease;
+        }
+        .track-menu-button:hover {
+            color: var(--text-color);
+        }
+
 
         .track-title {
             font-size: 1em;
@@ -874,25 +900,92 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            z-index: 21;
+            /* MODIFIED: Increased z-index to show above modal */
+            z-index: 105;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        @media (max-width: 768px) {
-             #custom-toast {
-                bottom: 85px; /* MODIFIED: Adjust for 70px mini-player */
-             }
-        }
-
-
         #custom-toast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(-5px);
         }
         /* --- END Custom Toast/Notification --- */
+
+        /* --- NEW: Mobile Context Menu --- */
+        #mobile-context-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 101;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        #mobile-context-menu-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #mobile-context-menu {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--light-gray);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            z-index: 102;
+            padding: 10px 0 30px 0;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        #mobile-context-menu.is-open {
+            transform: translateY(0);
+        }
+        .mobile-menu-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px 15px 16px;
+            border-bottom: 1px solid var(--mid-gray);
+        }
+        .mobile-menu-header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        .mobile-menu-header-text .title {
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+        .mobile-menu-header-text .artist {
+            color: var(--subtle-text);
+            font-size: 0.9em;
+        }
+        .mobile-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 16px;
+            font-size: 1em;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+        .mobile-menu-item i {
+            font-size: 1.2em;
+            width: 20px;
+            margin-right: 20px;
+            text-align: center;
+        }
+        .mobile-menu-item:active {
+            background-color: var(--mid-gray);
+        }
+        /* --- END Mobile Context Menu --- */
+
 
         /* --- Playback Rate Control Styles (In Modal) --- */
         /* MODIFIED: Redesigned for sliding thumb animation */
@@ -1260,6 +1353,11 @@
                 /* MODIFIED: Uses new variable height */
                 padding-bottom: var(--player-height-mobile);
             }
+             #custom-toast {
+                bottom: 85px; /* MODIFIED: Adjust for 70px mini-player */
+                width: calc(100% - 40px);
+                max-width: 400px;
+             }
             .header {
                 padding: 15px 20px;
                 flex-direction: column;
@@ -1290,6 +1388,11 @@
 
             .track-card:hover {
                  transform: none;
+            }
+
+            /* NEW: Show mobile menu button */
+            .track-menu-button {
+                display: block;
             }
 
             /* MODIFIED: Spotify-like Mini-Player (Restored) */
@@ -1406,6 +1509,7 @@
             .modal-image-wrapper {
                 margin-bottom: 20px;
                 margin-top: 10px; /* Space below drag handle */
+                cursor: pointer; /* NEW: Indicate interactivity */
             }
             
 			/* NEW: Adjust modal seek bar on mobile */
@@ -1624,6 +1728,25 @@
 
     <div id="custom-toast"></div>
 
+    <!-- NEW: Mobile Context Menu (YouTube Style Bottom Sheet) -->
+    <div id="mobile-context-menu-overlay"></div>
+    <div id="mobile-context-menu">
+        <div class="mobile-menu-header">
+            <img id="mobile-menu-image" src="" alt="Track Art">
+            <div class="mobile-menu-header-text">
+                <div id="mobile-menu-title" class="title"></div>
+                <div id="mobile-menu-artist" class="artist"></div>
+            </div>
+        </div>
+        <div class="mobile-menu-list">
+            <div class="mobile-menu-item" data-action="play"><i class="fas fa-play"></i> Play Track</div>
+            <div class="mobile-menu-item" data-action="download"><i class="fas fa-download"></i> Download</div>
+            <div class="mobile-menu-item" data-action="share-native"><i class="fas fa-share-alt"></i> Share</div>
+            <div class="mobile-menu-item" data-action="embed"><i class="fas fa-code"></i> Embed Track</div>
+        </div>
+    </div>
+
+
     <div id="error-404-screen">
         <dotlottie-wc src="https://lottie.host/083eace7-5921-40f8-8b3c-c958203b1851/MpMllKILRs.lottie" autoplay loop></dotlottie-wc>
         <h1>404</h1>
@@ -1806,6 +1929,15 @@
         // Context Menu Elements
         const contextMenu = document.getElementById('track-context-menu');
         let activeContextMenuTrack = null;
+        
+        // NEW: Mobile Context Menu Elements
+        const mobileContextMenuOverlay = document.getElementById('mobile-context-menu-overlay');
+        const mobileContextMenu = document.getElementById('mobile-context-menu');
+        const mobileMenuImage = document.getElementById('mobile-menu-image');
+        const mobileMenuTitle = document.getElementById('mobile-menu-title');
+        const mobileMenuArtist = document.getElementById('mobile-menu-artist');
+        let activeMobileMenuTrack = null;
+
 
         // MODIFIED: Embed Modal Elements
         const embedModalOverlay = document.getElementById('embed-modal-overlay');
@@ -2370,34 +2502,67 @@
             }
         }
         
+        function handleMenuAction(action, track) {
+            if (!track) return;
+            const trackIndex = originalTrackOrder.findIndex(t => t.id === track.id);
+            const shareUrl = `${window.location.origin}${window.location.pathname}?track=${track.id}`;
+            const shareText = `Check out this track: ${track.title} by ${track.artist}`;
+
+            switch (action) {
+                case 'play': if (trackIndex !== -1) playTrack(originalTrackOrder[trackIndex], trackIndex); break;
+                case 'download': document.querySelector(`.track-card[data-id="${track.id}"] .download-trigger-button`)?.click(); break;
+                case 'share-link': navigator.clipboard.writeText(shareUrl).then(() => showCustomToast('Share link copied to clipboard!', 'fas fa-link')); break;
+                case 'share-native':
+                    if (navigator.share) navigator.share({ title: `${track.title} - ${track.artist}`, text: shareText, url: shareUrl });
+                    else navigator.clipboard.writeText(shareUrl).then(() => showCustomToast('Share API not supported. Link copied instead!', 'fas fa-link'));
+                    break;
+                case 'embed': openEmbedModal(track); break;
+                case 'sleep-off': setSleepTimer(0); break;
+                case 'sleep-15': setSleepTimer(15); break;
+                case 'sleep-30': setSleepTimer(30); break;
+                case 'sleep-60': setSleepTimer(60); break;
+            }
+        }
+
         contextMenu.addEventListener('click', (event) => {
             const menuItem = event.target.closest('.context-menu-item');
             if (!menuItem || !activeContextMenuTrack) return;
             const action = menuItem.getAttribute('data-action');
             if (!action.includes('submenu')) { event.stopPropagation(); contextMenu.classList.remove('show'); }
             if (action === 'close') { activeContextMenuTrack = null; return; }
-            const trackIndex = originalTrackOrder.findIndex(t => t.id === activeContextMenuTrack.id);
-            const shareUrl = `${window.location.origin}${window.location.pathname}?track=${activeContextMenuTrack.id}`;
-            const shareText = `Check out this track: ${activeContextMenuTrack.title} by ${activeContextMenuTrack.artist}`;
-
-            switch (action) {
-                case 'play': if (trackIndex !== -1) playTrack(originalTrackOrder[trackIndex], trackIndex); break;
-                case 'download': document.querySelector(`.track-card[data-id="${activeContextMenuTrack.id}"] .download-trigger-button`)?.click(); break;
-                case 'share-link': navigator.clipboard.writeText(shareUrl).then(() => showCustomToast('Share link copied to clipboard!', 'fas fa-link')); break;
-                case 'share-native':
-                    if (navigator.share) navigator.share({ title: `${activeContextMenuTrack.title} - ${activeContextMenuTrack.artist}`, text: shareText, url: shareUrl });
-                    else navigator.clipboard.writeText(shareUrl).then(() => showCustomToast('Share API not supported. Link copied instead!', 'fas fa-link'));
-                    break;
-                case 'embed': openEmbedModal(activeContextMenuTrack); break;
-                case 'sleep-off': setSleepTimer(0); break;
-                case 'sleep-15': setSleepTimer(15); break;
-                case 'sleep-30': setSleepTimer(30); break;
-                case 'sleep-60': setSleepTimer(60); break;
-            }
+            handleMenuAction(action, activeContextMenuTrack);
             if (!action.includes('submenu') && !action.startsWith('sleep')) activeContextMenuTrack = null;
         });
 
         contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // NEW: Mobile Context Menu Logic
+        function openMobileContextMenu(track) {
+            activeMobileMenuTrack = track;
+            mobileMenuImage.src = track.image;
+            mobileMenuTitle.textContent = track.title;
+            mobileMenuArtist.textContent = track.artist;
+            mobileContextMenuOverlay.classList.add('is-open');
+            mobileContextMenu.classList.add('is-open');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeMobileContextMenu() {
+            mobileContextMenuOverlay.classList.remove('is-open');
+            mobileContextMenu.classList.remove('is-open');
+            document.body.classList.remove('modal-open');
+            activeMobileMenuTrack = null;
+        }
+
+        mobileContextMenuOverlay.addEventListener('click', closeMobileContextMenu);
+        mobileContextMenu.addEventListener('click', (e) => {
+            const menuItem = e.target.closest('.mobile-menu-item');
+            if (menuItem && activeMobileMenuTrack) {
+                const action = menuItem.dataset.action;
+                handleMenuAction(action, activeMobileMenuTrack);
+                closeMobileContextMenu();
+            }
+        });
         
         audioSource.addEventListener('loadstart', () => playPauseButton.classList.add('loading-track'));
         audioSource.addEventListener('waiting', () => playPauseButton.classList.add('loading-track'));
@@ -2555,25 +2720,60 @@
         });
         trackModal.addEventListener('contextmenu', (e) => { if (e.target === trackModal) { e.preventDefault(); closeModal(); } });
 
-        let touchStartY = 0, touchMoveY = 0, isDraggingModal = false;
+        // MODIFIED: Enhanced mobile panel swipe and tap gestures
+        let touchStartY = 0, touchMoveY = 0, isDraggingModal = false, dragThreshold = 5;
         function onTouchStart(e) {
             const targetTag = e.target.tagName;
-            if (targetTag === 'INPUT' || targetTag === 'BUTTON' || e.target.closest('.seek-bar')) { isDraggingModal = false; return; }
-            isDraggingModal = true; touchStartY = e.touches[0].clientY; trackModal.style.transition = 'none';
+            const isControl = targetTag === 'INPUT' || targetTag === 'BUTTON' || e.target.closest('.seek-bar');
+            if (isControl || !trackModal.classList.contains('is-open')) {
+                isDraggingModal = false;
+                return;
+            }
+            touchStartY = e.touches[0].clientY;
+            touchMoveY = touchStartY;
+            isDraggingModal = true;
+            // Only disable transition if we are truly at the top of the scrollable content
+            if (document.querySelector('.modal-content').scrollTop === 0) {
+                trackModal.style.transition = 'none';
+            }
         }
         function onTouchMove(e) {
             if (!isDraggingModal) return;
-            touchMoveY = e.touches[0].clientY;
-            const deltaY = touchMoveY - touchStartY;
-            if (deltaY > 0) { if (document.querySelector('.modal-content').scrollTop === 0) { e.preventDefault(); trackModal.style.transform = `translateY(${deltaY}px)`; } }
-            else isDraggingModal = false;
+            
+            const currentY = e.touches[0].clientY;
+            const deltaY = currentY - touchStartY;
+            
+            // Only allow dragging down, and only if content is scrolled to top
+            if (deltaY > 0 && document.querySelector('.modal-content').scrollTop === 0) {
+                e.preventDefault();
+                trackModal.style.transform = `translateY(${deltaY}px)`;
+                touchMoveY = currentY;
+            } else if (deltaY < 0) {
+                // If user tries to scroll up, let the native scroll take over and stop dragging
+                isDraggingModal = false;
+                trackModal.style.transform = ''; // Reset transform
+                trackModal.style.transition = ''; // Restore transition
+            }
         }
         function onTouchEnd() {
-            if (!isDraggingModal) return; isDraggingModal = false;
+            if (!isDraggingModal) return;
+            isDraggingModal = false;
             trackModal.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
-            if ((touchMoveY - touchStartY) > trackModal.offsetHeight * 0.3) closeModal();
-            else trackModal.style.transform = 'translateY(0)';
-            touchStartY = 0; touchMoveY = 0;
+            const deltaY = touchMoveY - touchStartY;
+
+            // Check for tap on image
+            if (deltaY < dragThreshold && event.target.closest('.modal-image-wrapper')) {
+                togglePlayPause();
+            }
+
+            // Check for swipe-to-close
+            if (deltaY > trackModal.offsetHeight * 0.3) {
+                closeModal();
+            } else {
+                trackModal.style.transform = 'translateY(0)';
+            }
+            touchStartY = 0;
+            touchMoveY = 0;
         }
         trackModal.addEventListener('touchstart', onTouchStart, { passive: false });
         trackModal.addEventListener('touchmove', onTouchMove, { passive: false });
@@ -2646,17 +2846,37 @@
                     <div class="play-icon-overlay"><i class="fas fa-play"></i></div>
                 </div>
                 <div class="track-info">
-                    <div class="track-title">${track.title}</div>
-                    <div class="track-artist">${track.artist}</div>
+                    <div class="track-info-text">
+                        <div class="track-title">${track.title}</div>
+                        <div class="track-artist">${track.artist}</div>
+                    </div>
+                    <button class="track-menu-button"><i class="fas fa-ellipsis-v"></i></button>
                 </div>
                 <button class="download-trigger-button download-button" data-uri="${track.uri}" data-filename="${downloadFileName}">${originalText}</button>`;
+
+            // Main click to play
             card.addEventListener('click', (event) => {
-                if (!event.target.closest('.download-trigger-button')) {
+                if (!event.target.closest('.download-trigger-button') && !event.target.closest('.track-menu-button')) {
                     const indexInList = originalTrackOrder.findIndex(t => t.id === track.id);
                     if (indexInList !== -1) playTrack(originalTrackOrder[indexInList], indexInList);
                 }
             });
-            card.addEventListener('contextmenu', (event) => showContextMenu(event, track));
+
+            // Desktop right-click
+            card.addEventListener('contextmenu', (event) => {
+                // Use a simple check for touch support to differentiate
+                if (!('ontouchstart' in window)) {
+                    showContextMenu(event, track);
+                }
+            });
+
+            // Mobile menu button click
+            const menuButton = card.querySelector('.track-menu-button');
+            menuButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                openMobileContextMenu(track);
+            });
+
             const downloadButton = card.querySelector('.download-trigger-button');
             downloadButton.addEventListener('click', async (event) => {
                 event.stopPropagation();
@@ -2772,7 +2992,7 @@
                 :root { --embed-accent-color: #1ED760; }
                 html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: transparent !important; }
                 body { padding-bottom: 0 !important; position: relative; background-size: cover; background-position: center; ${bgBlur ? `background-image: url('${bgUrl}');` : ''} }
-                .header, .container, #track-modal, #custom-toast, #track-context-menu, #embed-modal-overlay, #embed-modal, .background-overlay, .volume-control { display: none !important; }
+                .header, .container, #track-modal, #custom-toast, #track-context-menu, #mobile-context-menu, #mobile-context-menu-overlay, #embed-modal-overlay, #embed-modal, .background-overlay, .volume-control { display: none !important; }
                 body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; ${bgBlur ? `background-color: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);` : ''} z-index: -1; }
                 #global-player { position: relative !important; bottom: auto !important; height: ${height} !important; ${layout === 'art-only' ? 'width: 300px;' : ''} margin: 0; box-sizing: border-box; background-color: ${bgBlur ? 'transparent' : 'var(--mid-gray)'}; display: flex !important; flex-direction: ${layout === 'tall' ? 'column' : 'row'}; justify-content: space-between; align-items: center; border-radius: 12px; overflow: hidden; }
                 #global-player.active { opacity: 1; }
