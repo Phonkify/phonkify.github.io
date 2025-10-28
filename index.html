@@ -2755,7 +2755,7 @@
                 trackModal.style.transition = ''; // Restore transition
             }
         }
-        function onTouchEnd() {
+        function onTouchEnd(event) {
             if (!isDraggingModal) return;
             isDraggingModal = false;
             trackModal.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
